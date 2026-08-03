@@ -185,9 +185,12 @@
             <div class="belt-track"></div>
             <div class="belt-dashes"></div>
           </div>
-          <div class="ticker" id="narr">Bấm ▶ Play để xem cả ngày ở quán sushi — sáng vắng, trưa đông, rồi vãn khách. Chú ý: quán có <b>2 đầu bếp</b> đứng bếp giữa và <b>6 khách</b> ngồi quanh băng, không phải chỉ 1 người!</div>
+          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ngày tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một. Chú ý: quán có <b>2 đầu bếp</b> đứng bếp giữa và <b>6 khách</b> ngồi quanh băng, không phải chỉ 1 người!</div>
           <div class="k-controls">
-            <button class="play-btn" id="bPlay">▶ Play</button>
+            <div class="row" style="gap:8px">
+              <button class="play-btn" id="bPlay">▶ Tự động</button>
+              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+            </div>
             <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
@@ -351,6 +354,7 @@ function renderTheme(){
 function draw(){ renderTheme(); drawTech(); place(); }
 
 function lock(b){ busy=b; CL.lock(['bPlay','bReset','bWrite','bRead'], b); }
+function lockStep(b){ CL.lock(['bStep'], b); }
 
 async function doWrite(val){
   hl(L.wSig); await nap(120);
@@ -401,24 +405,51 @@ function resetState(){
 
 $('bWrite').onclick=async()=>{ if(busy)return; lock(true); await doWrite('🍣'); lock(false); };
 $('bRead').onclick=async()=>{ if(busy)return; lock(true); await doRead(); lock(false); };
-$('bReset').onclick=()=>{ if(busy)return; resetState(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); };
+
+/* ---- one shared script: "a day at the sushi belt" ---- */
+const SCRIPT=[
+  {narrate:'🌅 Sáng sớm, quán vắng khách — <b>2 đầu bếp</b> tranh thủ bày sẵn cả băng chuyền…', pause:900},
+  {op:'write', val:'🍣'}, {op:'write', val:'🍣'}, {op:'write', val:'🍤'}, {op:'write', val:'🍳'}, {op:'write', val:'🐟'}, {op:'write', val:'🦀'},
+  {narrate:'📦 Băng chuyền ĐẦY cứng — bếp phải dừng tay, khách chưa tới lấy cả.', pause:1400},
+  {narrate:'🍽️ Giờ trưa — <b>6 khách ngồi quanh băng</b> lần lượt gắp sạch từng đĩa khi đĩa lướt qua chỗ mình…', pause:1000},
+  {op:'read'}, {op:'read'}, {op:'read'}, {op:'read'}, {op:'read'}, {op:'read'},
+  {narrate:'🈳 Sạch trơn — băng chuyền TRỐNG. Nhìn kỹ: w và r cùng chỉ về ghế [0], y hệt lúc NÃY ĐẦY!', pause:1900},
+  {narrate:'👉 ĐẦY và RỖNG trông giống hệt nhau qua vị trí w/r — chỉ số đĩa (<b>count</b>) mới nói lên sự thật.', pause:1800},
+  {narrate:'🌇 Chiều muộn, vài khách lẻ tẻ ghé qua — bếp bày thêm vài đĩa mới, đĩa màu khác vì giá khác (như quán thật)…', pause:1000},
+  {op:'write', val:'🍣'}, {op:'write', val:'🦐'},
+  {narrate:'Hết ngày! Băng chuyền vẫn chạy êm — 6 ô cố định, 2 bếp + 6 khách, không bao giờ phình to hay tràn bộ nhớ.', pause:0},
+];
+async function runBeat(beat){
+  if(beat.op==='write') await doWrite(beat.val);
+  else if(beat.op==='read') await doRead();
+  else narrate(beat.narrate);
+}
+
+$('bReset').onclick=()=>{
+  if(busy)return;
+  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
+};
 
 $('bPlay').onclick=async()=>{
   if(busy)return; lock(true); resetState();
-  narrate('🌅 Sáng sớm, quán vắng khách — <b>2 đầu bếp</b> tranh thủ bày sẵn cả băng chuyền…'); await nap(900);
-  const morning=['🍣','🍣','🍤','🍳','🐟','🦀'];
-  for(const f of morning) await doWrite(f);
-  narrate('📦 Băng chuyền ĐẦY cứng — bếp phải dừng tay, khách chưa tới lấy cả.'); await nap(1400);
-
-  narrate('🍽️ Giờ trưa — <b>6 khách ngồi quanh băng</b> lần lượt gắp sạch từng đĩa khi đĩa lướt qua chỗ mình…'); await nap(1000);
-  for(let i=0;i<6;i++) await doRead();
-  narrate('🈳 Sạch trơn — băng chuyền TRỐNG. Nhìn kỹ: w và r cùng chỉ về ghế [0], y hệt lúc NÃY ĐẦY!'); await nap(1900);
-  narrate('👉 ĐẦY và RỖNG trông giống hệt nhau qua vị trí w/r — chỉ số đĩa (<b>count</b>) mới nói lên sự thật.'); await nap(1800);
-
-  narrate('🌇 Chiều muộn, vài khách lẻ tẻ ghé qua — bếp bày thêm vài đĩa mới, đĩa màu khác vì giá khác (như quán thật)…'); await nap(1000);
-  await doWrite('🍣'); await doWrite('🦐');
-  narrate('Hết ngày! Băng chuyền vẫn chạy êm — 6 ô cố định, 2 bếp + 6 khách, không bao giờ phình to hay tràn bộ nhớ.');
+  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
   lock(false);
+};
+
+let stepMode=false, stepIdx=0;
+$('bStep').onclick=async()=>{
+  if(busy)return;
+  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
+  if(stepIdx>=SCRIPT.length){
+    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+    return;
+  }
+  lockStep(true);
+  await runBeat(SCRIPT[stepIdx]);
+  stepIdx++;
+  lockStep(false);
+  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
 };
 
 initQuiz('quiz','circular',{
