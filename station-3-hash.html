@@ -88,11 +88,19 @@
   .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
   .k-side button:hover{background:var(--indigo);color:#fff;}
 
-  #hashInput{width:130px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+  #hashInput,#sipInput{width:130px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;}
   .hash-trace{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;background:var(--tatami);border-radius:10px;padding:10px 14px;min-height:24px;}
   .hash-trace .step{opacity:0;animation:hashStepIn .3s ease forwards;}
   .hash-trace .step.final{margin-top:6px;padding-top:8px;border-top:1px dashed #D8CDB6;font-weight:800;}
   @keyframes hashStepIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+
+  .mini-buckets{display:flex;flex-direction:column;gap:4px;}
+  .mini-bucket{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:center;background:#14261C;border-radius:8px;padding:5px 8px;min-height:26px;transition:box-shadow .2s;}
+  .mini-bucket.flash{box-shadow:0 0 0 2px var(--gold);}
+  .mini-bucket .midx{color:#9FB8A8;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:800;}
+  .mini-bucket .mitems{display:flex;gap:5px;flex-wrap:wrap;}
+  .mini-bucket .mchip{background:#1B2330;color:#fff;border:1.5px solid var(--green);border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;}
+  .mini-bucket .mchip.blue{border-color:#5AA0FF;}
 
   .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
   .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
@@ -192,20 +200,32 @@
               <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
             </div>
           </div>
-          <div class="card"><h3>Tham khảo · 2 phe xử lý va chạm</h3>
-            <div style="overflow-x:auto"><table class="summary">
-              <tr><th></th><th>Chaining (Java HashMap)</th><th>Open Addressing (Python dict)</th></tr>
-              <tr><td><b>Khi đụng</b></td><td>Nối thêm vào list của ô</td><td>Dò ô trống kế tiếp (probing)</td></tr>
-              <tr><td><b>Ưu điểm</b></td><td>Đơn giản, chịu tải cao, xóa dễ</td><td>Liền mảng, cache-friendly</td></tr>
-              <tr><td><b>Nhược điểm</b></td><td>Tốn con trỏ, hại cache</td><td>Nhạy tải (resize ~0.7), xóa phức tạp</td></tr>
-            </table></div>
-            <div class="legend" style="margin-top:9px"><b>3 tầng hàm băm:</b></div>
-            <div style="overflow-x:auto"><table class="summary">
-              <tr><th>Tầng</th><th>Công thức</th><th>Đặc điểm</th><th>Dùng bởi</th></tr>
-              <tr><td>« ngây thơ »</td><td>h = k % m</td><td>đơn giản; m sai (lũy thừa 2) → cụm</td><td>nền tảng, textbook</td></tr>
-              <tr><td>« khôn »</td><td>h = ⌊m·frac(k·A)⌋</td><td>trộn bit đều, ít nhạy m</td><td>Rust hashbrown</td></tr>
-              <tr><td>« hoang tưởng »</td><td>key+seed → crypto</td><td>chống DoS, chậm nhất</td><td>Python, Rust default</td></tr>
-            </table></div>
+          <div class="card"><h3>Minh hoạ trực tiếp · Chaining vs Open Addressing</h3>
+            <div class="legend">Cùng chèn <b>Minh, An, Mai</b> — An và Mai CÙNG băm ra một ô. Xem 2 cách xử lý va chạm khác nhau ra sao, không chỉ đọc mô tả.</div>
+            <div class="row" style="margin:10px 0">
+              <button id="bCollideDemo">▶ Chèn cả 3, xem cả 2 cách</button>
+              <button id="bCollideReset" class="ghost">↺ Reset</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div>
+                <div style="text-align:center;font-weight:800;color:var(--green);font-size:12.5px;margin-bottom:6px;">🔗 Chaining (Java HashMap)</div>
+                <div id="bucketsChain"></div>
+              </div>
+              <div>
+                <div style="text-align:center;font-weight:800;color:#3B78C4;font-size:12.5px;margin-bottom:6px;">➡️ Open Addressing (Python dict)</div>
+                <div id="bucketsOpen"></div>
+              </div>
+            </div>
+            <div class="legend" id="collideNarr" style="margin-top:10px;min-height:36px;"></div>
+          </div>
+          <div class="card"><h3>Minh hoạ trực tiếp · SipHash vs hàm băm kiểu Java</h3>
+            <div class="legend">« ngây thơ » (h = k % m) chỉ là lý thuyết nền — hai hàm THẬT đang chạy trong Python/Rust và Java thì khác hẳn nhau. Gõ 1 khoá, xem cả 2 tính ra sao.</div>
+            <div class="row" style="margin:10px 0">
+              <input type="text" id="sipInput" value="Mai" maxlength="14">
+              <button id="bSipDemo">🔍 So sánh 2 hàm băm</button>
+              <button id="bReseed" class="ghost">🎲 Đổi seed</button>
+            </div>
+            <div id="sipTrace" class="hash-trace"></div>
             <div class="legend" style="margin-top:9px"><b>So sánh ngôn ngữ:</b></div>
             <div style="overflow-x:auto"><table class="summary">
               <tr><th>Ngôn ngữ</th><th>Va chạm</th><th>Hàm băm</th><th>Vì sao</th></tr>
@@ -452,6 +472,87 @@ async function runHashDemo(){
 $('bHashDemo').onclick = runHashDemo;
 $('hashInput').addEventListener('keydown', e=>{ if(e.key==='Enter') runHashDemo(); });
 
+/* ---- chaining vs open addressing, minh hoạ trực tiếp trên cùng 1 lượt chèn ---- */
+const COLLIDE_KEYS=['Minh','An','Mai'];
+let chainDemoTable, openDemoTable, collideBusy=false;
+function renderMiniBuckets(elId, tbl, flashIdx, chipClass){
+  const el=$(elId); if(!el) return; el.innerHTML='';
+  const wrap=document.createElement('div'); wrap.className='mini-buckets';
+  for(let i=0;i<M;i++){
+    const row=document.createElement('div'); row.className='mini-bucket'+(i===flashIdx?' flash':'');
+    const idxEl=document.createElement('div'); idxEl.className='midx'; idxEl.textContent='['+i+']';
+    const itemsEl=document.createElement('div'); itemsEl.className='mitems';
+    const items = Array.isArray(tbl[i]) ? tbl[i] : (tbl[i]!=null ? [tbl[i]] : []);
+    items.forEach(k=>{ const c=document.createElement('span'); c.className='mchip'+(chipClass?(' '+chipClass):''); c.textContent=k; itemsEl.appendChild(c); });
+    row.appendChild(idxEl); row.appendChild(itemsEl);
+    wrap.appendChild(row);
+  }
+  el.appendChild(wrap);
+}
+function resetCollideDemo(){
+  chainDemoTable=Array.from({length:M},()=>[]);
+  openDemoTable=Array(M).fill(null);
+  renderMiniBuckets('bucketsChain', chainDemoTable, null);
+  renderMiniBuckets('bucketsOpen', openDemoTable, null, 'blue');
+  $('collideNarr').innerHTML='Bấm ▶ để chèn lần lượt <b>Minh, An, Mai</b> — An và Mai cùng băm ra 1 ô, xem 2 cách xử lý.';
+}
+async function runCollideDemo(){
+  if(collideBusy) return;
+  collideBusy=true; CL.lock(['bCollideDemo'],true);
+  resetCollideDemo();
+  await nap(400);
+  for(const key of COLLIDE_KEYS){
+    const idx = hashFn(key);
+    chainDemoTable[idx].push(key);
+    renderMiniBuckets('bucketsChain', chainDemoTable, idx);
+    let oidx=idx, probes=0;
+    while(openDemoTable[oidx]!==null){ oidx=(oidx+1)%M; probes++; }
+    openDemoTable[oidx]=key;
+    renderMiniBuckets('bucketsOpen', openDemoTable, oidx, 'blue');
+    if(probes===0){
+      $('collideNarr').innerHTML='<b>'+key+'</b> băm ra ô <b>'+idx+'</b> — còn trống, cả 2 cách đặt thẳng vào đó.';
+    } else {
+      $('collideNarr').innerHTML='<b>'+key+'</b> băm ra ô <b>'+idx+'</b> — đã CÓ người! <b style="color:var(--green)">Chaining</b>: nối thêm vào list ngay tại ô '+idx+'. <b style="color:#3B78C4">Open addressing</b>: phải dò tiếp '+probes+' ô mới có chỗ trống, cuối cùng nằm ở ô <b>'+oidx+'</b>.';
+    }
+    await nap(1500);
+  }
+  $('collideNarr').innerHTML += '<br><br>👉 Chaining luôn ở ĐÚNG ô băm ra — chỉ dài thêm list. Open addressing phải DỜI đi chỗ khác — càng nhiều va chạm càng dò xa, càng chậm.';
+  CL.lock(['bCollideDemo'],false); collideBusy=false;
+}
+$('bCollideDemo').onclick = runCollideDemo;
+$('bCollideReset').onclick = ()=>{ if(collideBusy) return; resetCollideDemo(); };
+
+/* ---- SipHash vs hàm băm kiểu Java, minh hoạ trực tiếp ---- */
+let sipSeed = Math.floor(Math.random()*0xFFFFFFFF);
+function javaStyleHash(key){ let h=0; for(const ch of String(key)) h=(h*31+ch.charCodeAt(0))>>>0; return h; }
+function simpleSipHash(key, seed){
+  let v0=(seed^0x736f6d65)>>>0, v1=(seed^0x646f7261)>>>0;
+  for(const ch of String(key)){
+    v0=(v0+ch.charCodeAt(0))>>>0;
+    v0=((v0<<13)|(v0>>>19))>>>0;
+    v1^=v0; v1=((v1<<7)|(v1>>>25))>>>0;
+    v0^=v1;
+  }
+  return (v0^v1)>>>0;
+}
+let sipDemoBusy=false;
+async function runSipDemo(){
+  if(sipDemoBusy) return;
+  sipDemoBusy=true; CL.lock(['bSipDemo','bReseed'],true);
+  const key = $('sipInput').value.trim() || 'Mai';
+  const el = $('sipTrace'); el.innerHTML='';
+  const jh=javaStyleHash(key), ji=jh%M;
+  traceRow(el, '<b style="color:var(--green)">Java-style</b> (31·h + mã ký tự, KHÔNG seed): hash("'+key+'") = '+jh+' → % '+M+' = <b>'+ji+'</b>');
+  await nap(600);
+  const sh=simpleSipHash(key, sipSeed), si=sh%M;
+  traceRow(el, '<b style="color:#3B78C4">SipHash</b> (rút gọn minh hoạ, seed = '+sipSeed+'): hash("'+key+'") = '+sh+' → % '+M+' = <b style="color:var(--lacquer)">'+si+'</b>');
+  await nap(700);
+  traceRow(el, '👉 Đổi seed (🎲) rồi băm lại CÙNG "'+key+'": Java-style luôn ra <b>'+ji+'</b> — kẻ tấn công đoán được, có thể cố tình tạo hàng loạt key cùng ô để "đánh sập" hiệu năng (DoS). SipHash đổi kết quả theo seed bí mật → không đoán trước được.', true);
+  CL.lock(['bSipDemo','bReseed'],false); sipDemoBusy=false;
+}
+$('bSipDemo').onclick = runSipDemo;
+$('bReseed').onclick = ()=>{ sipSeed = Math.floor(Math.random()*0xFFFFFFFF); runSipDemo(); };
+
 initQuiz('quiz','hash',{
   bug:{ok:false,msg:'Sai — nó không hiếm. Với đủ số key, va chạm gần như chắc chắn xảy ra (nghịch lý ngày sinh: chỉ 23 người đã >50% trùng ngày sinh).'},
   onlybad:{ok:false,msg:'Sai — kể cả hàm băm TỐT vẫn va chạm, vì hữu hạn ô mà vô hạn khóa có thể.'},
@@ -460,6 +561,8 @@ initQuiz('quiz','hash',{
 
 draw();
 runHashDemo();
+resetCollideDemo();
+runSipDemo();
 })();
 </script>
 </body>
