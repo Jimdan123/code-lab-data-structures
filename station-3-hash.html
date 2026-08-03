@@ -201,7 +201,8 @@
           </div>
           <div class="card"><h3>Minh hoạ · Chaining vs Open Addressing</h3>
             <div class="row" style="margin-bottom:8px">
-              <button id="bCollideDemo">▶ Chèn Minh, An, Mai</button>
+              <button id="bCollideDemo">⏭ Chèn "Minh" (1/3)</button>
+              <button id="bCollideReset" class="ghost">↺ Reset</button>
             </div>
             <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:3px;">🔗 Chaining</div>
             <div id="bucketsChain"></div>
@@ -471,49 +472,51 @@ function renderMiniBuckets(elId, tbl, flashIdx, chipClass){
   }
   el.appendChild(wrap);
 }
+let collideStepIdx=0;
+function collideBtnLabel(){
+  return collideStepIdx>=COLLIDE_KEYS.length
+    ? '↺ Xong! Bấm để làm lại'
+    : '⏭ Chèn "'+COLLIDE_KEYS[collideStepIdx]+'" ('+(collideStepIdx+1)+'/'+COLLIDE_KEYS.length+')';
+}
 function resetCollideDemo(){
   chainDemoTable=Array.from({length:M},()=>[]);
   openDemoTable=Array(M).fill(null);
+  collideStepIdx=0;
   renderMiniBuckets('bucketsChain', chainDemoTable, null);
   renderMiniBuckets('bucketsOpen', openDemoTable, null, 'blue');
-  $('collideNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm ▶ để xem 2 cách xử lý.';
+  $('collideNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm nút để chèn từng khách, xem 2 cách xử lý.';
+  $('bCollideDemo').textContent=collideBtnLabel();
 }
-async function runCollideDemo(){
+function collideStep(){
   if(collideBusy) return;
-  collideBusy=true; CL.lock(['bCollideDemo'],true);
-  resetCollideDemo();
-  await nap(300);
-  for(const key of COLLIDE_KEYS){
-    const idx = hashFn(key);
-    chainDemoTable[idx].push(key);
-    renderMiniBuckets('bucketsChain', chainDemoTable, idx);
-    let oidx=idx, probes=0;
-    while(openDemoTable[oidx]!==null){ oidx=(oidx+1)%M; probes++; }
-    openDemoTable[oidx]=key;
-    renderMiniBuckets('bucketsOpen', openDemoTable, oidx, 'blue');
-    if(probes===0){
-      $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trống).';
-    } else {
-      $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trùng!) · Chaining: ở lại ô '+idx+' · Open addressing: dò tới ô <b>'+oidx+'</b> ('+probes+' bước)';
-    }
-    await nap(1200);
+  if(collideStepIdx>=COLLIDE_KEYS.length){ resetCollideDemo(); return; }
+  const key = COLLIDE_KEYS[collideStepIdx];
+  const idx = hashFn(key);
+  chainDemoTable[idx].push(key);
+  renderMiniBuckets('bucketsChain', chainDemoTable, idx);
+  let oidx=idx, probes=0;
+  while(openDemoTable[oidx]!==null){ oidx=(oidx+1)%M; probes++; }
+  openDemoTable[oidx]=key;
+  renderMiniBuckets('bucketsOpen', openDemoTable, oidx, 'blue');
+  if(probes===0){
+    $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trống).';
+  } else {
+    $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trùng!) · Chaining: ở lại ô '+idx+' · Open addressing: dò tới ô <b>'+oidx+'</b> ('+probes+' bước)';
   }
-  CL.lock(['bCollideDemo'],false); collideBusy=false;
+  collideStepIdx++;
+  $('bCollideDemo').textContent=collideBtnLabel();
 }
-$('bCollideDemo').onclick = runCollideDemo;
+$('bCollideDemo').onclick = collideStep;
+$('bCollideReset').onclick = ()=>{ if(collideBusy) return; resetCollideDemo(); };
 
 /* ---- SipHash vs hàm băm kiểu Java, minh hoạ trực tiếp ---- */
 let sipSeed = Math.floor(Math.random()*0xFFFFFFFF);
-function javaStyleHash(key){ let h=0; for(const ch of String(key)) h=(h*31+ch.charCodeAt(0))>>>0; return h; }
-function simpleSipHash(key, seed){
-  let v0=(seed^0x736f6d65)>>>0, v1=(seed^0x646f7261)>>>0;
-  for(const ch of String(key)){
-    v0=(v0+ch.charCodeAt(0))>>>0;
-    v0=((v0<<13)|(v0>>>19))>>>0;
-    v1^=v0; v1=((v1<<7)|(v1>>>25))>>>0;
-    v0^=v1;
-  }
-  return (v0^v1)>>>0;
+function sipMixStep(ch, v0, v1){
+  v0=(v0+ch.charCodeAt(0))>>>0;
+  v0=((v0<<13)|(v0>>>19))>>>0;
+  v1^=v0; v1=((v1<<7)|(v1>>>25))>>>0;
+  v0^=v1;
+  return {v0, v1};
 }
 let sipDemoBusy=false;
 async function runSipDemo(){
@@ -521,11 +524,28 @@ async function runSipDemo(){
   sipDemoBusy=true; CL.lock(['bSipDemo','bReseed'],true);
   const key = $('sipInput').value.trim() || 'Mai';
   const el = $('sipTrace'); el.innerHTML='';
-  const jh=javaStyleHash(key), ji=jh%M;
-  traceRow(el, '<b style="color:var(--green)">Java</b>: hash("'+key+'") % '+M+' = <b>'+ji+'</b> (không seed, luôn cố định)');
-  await nap(600);
-  const sh=simpleSipHash(key, sipSeed), si=sh%M;
-  traceRow(el, '<b style="color:#3B78C4">SipHash</b> (seed='+sipSeed+'): hash("'+key+'") % '+M+' = <b style="color:var(--lacquer)">'+si+'</b>', true);
+  const cap=document.createElement('div');
+  cap.style.cssText='font-size:11.5px;color:var(--soy-light);margin-bottom:6px;';
+  cap.innerHTML='Seed hiện tại: <b>'+sipSeed+'</b> — mỗi ký tự làm 2 hàm rẽ hướng khác nhau.';
+  el.appendChild(cap);
+  const table=document.createElement('table'); table.className='summary';
+  table.innerHTML='<tr><th>Ký tự</th><th style="color:var(--green)">Java (h)</th><th style="color:#3B78C4">SipHash (mix)</th></tr>';
+  el.appendChild(table);
+  let h=0, v0=(sipSeed^0x736f6d65)>>>0, v1=(sipSeed^0x646f7261)>>>0;
+  for(const ch of String(key)){
+    const code=ch.charCodeAt(0);
+    h=(h*31+code)>>>0;
+    ({v0,v1}=sipMixStep(ch,v0,v1));
+    const mix=(v0^v1)>>>0;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>\''+ch+'\' ('+code+')</td><td>'+h+'</td><td>'+mix+'</td>';
+    table.appendChild(tr);
+    await nap(450);
+  }
+  const ji=h%M, si=((v0^v1)>>>0)%M;
+  const trFinal=document.createElement('tr');
+  trFinal.innerHTML='<td><b>% '+M+'</b></td><td><b style="color:var(--green)">'+ji+'</b></td><td><b style="color:var(--lacquer)">'+si+'</b></td>';
+  table.appendChild(trFinal);
   CL.lock(['bSipDemo','bReseed'],false); sipDemoBusy=false;
 }
 $('bSipDemo').onclick = runSipDemo;
