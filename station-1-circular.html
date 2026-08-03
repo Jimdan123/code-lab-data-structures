@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Lab · Circular Buffer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
+  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <div class="toolbox" id="toolbox"></div>
+
+  <div class="station-h">Trạm 1 · Circular Buffer <span style="color:var(--muted);font-weight:600">(bộ đệm vòng, FIFO)</span></div>
+  <p class="station-s">Mảng <b>N ô cố định</b>, không cấp thêm bộ nhớ. <b>w</b> = ô sắp GHI · <b>r</b> = ô sắp ĐỌC — đi hết ô cuối thì tự <b style="color:var(--amber)">QUAY VỀ</b> ô đầu.</p>
+
+  <div class="why">
+    <div><span class="wt">🎯 Vấn đề:</span> Hàng đợi FIFO chạy liên tục (log, buffer mạng, băng chuyền) mà <b>không được cấp thêm bộ nhớ</b> mỗi lần có dữ liệu mới.</div>
+    <div><span class="wt">❌ Mảng thường:</span> đọc xong phải <b>dồn (shift)</b> cả mảng — O(n); hoặc cấp mảng mới mỗi lần đầy — tốn bộ nhớ.</div>
+    <div><span class="wt">💡 Ý tưởng:</span> một mảng <b>N ô cố định</b>; hai con trỏ <b>w</b> (ghi) và <b>r</b> (đọc) tự quay vòng về đầu khi hết ô cuối.</div>
+  </div>
+
+  <div class="wrap">
+    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+      <div class="code-title">// write() ghi ở w · read() đọc ở r · cả hai tự quay vòng</div>
+      <div class="code" id="code"></div></div></div>
+
+    <div class="col-viz">
+      <div class="card"><h3>Buffer <span id="statebadge"></span></h3>
+        <svg id="svg" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="legend"><b>w</b> = con trỏ GHI · <b>r</b> = con trỏ ĐỌC · <b>count</b> = số phần tử đang giữ · <span style="color:var(--green)">● xanh lá</span> = ô vừa đổi</div>
+      </div>
+      <div class="narr" id="narr">Bấm <b>✍️ Ghi</b> / <b>📖 Đọc</b> để điều khiển buffer trực tiếp.</div>
+      <div class="card"><h3>Điều khiển</h3>
+        <div class="row">
+          <button id="bWrite">✍️ Ghi</button>
+          <button id="bRead">📖 Đọc</button>
+          <button id="bReset" class="ghost">↺ Reset</button>
+        </div>
+        <div class="row" style="margin-top:9px">
+          <button id="bEdge" class="ghost">🔍 Demo ca w==r (đầy vs rỗng)</button>
+          <button id="bSushi" class="ghost">🍣 Demo băng chuyền sushi</button>
+        </div>
+      </div>
+      <div class="quiz" id="quiz"><div class="q">❓ Nếu w và r đang ở CÙNG một ô, buffer đang ĐẦY hay RỖNG?</div>
+        <button data-a="full">Chắc chắn ĐẦY</button>
+        <button data-a="empty">Chắc chắn RỖNG</button>
+        <button data-a="unknown">Không thể biết chỉ từ w, r</button>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="common.js"></script>
+<script>
+(function(){
+const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+renderToolbox('circular');
+
+const CODE=[
+ ['<span class="kw">const</span> N = 6;                          <span class="cm">// kích thước cố định</span>'],
+ ['<span class="kw">let</span> buf = <span class="kw">new</span> Array(N).fill(<span class="kw">null</span>);'],
+ ['<span class="kw">let</span> w = 0, r = 0, count = 0;          <span class="cm">// w=ghi · r=đọc</span>'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">write</span>(x) {'],
+ ['  <span class="kw">if</span> (count === N) <span class="kw">return</span> <span class="kw">false</span>;      <span class="cm">// ĐẦY → không ghi được</span>'],
+ ['  buf[w] = x;                          <span class="cm">// đặt giá trị vào ô w</span>'],
+ ['  w = (w + 1) % N;                     <span class="cm">// hết ô cuối → quay lại ô đầu</span>'],
+ ['  count++;'],
+ ['  <span class="kw">return</span> <span class="kw">true</span>;'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">read</span>() {'],
+ ['  <span class="kw">if</span> (count === 0) <span class="kw">return</span> <span class="kw">null</span>;       <span class="cm">// RỖNG → không đọc được</span>'],
+ ['  <span class="kw">const</span> x = buf[r]; buf[r] = <span class="kw">null</span>;'],
+ ['  r = (r + 1) % N;                    <span class="cm">// quay vòng tương tự</span>'],
+ ['  count--;'],
+ ['  <span class="kw">return</span> x;'],
+ ['}'],
+];
+renderCode('code', CODE);
+const L={wSig:4, wFull:5, wSet:6, wAdv:7, wInc:8, wRet:9, rSig:12, rEmpty:13, rGet:14, rAdv:15, rDec:16, rRet:17};
+
+const N=6, CX=240, CY=190, RAD=130, CELLR=24;
+let buf=new Array(N).fill(null), w=0, r=0, count=0, seq=1, busy=false;
+let flashCell=null, flashFull=false, flashEmpty=false, theme='buffer';
+
+function angleOf(i){ return -Math.PI/2 + i*(2*Math.PI/N); }
+function cellPos(i){ const a=angleOf(i); return {x:CX+RAD*Math.cos(a), y:CY+RAD*Math.sin(a), a}; }
+function labelPos(i, sign){ const {a}=cellPos(i); const ox=CX+(RAD+38)*Math.cos(a), oy=CY+(RAD+38)*Math.sin(a);
+  const px=-Math.sin(a), py=Math.cos(a); return {x:ox+sign*17*px, y:oy+sign*17*py}; }
+
+function draw(){
+  const el=$('svg'); el.innerHTML='';
+  el.appendChild(SVG('circle',{cx:CX,cy:CY,r:RAD,fill:'none',stroke:'#DDE2E9','stroke-width':2,'stroke-dasharray':'4 4'}));
+  for(let i=0;i<N;i++){
+    const {x,y}=cellPos(i);
+    let cls='node'; if(i===flashCell) cls+=' flash'; if(flashFull||flashEmpty) cls+=' rot';
+    const g=SVG('g',{class:cls, transform:'translate('+x+','+y+')'});
+    g.appendChild(SVG('circle',{r:CELLR}));
+    const t=SVG('text',{}); t.textContent = buf[i]!=null ? String(buf[i]) : '·';
+    g.appendChild(t);
+    const idxT=SVG('text',{class:'h', y:-CELLR-8}); idxT.textContent='['+i+']';
+    g.appendChild(idxT);
+    el.appendChild(g);
+    if(i===w){ const sign=(w===r)?-1:0; const p=labelPos(w,sign);
+      const wt=SVG('text',{x:p.x,y:p.y,'text-anchor':'middle',fill:'var(--green)','font-weight':800,'font-size':14}); wt.textContent='▼w'; el.appendChild(wt); }
+    if(i===r){ const sign=(w===r)?1:0; const p=labelPos(r,sign);
+      const rt=SVG('text',{x:p.x,y:p.y,'text-anchor':'middle',fill:'var(--blue)','font-weight':800,'font-size':14}); rt.textContent='▲r'; el.appendChild(rt); }
+  }
+  const ct=SVG('text',{x:CX,y:CY-4,'text-anchor':'middle',fill:'var(--ink)','font-size':16,'font-weight':800}); ct.textContent='count = '+count+' / '+N;
+  el.appendChild(ct);
+}
+function setBadge(kind){
+  const b=$('statebadge');
+  b.innerHTML = kind==='full' ? '<span class="badge warn">ĐẦY</span>' : kind==='empty' ? '<span class="badge info">RỖNG</span>' : '';
+}
+function lock(b){ busy=b; CL.lock(['bWrite','bRead','bReset','bEdge','bSushi'], b); }
+
+async function doWrite(val, spoken){
+  spoken = spoken || val;
+  hl(L.wSig);
+  narrate(theme==='sushi' ? '🧑‍🍳 Chef muốn bày <b>'+spoken+'</b> lên băng.' : 'Ghi <b>'+spoken+'</b>: gọi <code>write('+spoken+')</code>.');
+  await nap(600);
+  hl(L.wFull);
+  if(count===N){
+    narrate(theme==='sushi'
+      ? '<b style="color:var(--red)">Băng ĐẦY</b> (count = N = '+N+') → chef <b>PHẢI CHỜ</b>, không bày đè lên đĩa chưa ai lấy.'
+      : '<b style="color:var(--red)">ĐẦY</b> (count = N = '+N+') → <b>KHÔNG</b> ghi được, phải chờ có ô trống.');
+    flashFull=true; setBadge('full'); draw(); await nap(1000); flashFull=false; draw();
+    return false;
+  }
+  await nap(650);
+  hl(L.wSet); buf[w]=val; flashCell=w; setBadge(''); draw();
+  narrate('Đặt <b>'+spoken+'</b> vào ô <b>w = '+w+'</b>.'); await nap(850);
+  hl(L.wAdv);
+  const wrapped=(w===N-1), oldW=w; w=(w+1)%N; draw();
+  narrate(wrapped ? 'w đi hết ô cuối ['+oldW+'] → <b style="color:var(--amber)">QUAY VỀ ô đầu</b> [0].' : 'w nhích sang ô kế: ['+oldW+'] → ['+w+'].');
+  await nap(850);
+  hl(L.wInc); count++; draw(); narrate('count = <b>'+count+'</b> / '+N+'.'); await nap(650);
+  hl(L.wRet); flashCell=null; draw();
+  return true;
+}
+
+async function doRead(){
+  hl(L.rSig);
+  narrate(theme==='sushi' ? '🧍 Khách muốn lấy đĩa kế tiếp trên băng.' : 'Đọc: gọi <code>read()</code>.');
+  await nap(600);
+  hl(L.rEmpty);
+  if(count===0){
+    narrate(theme==='sushi'
+      ? '<b style="color:var(--blue)">Băng RỖNG</b> (count = 0) → chef chưa kịp bày, khách <b>phải ĐỢI</b>.'
+      : '<b style="color:var(--blue)">RỖNG</b> (count = 0) → không có gì để đọc.');
+    flashEmpty=true; setBadge('empty'); draw(); await nap(1000); flashEmpty=false; draw();
+    return null;
+  }
+  await nap(650);
+  hl(L.rGet); const val=buf[r]; flashCell=r; setBadge(''); draw();
+  narrate(theme==='sushi' ? '🧍 Khách lấy <b>'+val+'</b> ở ô r = '+r+'.' : 'Lấy giá trị <b>'+val+'</b> ở ô <b>r = '+r+'</b>.');
+  await nap(850);
+  buf[r]=null;
+  hl(L.rAdv);
+  const wrapped=(r===N-1), oldR=r; r=(r+1)%N; draw();
+  narrate(wrapped ? 'r đi hết ô cuối ['+oldR+'] → <b style="color:var(--amber)">QUAY VỀ ô đầu</b> [0].' : 'r nhích sang ô kế: ['+oldR+'] → ['+r+'].');
+  await nap(850);
+  hl(L.rDec); count--; draw(); narrate('count = <b>'+count+'</b> / '+N+'.'); await nap(650);
+  hl(L.rRet); flashCell=null; draw();
+  return val;
+}
+
+function resetState(){ buf=new Array(N).fill(null); w=0; r=0; count=0; seq=1; flashCell=null; flashFull=false; flashEmpty=false; setBadge(''); hl(); draw(); }
+
+$('bWrite').onclick=async()=>{ if(busy)return; lock(true); theme='buffer'; await doWrite(seq++); lock(false); };
+$('bRead').onclick=async()=>{ if(busy)return; lock(true); theme='buffer'; await doRead(); lock(false); };
+$('bReset').onclick=()=>{ if(busy)return; resetState(); narrate('Đã reset. Bấm Ghi/Đọc để điều khiển buffer.'); };
+
+$('bEdge').onclick=async()=>{
+  if(busy)return; lock(true); resetState(); theme='buffer';
+  narrate('🔍 Lấp ĐẦY buffer rồi RÚT CẠN — xem con trỏ w, r ra sao ở hai đầu.'); await nap(700);
+  for(let i=0;i<N;i++) await doWrite(seq++);
+  setBadge('full');
+  narrate('<b style="color:var(--red)">ĐẦY:</b> w = '+w+', r = '+r+' — <b>w TRÙNG r</b>! count = '+count+'.'); await nap(1900);
+  for(let i=0;i<N;i++) await doRead();
+  setBadge('empty');
+  narrate('<b style="color:var(--blue)">RỖNG:</b> w = '+w+', r = '+r+' — <b>w TRÙNG r</b> y hệt lúc nãy! count = '+count+'.'); await nap(1900);
+  narrate('👉 <b>w == r</b> xảy ra ở CẢ hai đầu — không thể phân biệt ĐẦY hay RỖNG chỉ bằng con trỏ. Phải nhìn <b>count</b> (0 = rỗng, N = đầy).');
+  setBadge(''); lock(false);
+};
+
+$('bSushi').onclick=async()=>{
+  if(busy)return; lock(true); resetState(); theme='sushi';
+  narrate('🍣 Băng chuyền: <b>chef</b> bày (ghi), <b>khách</b> lấy (đọc). Băng đang RỖNG — chef bắt đầu bày.'); await nap(900);
+  const ops=[
+    {op:'w',v:'🍣',s:'Cá hồi 🍣'},{op:'w',v:'🍣',s:'Cá ngừ 🍣'},
+    {op:'r'},{op:'r'},
+    {op:'w',v:'🍤',s:'Tôm 🍤'},{op:'w',v:'🍳',s:'Trứng 🍳'},{op:'w',v:'🐍',s:'Lươn 🐍'},
+    {op:'r'},
+  ];
+  for(const o of ops){ if(o.op==='w') await doWrite(o.v,o.s); else await doRead(); }
+  narrate('Băng chuyền chạy xong — vẫn là <b>buffer vòng N='+N+'</b> phía sau, chỉ đổi tên gọi "ghi/đọc" thành "chef bày / khách lấy".');
+  theme='buffer'; lock(false);
+};
+
+initQuiz('quiz','circular',{
+  full:{ok:false,msg:'Sai — w==r cũng xảy ra khi RỖNG (bấm "Demo ca w==r" để xem). Không thể chắc chắn chỉ từ con trỏ.'},
+  empty:{ok:false,msg:'Sai — w==r cũng xảy ra khi ĐẦY. Không thể chắc chắn chỉ từ con trỏ.'},
+  unknown:{ok:true,msg:'Đúng! w==r xảy ra ở CẢ hai đầu (đầy và rỗng) — phải nhìn <b>count</b> để biết chắc.'}
+});
+
+draw();
+})();
+</script>
+</body>
+</html>

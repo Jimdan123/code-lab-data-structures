@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Lab · Hash Table</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
+  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <div class="toolbox" id="toolbox"></div>
+
+  <div class="station-h">Trạm 3 · Hash Table <span style="color:var(--muted);font-weight:600">(bảng băm)</span></div>
+  <p class="station-s">key → hàm băm → chỉ số ô → <b>nhảy thẳng</b>, O(1) trung bình. Va chạm (2 khóa cùng ô) là <b style="color:var(--amber)">CHẮC CHẮN</b> xảy ra — <b>chaining</b> nối thêm vào danh sách liên kết của ô.</p>
+
+  <div class="why">
+    <div><span class="wt">🎯 Vấn đề:</span> Tra cứu theo KHÓA (tên, id, từ) trong tập dữ liệu lớn mà không phải dò từng phần tử.</div>
+    <div><span class="wt">❌ Mảng/danh sách thường:</span> khách sạn không đánh số phòng → phải gõ TỪNG phòng dọc hành lang tới khi trúng — O(n).</div>
+    <div><span class="wt">💡 Ý tưởng:</span> hàm băm biến khóa thành 1 <b>SỐ Ô</b> cố định → nhảy thẳng tới đó; nếu 2 khóa trùng ô (va chạm) thì nối vào danh sách liên kết của ô đó.</div>
+  </div>
+
+  <div class="wrap">
+    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+      <div class="code-title">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
+      <div class="code" id="code"></div></div></div>
+
+    <div class="col-viz">
+      <div class="card"><h3>Bảng băm (M = 8 ô, chaining)</h3>
+        <svg id="svg" viewBox="0 0 560 330" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="legend">Ô = chỉ số bucket · vòng tròn nối tiếp = danh sách liên kết (chaining) trong ô đó · <span style="color:#5FE0A0">● xanh</span> = vừa thêm/chạm</div>
+      </div>
+      <div class="narr" id="narr">Bấm lần lượt <b>Chèn 'Minh'</b> → <b>'An'</b> → <b>'Mai'</b> để xem O(1) rồi va chạm.</div>
+      <div class="card"><h3>Điều khiển</h3>
+        <div class="row">
+          <button id="bMinh">Chèn 'Minh'</button>
+          <button id="bAn">Chèn 'An'</button>
+          <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
+          <button id="bReset" class="ghost">↺ Reset</button>
+        </div>
+      </div>
+      <div class="card"><h3>Tham khảo · 2 phe xử lý va chạm</h3>
+        <div style="overflow-x:auto"><table class="summary">
+          <tr><th></th><th>Chaining (Java HashMap)</th><th>Open Addressing (Python dict)</th></tr>
+          <tr><td><b>Khi đụng</b></td><td>Nối thêm vào list của ô</td><td>Dò ô trống kế tiếp (probing)</td></tr>
+          <tr><td><b>Ưu điểm</b></td><td>Đơn giản, chịu tải cao, xóa dễ</td><td>Liền mảng, cache-friendly</td></tr>
+          <tr><td><b>Nhược điểm</b></td><td>Tốn con trỏ, hại cache</td><td>Nhạy tải (resize ~0.7), xóa phức tạp</td></tr>
+        </table></div>
+        <div class="legend" style="margin-top:9px"><b>3 tầng hàm băm:</b></div>
+        <div style="overflow-x:auto"><table class="summary">
+          <tr><th>Tầng</th><th>Công thức</th><th>Đặc điểm</th><th>Dùng bởi</th></tr>
+          <tr><td>« ngây thơ »</td><td>h = k % m</td><td>đơn giản; m sai (lũy thừa 2) → cụm</td><td>nền tảng, textbook</td></tr>
+          <tr><td>« khôn »</td><td>h = ⌊m·frac(k·A)⌋</td><td>trộn bit đều, ít nhạy m</td><td>Rust hashbrown</td></tr>
+          <tr><td>« hoang tưởng »</td><td>key+seed → crypto</td><td>chống DoS, chậm nhất</td><td>Python, Rust default</td></tr>
+        </table></div>
+        <div class="legend" style="margin-top:9px"><b>So sánh ngôn ngữ:</b></div>
+        <div style="overflow-x:auto"><table class="summary">
+          <tr><th>Ngôn ngữ</th><th>Va chạm</th><th>Hàm băm</th><th>Vì sao</th></tr>
+          <tr><td>Python</td><td>Open addressing</td><td>SipHash (seed)</td><td>an toàn mặc định (chống DoS)</td></tr>
+          <tr><td>Java</td><td>Chaining + treeify</td><td>31·h+c → trộn bit</td><td>tương thích cũ; cây đỏ-đen cứu bucket dài</td></tr>
+          <tr><td>Rust</td><td>Open (SwissTable)</td><td>SipHash</td><td>an toàn mặc định + dò SIMD siêu nhanh</td></tr>
+        </table></div>
+      </div>
+      <div class="quiz" id="quiz"><div class="q">❓ Hai khóa khác nhau băm ra CÙNG một ô — đó là...?</div>
+        <button data-a="bug">Lỗi hiếm khi xảy ra</button>
+        <button data-a="onlybad">Chỉ xảy ra nếu hàm băm viết sai</button>
+        <button data-a="certain">Chuyện chắc chắn xảy ra (nghịch lý ngày sinh)</button>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="common.js"></script>
+<script>
+(function(){
+const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+renderToolbox('hash');
+
+const CODE=[
+ ['<span class="kw">function</span> <span class="fn">hash</span>(key) {'],
+ ['  <span class="kw">let</span> h = 0;'],
+ ['  <span class="kw">for</span> (<span class="kw">const</span> ch <span class="kw">of</span> String(key)) h = (h*31 + ch.charCodeAt(0)) &gt;&gt;&gt; 0;  <span class="cm">// cuộn bit</span>'],
+ ['  <span class="kw">return</span> h % M;                          <span class="cm">// ép vào 1 trong M ô</span>'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">put</span>(key, val) {'],
+ ['  <span class="kw">const</span> i = hash(key);'],
+ ['  <span class="kw">for</span> (<span class="kw">const</span> pair <span class="kw">of</span> table[i])'],
+ ['    <span class="kw">if</span> (pair.key === key) { pair.val = val; <span class="kw">return</span>; }  <span class="cm">// đã có → ghi đè</span>'],
+ ['  table[i].push({key, val});             <span class="cm">// chưa có → nối vào ĐUÔI chain ô i</span>'],
+ ['}'],
+];
+renderCode('code', CODE);
+const L={hashSig:0, hashLoop:2, hashMod:3, putSig:6, putHash:7, putScan:8, putMatch:9, putPush:10};
+
+const M=8;
+let table = Array.from({length:M},()=>[]);
+let flashBucket=null, busy=false;
+
+function hashFn(key){ let h=0; for(const ch of String(key)) h=(h*31+ch.charCodeAt(0))>>>0; return h%M; }
+
+function draw(){
+  const el=$('svg'); el.innerHTML='';
+  const rowH=38, startY=6, boxW=46, boxX=14;
+  for(let i=0;i<M;i++){
+    const y = startY + i*rowH;
+    const isFlash = (i===flashBucket);
+    const rect=SVG('rect',{x:boxX,y,width:boxW,height:rowH-8,rx:8, fill: isFlash?'#0A5A3A':'#14261C', stroke: isFlash?'#5FE0A0':'var(--green)','stroke-width':2});
+    el.appendChild(rect);
+    const idxT=SVG('text',{x:boxX+boxW/2,y:y+(rowH-8)/2+4,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':800}); idxT.textContent=i;
+    el.appendChild(idxT);
+    let prevX = boxX+boxW;
+    const cy = y+(rowH-8)/2;
+    table[i].forEach((pair,j)=>{
+      const cx = prevX + 42;
+      el.appendChild(SVG('line',{x1:prevX,y1:cy,x2:cx-17,y2:cy,stroke:'#9FB0C0','stroke-width':2}));
+      const isNew = isFlash && j===table[i].length-1;
+      el.appendChild(SVG('circle',{cx,cy,r:17, fill: isNew?'#0A5A3A':'#1B2330', stroke: isNew?'#5FE0A0':'#39506b','stroke-width':2}));
+      const t=SVG('text',{x:cx,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':10,'font-weight':700}); t.textContent=pair.key;
+      el.appendChild(t);
+      prevX = cx+17;
+    });
+  }
+}
+function lock(b){ busy=b; CL.lock(['bMinh','bAn','bMai','bReset'], b); }
+
+async function doInsert(key){
+  hl(L.hashSig); narrate('Tính <b>hash(\''+key+'\')</b>…'); await nap(600);
+  hl(L.hashLoop); narrate('Cuộn qua từng ký tự: <code>h = h×31 + mã ký tự</code>.'); await nap(750);
+  const idx = hashFn(key);
+  hl(L.hashMod); narrate('<b>hash(\''+key+'\')</b> mod '+M+' = <b>'+idx+'</b>.'); await nap(850);
+  hl(L.putSig); narrate('<code>put(\''+key+'\')</code>: i = hash(\''+key+'\') = <b>'+idx+'</b>.'); await nap(600);
+  hl(L.putScan);
+  const bucket = table[idx];
+  const existing = bucket.find(p=>p.key===key);
+  if(existing){
+    narrate('Ô '+idx+' đã có \''+key+'\' → chỉ cập nhật giá trị, không thêm node mới.'); await nap(900);
+  } else if(bucket.length>0){
+    narrate('⚠️ Ô '+idx+' đã có <b>\''+bucket[0].key+'\'</b> rồi — nhưng \''+key+'\' khác khóa → <b style="color:var(--amber)">VA CHẠM</b>! Không phải xui: nghịch lý ngày sinh nói đây là chuyện <b>chắc chắn</b> xảy ra khi đủ nhiều key.'); await nap(1600);
+  } else {
+    narrate('Ô '+idx+' đang TRỐNG → nhảy thẳng tới, <b>O(1)</b>, không cần dò từng ô.'); await nap(850);
+  }
+  hl(L.putPush);
+  flashBucket=idx;
+  if(!existing) bucket.push({key});
+  draw();
+  narrate(existing ? 'Cập nhật xong ở ô '+idx+'.' : (bucket.length>1 ? 'Nối \''+key+'\' vào <b>ĐUÔI danh sách liên kết</b> của ô '+idx+' (chaining giải quyết va chạm).' : 'Nối \''+key+'\' vào ô '+idx+'.'));
+  await nap(950);
+  flashBucket=null; draw(); hl();
+}
+
+$('bMinh').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Minh'); lock(false); };
+$('bAn').onclick=async()=>{ if(busy)return; lock(true); await doInsert('An'); lock(false); };
+$('bMai').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Mai'); lock(false); };
+$('bReset').onclick=()=>{ if(busy)return; table=Array.from({length:M},()=>[]); flashBucket=null; draw(); hl(); narrate('Đã reset. Bấm lần lượt Chèn \'Minh\' → \'An\' → \'Mai\'.'); };
+
+initQuiz('quiz','hash',{
+  bug:{ok:false,msg:'Sai — nó không hiếm. Với đủ số key, va chạm gần như chắc chắn xảy ra (nghịch lý ngày sinh: chỉ 23 người đã >50% trùng ngày sinh).'},
+  onlybad:{ok:false,msg:'Sai — kể cả hàm băm TỐT vẫn va chạm, vì hữu hạn ô mà vô hạn khóa có thể.'},
+  certain:{ok:true,msg:'Đúng! Vô hạn key ép vào hữu hạn ô → chắc chắn có 2 key rơi cùng ô. Chaining/open addressing là cách xử lý, không phải cách "tránh".'}
+});
+
+draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Lab · Quadtree</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
+  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <div class="toolbox" id="toolbox"></div>
+
+  <div class="station-h">Trạm 6 · Quadtree <span style="color:var(--muted);font-weight:600">(cây tứ phân)</span></div>
+  <p class="station-s">Mỗi ô ≤ <b>CAP</b> điểm; đầy → <b style="color:var(--amber)">chẻ 4</b> (đệ quy). Đông → ô nhỏ · vắng → ô to — cây <b>TỰ UỐN</b> theo mật độ dữ liệu.</p>
+
+  <div class="why">
+    <div><span class="wt">🎯 Vấn đề:</span> 1 triệu điểm trên bản đồ, phải trả lời "điểm nào trong khung nhìn?" MỖI khung hình (60 lần/giây).</div>
+    <div><span class="wt">❌ Mảng quét thẳng:</span> kiểm tra từng điểm có trong khung không → O(n) mỗi lần hỏi = hàng chục triệu phép so/giây.</div>
+    <div><span class="wt">💡 Ý tưởng:</span> chia không gian thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</div>
+  </div>
+
+  <div class="wrap">
+    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+      <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
+      <div class="code" id="code"></div></div></div>
+
+    <div class="col-viz">
+      <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
+        <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:#5FE0A0">chấm xanh</span> = điểm vừa thêm · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
+      </div>
+      <div class="narr" id="narr">Bấm <b>✏️ Thêm 1 điểm</b> để xem insert() từng bước, hoặc <b>▶ Rải 30 điểm</b> để xem cây tự uốn.</div>
+      <div class="card"><h3>Điều khiển</h3>
+        <div class="row">
+          <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
+          <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
+          <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
+          <button id="bReset" class="ghost">↺ Reset</button>
+        </div>
+      </div>
+      <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
+        <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm. Không bao giờ quét hết mọi điểm.</div>
+        <table class="summary" style="margin-top:9px">
+          <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
+          <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
+          <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
+        </table>
+        <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí — không có nó, subdivide() sẽ không bao giờ dừng.</div>
+      </div>
+      <div class="quiz" id="quiz"><div class="q">❓ Nếu ô đã đủ CAP nhưng đã đạt MAX_DEPTH, chèn thêm điểm rơi vào đó thì sao?</div>
+        <button data-a="split">Chẻ tiếp thành 4 ô nhỏ hơn</button>
+        <button data-a="error">Báo lỗi, từ chối chèn</button>
+        <button data-a="keep">Ô giữ điểm dư, KHÔNG chẻ tiếp</button>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="common.js"></script>
+<script>
+(function(){
+const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+renderToolbox('quadtree');
+
+const CODE=[
+ ['<span class="kw">function</span> <span class="fn">contains</span>(node, p) {'],
+ ['  <span class="kw">return</span> p.x &gt;= node.cx-node.half &amp;&amp; p.x &lt; node.cx+node.half &amp;&amp;'],
+ ['         p.y &gt;= node.cy-node.half &amp;&amp; p.y &lt; node.cy+node.half;'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">subdivide</span>(node) {'],
+ ['  <span class="kw">const</span> h = node.half / 2;'],
+ ['  node.nw = QuadNode(node.cx-h, node.cy-h, h, node.depth+1);'],
+ ['  node.ne = QuadNode(node.cx+h, node.cy-h, h, node.depth+1);'],
+ ['  node.sw = QuadNode(node.cx-h, node.cy+h, h, node.depth+1);'],
+ ['  node.se = QuadNode(node.cx+h, node.cy+h, h, node.depth+1);'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">insert</span>(node, p) {'],
+ ['  <span class="kw">if</span> (!contains(node, p)) <span class="kw">return</span> <span class="kw">false</span>;                     <span class="cm">// ngoài ô này</span>'],
+ ['  <span class="kw">if</span> (node.points.length &lt; CAP || node.depth &gt;= MAX_DEPTH) { <span class="cm">// còn chỗ HOẶC chạm đáy</span>'],
+ ['    node.points.push(p); <span class="kw">return</span> <span class="kw">true</span>;'],
+ ['  }'],
+ ['  <span class="kw">if</span> (!node.nw) subdivide(node);                            <span class="cm">// đầy → chẻ 4 ô con</span>'],
+ ['  <span class="kw">return</span> insert(node.nw,p)||insert(node.ne,p)||insert(node.sw,p)||insert(node.se,p);'],
+ ['}'],
+];
+renderCode('code', CODE);
+const L={containsChk:14, roomChk:15, pushDirect:16, subdivideCall:18, recurseCall:19};
+
+const CAP=4, MAX_DEPTH=5;
+function QN(cx,cy,half,depth){ return {cx,cy,half,depth,points:[],nw:null,ne:null,sw:null,se:null}; }
+let root=QN(200,200,200,0), curNode=null, flashPoint=null, busy=false;
+
+function contains(node,p){ return p.x>=node.cx-node.half && p.x<node.cx+node.half && p.y>=node.cy-node.half && p.y<node.cy+node.half; }
+function subdivide(node){ const h=node.half/2;
+  node.nw=QN(node.cx-h,node.cy-h,h,node.depth+1); node.ne=QN(node.cx+h,node.cy-h,h,node.depth+1);
+  node.sw=QN(node.cx-h,node.cy+h,h,node.depth+1); node.se=QN(node.cx+h,node.cy+h,h,node.depth+1); }
+function pickChild(node,p){
+  const west=p.x<node.cx, north=p.y<node.cy;
+  if(north&&west) return {node:node.nw,name:'NW'}; if(north&&!west) return {node:node.ne,name:'NE'};
+  if(!north&&west) return {node:node.sw,name:'SW'}; return {node:node.se,name:'SE'};
+}
+function randPoint(){
+  if(Math.random()<0.65){ return {x:300+(Math.random()-0.5)*70, y:100+(Math.random()-0.5)*70}; }
+  return {x:Math.random()*370+15, y:Math.random()*370+15};
+}
+
+function drawNode(node, el){
+  const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
+  const isCur=(node===curNode);
+  const atMax=(node.depth>=MAX_DEPTH && node.points.length>CAP);
+  el.appendChild(SVG('rect',{x,y,width:s,height:s,fill:'none',
+    stroke: atMax?'var(--red)':(isCur?'#5AA0FF':'#9FB0C0'),
+    'stroke-width': (isCur||atMax)?2.5:1,
+    'stroke-dasharray': atMax?'5 4':'0'}));
+  node.points.forEach(p=>{
+    el.appendChild(SVG('circle',{cx:p.x,cy:p.y,r:4.5, fill: (p===flashPoint)?'#5FE0A0':'#2E7D46'}));
+  });
+  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawNode(c,el)); }
+}
+function draw(){ const el=$('svg'); el.innerHTML=''; drawNode(root, el); }
+function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset'], b); }
+function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; draw(); hl(); }
+
+async function insertRec(node,p,verbose){
+  curNode=node;
+  if(verbose){ draw(); hl(L.containsChk); narrate('Kiểm tra: điểm có nằm trong ô tâm ('+Math.round(node.cx)+','+Math.round(node.cy)+'), nửa cạnh '+Math.round(node.half)+'?'); await nap(240); }
+  if(!contains(node,p)){ if(verbose){ narrate('Ngoài ô → return false.'); await nap(240); } return false; }
+  if(verbose){ hl(L.roomChk); await nap(200); }
+  if(node.points.length<CAP || node.depth>=MAX_DEPTH){
+    if(verbose) hl(L.pushDirect);
+    node.points.push(p); flashPoint=p; draw();
+    if(verbose){
+      if(node.depth>=MAX_DEPTH && node.points.length>CAP){
+        narrate('Ô đã đủ CAP ('+CAP+'/'+CAP+') <b>NHƯNG</b> đã chạm <b style="color:var(--red)">MAX_DEPTH='+MAX_DEPTH+'</b> → <b style="color:var(--red)">KHÔNG chẻ tiếp</b>, cứ giữ điểm dư ở đây.');
+      } else {
+        narrate('Ô còn chỗ ('+node.points.length+'/'+CAP+') → thêm điểm trực tiếp, không cần chẻ.');
+      }
+      await nap(420);
+    }
+    return true;
+  }
+  if(verbose){ narrate('Ô ĐẦY ('+CAP+'/'+CAP+') và chưa chạm MAX_DEPTH → phải <b style="color:var(--amber)">CHẺ 4</b>.'); await nap(340); hl(L.subdivideCall); }
+  if(!node.nw){ subdivide(node); draw(); if(verbose){ narrate('subdivide(): chẻ ô thành 4 ô con NW · NE · SW · SE.'); await nap(450); } }
+  if(verbose){ hl(L.recurseCall); await nap(200); }
+  const child = pickChild(node,p);
+  if(verbose){ narrate('Điểm rơi vào góc <b>'+child.name+'</b> → đệ quy insert() xuống đó.'); await nap(280); }
+  return await insertRec(child.node,p,verbose);
+}
+
+$('bOne').onclick=async()=>{
+  if(busy)return; lock(true);
+  const p=randPoint();
+  narrate('Chèn điểm mới ('+Math.round(p.x)+','+Math.round(p.y)+')…'); await nap(300);
+  await insertRec(root,p,true);
+  curNode=null; flashPoint=null; draw(); hl();
+  lock(false);
+};
+$('bBulk').onclick=async()=>{
+  if(busy)return; lock(true);
+  narrate('▶ Rải 30 điểm (lệch mật độ: 1 góc đông, phần còn lại thưa) — xem cây tự uốn.'); await nap(400);
+  for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); draw(); await nap(70); }
+  curNode=null; flashPoint=null; draw(); hl();
+  narrate('Xong! Vùng ĐÔNG bị chẻ thành nhiều ô nhỏ, vùng THƯA vẫn là ô to — cây tự uốn theo mật độ dữ liệu.');
+  lock(false);
+};
+$('bMax').onclick=async()=>{
+  if(busy)return; lock(true); resetTree();
+  const p={x:137.3,y:84.6};
+  narrate('🎯 Chèn nhiều điểm GẦN NHƯ TRÙNG nhau — xem điều gì chặn việc chẻ vô hạn.'); await nap(500);
+  for(let i=0;i<24;i++){ await insertRec(root,p,false); draw(); await nap(35); }
+  narrate('Đã chèn 24 điểm trùng vị trí — cây đã chẻ liên tiếp xuống tới <b>depth 5</b>. Chèn thêm 1 điểm nữa…'); await nap(800);
+  await insertRec(root,p,true);
+  curNode=null; flashPoint=null; draw(); hl();
+  lock(false);
+};
+$('bReset').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ✏️ Thêm 1 điểm hoặc ▶ Rải 30 điểm.'); };
+
+initQuiz('quiz','quadtree',{
+  split:{ok:false,msg:'Sai — MAX_DEPTH có nghĩa là KHÔNG chẻ tiếp nữa, dù ô vẫn đầy.'},
+  error:{ok:false,msg:'Sai — không có lỗi gì cả, điểm vẫn được chèn, chỉ là ô giữ dư ra thôi.'},
+  keep:{ok:true,msg:'Đúng! MAX_DEPTH chặn đệ quy subdivide() vô hạn — ô đã chạm đáy thì cứ giữ điểm dư, không chẻ thêm.'}
+});
+
+draw();
+})();
+</script>
+</body>
+</html>

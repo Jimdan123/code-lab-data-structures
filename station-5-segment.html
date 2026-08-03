@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Lab · Segment Tree</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
+  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <div class="toolbox" id="toolbox"></div>
+
+  <div class="station-h">Trạm 5 · Segment Tree <span style="color:var(--muted);font-weight:600">(cây đoạn)</span></div>
+  <p class="station-s">Mảng <b>seg[]</b> lưu cả CÂY: cha = tổng 2 con (con = <b>2v, 2v+1</b>). <b>build</b> dựng cây · <b>sum</b> hỏi tổng đoạn O(log n) · <b>update</b> sửa 1 ô O(log n).</p>
+
+  <div class="why">
+    <div><span class="wt">🎯 Vấn đề:</span> Cần hỏi TỔNG một đoạn [l,r] và SỬA 1 phần tử, lặp lại rất nhiều lần.</div>
+    <div><span class="wt">❌ Mảng thường:</span> cộng lại cả đoạn mỗi lần hỏi = O(n); prefix-sum thì sửa 1 ô phải tính lại O(n).</div>
+    <div><span class="wt">💡 Ý tưởng:</span> đếm tiền lẻ — gộp thành <b>CỤM tròn</b> (node) đã lưu sẵn tổng; hỏi đoạn chỉ cộng vài cụm, sửa 1 ô chỉ đi lên 1 đường — cả hai O(log n).</div>
+  </div>
+
+  <div class="wrap">
+    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+      <div class="code-title">// build dựng cây · sum hỏi đoạn · update sửa 1 ô</div>
+      <div class="code" id="code"></div></div></div>
+
+    <div class="col-viz">
+      <div class="card"><h3>Cây đoạn (a = [5,2,2,1,5,2,1,2])</h3>
+        <svg id="svg" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="legend">Nhãn trên = [l,r] · số trong vòng = seg[v] · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--green)">xanh lá</span> = TRỌN · <span style="color:var(--amber)">viền cam</span> = DÍNH · mờ = NGOÀI</div>
+      </div>
+      <div class="narr" id="narr">Bấm <b>▶ Xây cây (build)</b> trước, rồi thử <b>sum(1..6)</b>.</div>
+      <div class="card"><h3>Điều khiển</h3>
+        <div class="row">
+          <button id="bBuild">▶ Xây cây (build)</button>
+          <button id="bSum" class="ghost" disabled>▶ Truy vấn sum(1..6)</button>
+          <button id="bUpdate" class="ghost" disabled>✏️ update(a[2] = 9)</button>
+          <button id="bReset" class="ghost">↺ Reset</button>
+        </div>
+      </div>
+      <div class="quiz" id="quiz"><div class="q">❓ Khi đoạn của 1 node GIAO một phần với đoạn truy vấn (không NGOÀI, không TRỌN), thuật toán làm gì?</div>
+        <button data-a="zero">Trả về 0 luôn</button>
+        <button data-a="grab">Bốc thẳng seg[v]</button>
+        <button data-a="split">Chẻ đôi, đệ quy cả 2 con rồi cộng lại (DÍNH)</button>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="common.js"></script>
+<script>
+(function(){
+const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+renderToolbox('segment');
+
+const CODE=[
+ ['<span class="kw">const</span> N = 8;'],
+ ['<span class="kw">const</span> a = [5,2,2,1,5,2,1,2];'],
+ ['<span class="kw">let</span> seg = <span class="kw">new</span> Array(4*N).fill(0);'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">build</span>(v, l, r) {'],
+ ['  <span class="kw">if</span> (l === r) { seg[v] = a[l]; <span class="kw">return</span>; }   <span class="cm">// lá: copy trực tiếp</span>'],
+ ['  <span class="kw">const</span> m = (l+r) &gt;&gt; 1;'],
+ ['  build(2*v, l, m); build(2*v+1, m+1, r);       <span class="cm">// xây 2 con</span>'],
+ ['  seg[v] = seg[2*v] + seg[2*v+1];               <span class="cm">// gộp lên: cha = trái+phải</span>'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">sum</span>(v, l, r, ql, qr) {'],
+ ['  <span class="kw">if</span> (qr &lt; l || r &lt; ql) <span class="kw">return</span> 0;              <span class="cm">// NGOÀI</span>'],
+ ['  <span class="kw">if</span> (ql &lt;= l &amp;&amp; r &lt;= qr) <span class="kw">return</span> seg[v];        <span class="cm">// TRỌN</span>'],
+ ['  <span class="kw">const</span> m = (l+r) &gt;&gt; 1;                          <span class="cm">// DÍNH: chẻ đôi</span>'],
+ ['  <span class="kw">return</span> sum(2*v,l,m,ql,qr) + sum(2*v+1,m+1,r,ql,qr);'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">update</span>(v, l, r, p, x) {'],
+ ['  <span class="kw">if</span> (l === r) { seg[v] = x; <span class="kw">return</span>; }         <span class="cm">// tới đúng lá</span>'],
+ ['  <span class="kw">const</span> m = (l+r) &gt;&gt; 1;'],
+ ['  <span class="kw">if</span> (p &lt;= m) update(2*v, l, m, p, x);'],
+ ['  <span class="kw">else</span>        update(2*v+1, m+1, r, p, x);'],
+ ['  seg[v] = seg[2*v] + seg[2*v+1];               <span class="cm">// đi lên: gộp lại</span>'],
+ ['}'],
+];
+renderCode('code', CODE);
+const L={buildSig:4, buildLeaf:5, buildMid:6, buildRecurse:7, buildMerge:8,
+         sumSig:11, sumOutside:12, sumFull:13, sumMid:14, sumRecurse:15,
+         updSig:18, updLeaf:19, updMid:20, updGo:21, updMerge:23};
+
+const N=8, a=[5,2,2,1,5,2,1,2];
+let seg = new Array(4*N).fill(0);
+let curV=null, caseOf={}, busy=false, built=false;
+
+const pos={};
+(function initPos(){
+  function rec(v,l,r,depth){
+    if(l===r){ pos[v]={l,r,depth,x:l}; return l; }
+    const m=(l+r)>>1;
+    const xl=rec(2*v,l,m,depth+1), xr=rec(2*v+1,m+1,r,depth+1);
+    const x=(xl+xr)/2; pos[v]={l,r,depth,x}; return x;
+  }
+  rec(1,0,N-1,0);
+})();
+
+function draw(){
+  const el=$('svg'); el.innerHTML='';
+  const W=700,H=300,padX=40,padY=42;
+  const dx=(W-2*padX)/(N-1), dy=(H-2*padY)/3;
+  const px=v=>padX+pos[v].x*dx, py=v=>padY+pos[v].depth*dy;
+  Object.keys(pos).map(Number).forEach(v=>{
+    const c1=2*v, c2=2*v+1;
+    [c1,c2].forEach(c=>{ if(pos[c]){ el.appendChild(SVG('line',{class:'edge',x1:px(v),y1:py(v),x2:px(c),y2:py(c)})); } });
+  });
+  Object.keys(pos).map(Number).forEach(v=>{
+    const kase=caseOf[v];
+    let cls='node'; if(v===curV) cls+=' cur'; if(kase==='full') cls+=' flash'; if(kase==='part') cls+=' rot';
+    const opacity = kase==='out' ? 0.35 : 1;
+    const g=SVG('g',{class:cls, transform:'translate('+px(v)+','+py(v)+')', style:'opacity:'+opacity});
+    g.appendChild(SVG('circle',{r:20}));
+    const t=SVG('text',{}); t.textContent=seg[v]; g.appendChild(t);
+    const rg=SVG('text',{class:'h', y:-27}); rg.textContent='['+pos[v].l+','+pos[v].r+']'; g.appendChild(rg);
+    el.appendChild(g);
+  });
+}
+function lock(b){ busy=b; CL.lock(['bBuild','bSum','bUpdate','bReset'], b); if(!b){ CL.lock(['bSum','bUpdate'], !built); } }
+
+async function build(v,l,r){
+  curV=v; draw(); hl(L.buildSig); await nap(140);
+  if(l===r){
+    hl(L.buildLeaf); seg[v]=a[l]; draw();
+    narrate('LÁ seg['+v+'] = a['+l+'] = <b>'+a[l]+'</b>.'); await nap(320);
+    return;
+  }
+  hl(L.buildMid); const m=(l+r)>>1; await nap(120);
+  hl(L.buildRecurse); await build(2*v,l,m); await build(2*v+1,m+1,r);
+  curV=v; hl(L.buildMerge); seg[v]=seg[2*v]+seg[2*v+1]; draw();
+  narrate('GỘP: seg['+v+'] = seg['+(2*v)+'] + seg['+(2*v+1)+'] = '+seg[2*v]+' + '+seg[2*v+1]+' = <b>'+seg[v]+'</b>.'); await nap(320);
+}
+async function sumQ(v,l,r,ql,qr){
+  curV=v; draw(); hl(L.sumSig); narrate('sum(v='+v+', ['+l+'..'+r+'], hỏi ['+ql+'..'+qr+'])'); await nap(260);
+  hl(L.sumOutside);
+  if(qr<l || r<ql){ caseOf[v]='out'; draw(); narrate('['+l+'..'+r+'] <b>NGOÀI</b> vùng hỏi → trả về 0.'); await nap(360); return 0; }
+  hl(L.sumFull);
+  if(ql<=l && r<=qr){ caseOf[v]='full'; draw(); narrate('['+l+'..'+r+'] <b style="color:var(--green)">TRỌN</b> trong vùng hỏi → bốc thẳng seg['+v+'] = <b>'+seg[v]+'</b>.'); await nap(400); return seg[v]; }
+  caseOf[v]='part'; draw(); hl(L.sumMid); const m=(l+r)>>1; await nap(220);
+  hl(L.sumRecurse); narrate('['+l+'..'+r+'] giao <b>MỘT PHẦN</b> (<b style="color:var(--amber)">DÍNH</b>) — ca khó nhất: chẻ đôi, đệ quy CẢ 2 con rồi cộng lại.'); await nap(420);
+  const left=await sumQ(2*v,l,m,ql,qr), right=await sumQ(2*v+1,m+1,r,ql,qr);
+  curV=v; draw(); narrate('Cộng lại ở v='+v+': '+left+' + '+right+' = <b>'+(left+right)+'</b>.'); await nap(340);
+  return left+right;
+}
+async function update(v,l,r,p,x){
+  curV=v; draw(); hl(L.updSig); await nap(200);
+  if(l===r){ hl(L.updLeaf); seg[v]=x; draw(); narrate('Tới LÁ seg['+v+'] → gán = <b>'+x+'</b>.'); await nap(380); return; }
+  hl(L.updMid); const m=(l+r)>>1; await nap(180);
+  hl(L.updGo);
+  if(p<=m){ narrate('a['+p+'] nằm bên TRÁI (≤ '+m+') → đi xuống con trái.'); await nap(300); await update(2*v,l,m,p,x); }
+  else { narrate('a['+p+'] nằm bên PHẢI (&gt; '+m+') → đi xuống con phải.'); await nap(300); await update(2*v+1,m+1,r,p,x); }
+  curV=v; hl(L.updMerge); seg[v]=seg[2*v]+seg[2*v+1]; draw();
+  narrate('Đi lên gộp: seg['+v+'] = '+seg[2*v]+' + '+seg[2*v+1]+' = <b>'+seg[v]+'</b>.'); await nap(340);
+}
+
+$('bBuild').onclick=async()=>{
+  if(busy)return; lock(true); seg=new Array(4*N).fill(0); caseOf={}; curV=null; draw();
+  narrate('Xây cây từ mảng a — đệ quy xuống LÁ rồi GỘP ngược lên.'); await nap(500);
+  await build(1,0,N-1);
+  curV=null; draw(); built=true;
+  narrate('Xây xong! seg[1] (gốc) = tổng cả mảng = <b>'+seg[1]+'</b>.');
+  lock(false);
+};
+$('bSum').onclick=async()=>{
+  if(busy)return; lock(true); caseOf={}; curV=null; draw();
+  narrate('Truy vấn <b>sum(a[1..6])</b> — 3 ca: NGOÀI→0 · TRỌN→bốc seg[v] · DÍNH→chẻ đôi.'); await nap(500);
+  const result = await sumQ(1,0,N-1,1,6);
+  curV=null; draw();
+  narrate('Xong! <b>sum(a[1..6]) = '+result+'</b>.');
+  lock(false);
+};
+$('bUpdate').onclick=async()=>{
+  if(busy)return; lock(true); caseOf={}; curV=null; draw();
+  narrate('update(a[2] = <b>9</b>) — xuống tới lá rồi đi lên gộp lại, KHÔNG xây lại cả cây.'); await nap(500);
+  await update(1,0,N-1,2,9);
+  curV=null; draw();
+  narrate('Cập nhật xong — chỉ 1 đường từ gốc xuống lá rồi lên: O(log n).');
+  lock(false);
+};
+$('bReset').onclick=()=>{
+  if(busy)return; seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw(); hl();
+  CL.lock(['bSum','bUpdate'], true);
+  narrate('Đã reset. Bấm ▶ Xây cây (build) trước.');
+};
+
+initQuiz('quiz','segment',{
+  zero:{ok:false,msg:'Sai — trả về 0 là ca NGOÀI, không phải DÍNH.'},
+  grab:{ok:false,msg:'Sai — bốc thẳng seg[v] là ca TRỌN, không phải DÍNH.'},
+  split:{ok:true,msg:'Đúng! Ca DÍNH (giao một phần) phải chẻ đôi, đệ quy cả 2 con rồi cộng kết quả lại.'}
+});
+
+draw();
+})();
+</script>
+</body>
+</html>
