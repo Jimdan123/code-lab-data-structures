@@ -173,10 +173,18 @@
             <div class="legend">Nhãn trên = [l,r] · số trong vòng = seg[v] · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--green)">xanh lá</span> = TRỌN · <span style="color:var(--amber)">viền cam</span> = DÍNH · mờ = NGOÀI</div>
           </div>
           <div class="card"><h3>Điều khiển thủ công</h3>
-            <div class="row">
+            <div class="row" style="margin-bottom:8px">
               <button id="bBuild">▶ Xây cây (build)</button>
-              <button id="bSum" class="ghost" disabled>▶ Truy vấn sum(1..6)</button>
-              <button id="bUpdate" class="ghost" disabled>✏️ update(a[2] = 9)</button>
+            </div>
+            <div class="row" style="margin-bottom:8px">
+              <input type="number" id="sumL" value="1" min="0" max="7" style="width:56px;">
+              <input type="number" id="sumR" value="6" min="0" max="7" style="width:56px;">
+              <button id="bSum" class="ghost" disabled>▶ sum(l..r)</button>
+            </div>
+            <div class="row">
+              <input type="number" id="updIdx" value="2" min="0" max="7" style="width:56px;">
+              <input type="number" id="updVal" value="9" min="0" max="99" style="width:56px;">
+              <button id="bUpdate" class="ghost" disabled>✏️ update(idx, val)</button>
             </div>
           </div>
         </div>
@@ -427,16 +435,22 @@ $('bBuild').onclick=async()=>{
 };
 $('bSum').onclick=async()=>{
   if(busy)return; lock(true); caseOf={}; curV=null; draw();
-  narrate('Truy vấn <b>sum(a[1..6])</b> — 3 ca: NGOÀI→0 · TRỌN→bốc seg[v] · DÍNH→chẻ đôi.'); await nap(500);
-  const result = await sumQ(1,0,N-1,1,6);
+  let l=parseInt($('sumL').value,10), r=parseInt($('sumR').value,10);
+  if(isNaN(l))l=0; if(isNaN(r))r=N-1;
+  l=Math.max(0,Math.min(N-1,l)); r=Math.max(l,Math.min(N-1,r));
+  narrate('Truy vấn <b>sum(a['+l+'..'+r+'])</b> — 3 ca: NGOÀI→0 · TRỌN→bốc seg[v] · DÍNH→chẻ đôi.'); await nap(500);
+  const result = await sumQ(1,0,N-1,l,r);
   curV=null; draw();
-  narrate('Xong! <b>sum(a[1..6]) = '+result+'</b>.');
+  narrate('Xong! <b>sum(a['+l+'..'+r+']) = '+result+'</b>.');
   lock(false);
 };
 $('bUpdate').onclick=async()=>{
   if(busy)return; lock(true); caseOf={}; curV=null; draw();
-  narrate('update(a[2] = <b>9</b>) — xuống tới lá rồi đi lên gộp lại, KHÔNG xây lại cả cây.'); await nap(500);
-  await update(1,0,N-1,2,9);
+  let idx=parseInt($('updIdx').value,10), val=parseInt($('updVal').value,10);
+  if(isNaN(idx))idx=0; if(isNaN(val))val=0;
+  idx=Math.max(0,Math.min(N-1,idx));
+  narrate('update(a['+idx+'] = <b>'+val+'</b>) — xuống tới lá rồi đi lên gộp lại, KHÔNG xây lại cả cây.'); await nap(500);
+  await update(1,0,N-1,idx,val);
   curV=null; draw();
   narrate('Cập nhật xong — chỉ 1 đường từ gốc xuống lá rồi lên: O(log n).');
   lock(false);

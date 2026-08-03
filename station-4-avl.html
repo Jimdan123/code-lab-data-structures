@@ -179,6 +179,26 @@
               <button id="bDemo" class="ghost">▶ Chèn 1→7 (nhanh)</button>
             </div>
           </div>
+          <div class="card"><h3>Minh hoạ · Cây thường vs AVL</h3>
+            <div class="row" style="margin-bottom:8px">
+              <input type="text" id="bstSeqInput" value="1,2,3,4,5,6,7" style="width:150px;">
+              <button id="bBstStep">⏭ Chèn 1 (1/7)</button>
+              <button id="bBstReset" class="ghost">↺ Reset</button>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-end;height:74px;">
+              <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;">
+                <div style="font-size:11px;font-weight:800;color:var(--lacquer);">Cây thường</div>
+                <div id="bstBar" style="background:var(--lacquer);height:2px;border-radius:3px;margin-top:auto;transition:height .3s;"></div>
+                <div id="bstHeightLabel" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:4px;">cao 0</div>
+              </div>
+              <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;">
+                <div style="font-size:11px;font-weight:800;color:var(--wasabi);">AVL (tự cân)</div>
+                <div id="avlBar" style="background:var(--wasabi);height:2px;border-radius:3px;margin-top:auto;transition:height .3s;"></div>
+                <div id="avlHeightLabel" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:4px;">cao 0</div>
+              </div>
+            </div>
+            <div class="legend" id="bstNarr" style="margin-top:8px;min-height:18px;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -431,12 +451,52 @@ $('bDemo').onclick=async ()=>{ if(busy)return; lock(true); root=null; setRot('')
   lock(false);
 };
 
+/* ---- cây thường (không cân) vs AVL, minh hoạ trực tiếp, từng bước ---- */
+function bstInsert(n,x){ if(!n) return {v:x,l:null,r:null}; if(x<n.v) n.l=bstInsert(n.l,x); else if(x>n.v) n.r=bstInsert(n.r,x); return n; }
+function treeHeight(n){ return n ? 1+Math.max(treeHeight(n.l), treeHeight(n.r)) : 0; }
+let bstDemoRoot=null, avlDemoRoot=null, bstSeq=[1,2,3,4,5,6,7], bstStepIdx=0, bstDemoBusy=false;
+function parseBstSeq(){
+  const nums = ($('bstSeqInput').value||'').split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n));
+  return nums.length ? nums : [1,2,3,4,5,6,7];
+}
+function bstBtnLabel(){
+  return bstStepIdx>=bstSeq.length ? '↺ Xong! Bấm để làm lại' : '⏭ Chèn '+bstSeq[bstStepIdx]+' ('+(bstStepIdx+1)+'/'+bstSeq.length+')';
+}
+function renderBstBars(){
+  const bh=treeHeight(bstDemoRoot), ah=treeHeight(avlDemoRoot);
+  $('bstBar').style.height=Math.max(2,Math.min(bh*8,64))+'px';
+  $('avlBar').style.height=Math.max(2,Math.min(ah*8,64))+'px';
+  $('bstHeightLabel').textContent='cao '+bh;
+  $('avlHeightLabel').textContent='cao '+ah;
+}
+function resetBstDemo(){
+  bstDemoRoot=null; avlDemoRoot=null; bstStepIdx=0; bstSeq=parseBstSeq();
+  renderBstBars();
+  $('bstNarr').innerHTML='Bấm nút để chèn từng số vào CẢ 2 cây, so chiều cao.';
+  $('bBstStep').textContent=bstBtnLabel();
+}
+function bstStep(){
+  if(bstDemoBusy) return;
+  if(bstStepIdx>=bstSeq.length){ resetBstDemo(); return; }
+  const x = bstSeq[bstStepIdx];
+  bstDemoRoot = bstInsert(bstDemoRoot, x);
+  avlDemoRoot = insertSync(avlDemoRoot, x);
+  renderBstBars();
+  const bh=treeHeight(bstDemoRoot), ah=treeHeight(avlDemoRoot);
+  $('bstNarr').innerHTML='Chèn <b>'+x+'</b> → cây thường cao <b style="color:var(--lacquer)">'+bh+'</b>, AVL cao <b style="color:var(--wasabi)">'+ah+'</b>'+(bh>ah?' — AVL đã tự xoay để thấp hơn!':'.');
+  bstStepIdx++;
+  $('bBstStep').textContent=bstBtnLabel();
+}
+$('bBstStep').onclick = bstStep;
+$('bBstReset').onclick = ()=>{ if(bstDemoBusy) return; resetBstDemo(); };
+
 initQuiz('quiz','avl',{
   line:{ok:true, msg:'Đúng! Cây THƯỜNG không tự cân → thành đường thẳng, tìm chậm như list. AVL tự XOAY nên luôn thấp.'},
   bal:{ok:false, msg:'Cây THƯỜNG (không cân) sẽ nghiêng thành đường thẳng. Chỉ AVL mới giữ cân.'}
 });
 
 draw();
+resetBstDemo();
 if(location.hash==='#seed'){ [50,30,70,20,40,60,80,10,25,90].forEach(v=>{root=insertSync(root,v);}); draw(); }
 })();
 </script>

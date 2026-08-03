@@ -179,14 +179,20 @@
               <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
             </div>
           </div>
-          <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
-            <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm.</div>
-            <table class="summary" style="margin-top:9px">
-              <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
-              <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
-              <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
-            </table>
-            <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí.</div>
+          <div class="card"><h3>Minh hoạ · Ảnh hưởng của CAP</h3>
+            <div class="row" style="margin-bottom:8px">
+              <input type="number" id="capInput" value="4" min="1" max="20" style="width:60px;">
+              <button id="bCapDemo">🔁 Rải lại với CAP này</button>
+            </div>
+            <div class="legend" id="capStats" style="min-height:18px;"></div>
+          </div>
+          <div class="card"><h3>Minh hoạ · Tìm điểm gần nhất</h3>
+            <div class="row" style="margin-bottom:8px">
+              <button id="bNNSearch">🔍 Tìm gần nhất (điểm ngẫu nhiên)</button>
+              <button id="bNNClear" class="ghost">✖ Xoá</button>
+            </div>
+            <div class="legend">Vòng nét đứt = phạm vi tìm · <span style="color:#5AA0FF">viền xanh</span> = ô ĐÃ kiểm tra · ô mờ = bị CẮT NHÁNH · <span style="color:#B8860B">●vàng</span> = điểm gần nhất.</div>
+            <div class="legend" id="nnStats" style="margin-top:6px;min-height:18px;"></div>
           </div>
         </div>
       </div>
@@ -276,7 +282,7 @@ const CODE=[
 renderCode('code', CODE);
 const L={containsChk:14, roomChk:15, pushDirect:16, subdivideCall:18, recurseCall:19};
 
-const CAP=4, MAX_DEPTH=5;
+let CAP=4; const MAX_DEPTH=5;
 function QN(cx,cy,half,depth){ return {cx,cy,half,depth,points:[],nw:null,ne:null,sw:null,se:null}; }
 let root=QN(200,200,200,0), curNode=null, flashPoint=null, busy=false;
 
@@ -294,20 +300,35 @@ function randPoint(){
   return {x:Math.random()*370+15, y:Math.random()*370+15};
 }
 
+let nnState=null;
 function drawTechNode(node, el){
   const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
   const isCur=(node===curNode);
   const atMax=(node.depth>=MAX_DEPTH && node.points.length>CAP);
-  el.appendChild(SVG('rect',{x,y,width:s,height:s,fill:'none',
-    stroke: atMax?'var(--red)':(isCur?'#5AA0FF':'#9FB0C0'),
-    'stroke-width': (isCur||atMax)?2.5:1,
-    'stroke-dasharray': atMax?'5 4':'0'}));
+  let stroke = atMax?'var(--red)':(isCur?'#5AA0FF':'#9FB0C0');
+  let strokeWidth = (isCur||atMax)?2.5:1;
+  let opacity=1;
+  if(nnState){
+    if(nnState.pruned.includes(node)){ opacity=0.15; }
+    else if(nnState.visited.includes(node)){ stroke='#5AA0FF'; strokeWidth=2.5; }
+  }
+  const rectEl=SVG('rect',{x,y,width:s,height:s,fill:'none', stroke, 'stroke-width':strokeWidth, 'stroke-dasharray': atMax?'5 4':'0'});
+  rectEl.style.opacity=opacity;
+  el.appendChild(rectEl);
   node.points.forEach(p=>{
-    el.appendChild(SVG('circle',{cx:p.x,cy:p.y,r:4.5, fill: (p===flashPoint)?'#5FE0A0':'#2E7D46'}));
+    const isNearest = nnState && nnState.nearest===p;
+    el.appendChild(SVG('circle',{cx:p.x,cy:p.y,r: isNearest?7:4.5, fill: isNearest?'#D9A441':((p===flashPoint)?'#5FE0A0':'#2E7D46'), stroke: isNearest?'#8a6a2a':'none','stroke-width':isNearest?2:0}));
   });
   if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawTechNode(c,el)); }
 }
-function drawTech(){ const el=$('svg'); if(!el) return; el.innerHTML=''; drawTechNode(root, el); }
+function drawTech(){
+  const el=$('svg'); if(!el) return; el.innerHTML='';
+  drawTechNode(root, el);
+  if(nnState){
+    el.appendChild(SVG('circle',{cx:nnState.qx,cy:nnState.qy,r:nnState.r, fill:'none', stroke:'var(--amber)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
+    el.appendChild(SVG('circle',{cx:nnState.qx,cy:nnState.qy,r:3.5, fill:'var(--amber)'}));
+  }
+}
 
 function drawMapNode(node, el){
   const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
@@ -331,7 +352,7 @@ function drawMap(){
 function draw(){ drawMap(); drawTech(); }
 function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset','bPlay'], b); }
 function lockStep(b){ CL.lock(['bStep'], b); }
-function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; draw(); hl(); }
+function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; nnState=null; draw(); hl(); }
 
 async function insertRec(node,p,verbose){
   curNode=node;
@@ -358,6 +379,52 @@ async function insertRec(node,p,verbose){
   if(verbose){ narrate('Ghim rơi vào góc <b>'+child.name+'</b> → đệ quy insert() xuống đó.'); await nap(280); }
   return await insertRec(child.node,p,verbose);
 }
+
+/* ---- minh hoạ · CAP ảnh hưởng tới cấu trúc cây ra sao, trên cùng 1 bộ điểm cố định ---- */
+const CAP_DEMO_POINTS=(function(){
+  const pts=[]; let s=42;
+  function rnd(){ s=(s*1103515245+12345)&0x7fffffff; return (s%1000)/1000; }
+  for(let i=0;i<16;i++) pts.push({x:300+(rnd()-0.5)*70, y:100+(rnd()-0.5)*70});
+  for(let i=0;i<10;i++) pts.push({x:rnd()*370+15, y:rnd()*370+15});
+  return pts;
+})();
+function countNodes(node){ let c=1; if(node.nw){ c+=countNodes(node.nw)+countNodes(node.ne)+countNodes(node.sw)+countNodes(node.se); } return c; }
+function maxDepthOf(node){ let m=node.depth; if(node.nw){ m=Math.max(m,maxDepthOf(node.nw),maxDepthOf(node.ne),maxDepthOf(node.sw),maxDepthOf(node.se)); } return m; }
+let capDemoBusy=false;
+async function runCapDemo(){
+  if(capDemoBusy) return; capDemoBusy=true; CL.lock(['bCapDemo'],true);
+  CAP=Math.max(1,Math.min(20,parseInt($('capInput').value,10)||4));
+  nnState=null; resetTree();
+  for(const p of CAP_DEMO_POINTS){ await insertRec(root,p,false); }
+  curNode=null; flashPoint=null; draw();
+  $('capStats').innerHTML='CAP = <b>'+CAP+'</b> → cây có <b>'+countNodes(root)+'</b> node, sâu tối đa <b>'+maxDepthOf(root)+'</b> (cùng '+CAP_DEMO_POINTS.length+' ghim).';
+  CL.lock(['bCapDemo'],false); capDemoBusy=false;
+}
+$('bCapDemo').onclick = runCapDemo;
+
+/* ---- minh hoạ · tìm điểm gần nhất, có cắt nhánh thật ---- */
+function nnCollect(node, qx,qy,r, visited, pruned, candidates){
+  const nx=Math.max(node.cx-node.half, Math.min(qx, node.cx+node.half));
+  const ny=Math.max(node.cy-node.half, Math.min(qy, node.cy+node.half));
+  const d2=(qx-nx)*(qx-nx)+(qy-ny)*(qy-ny);
+  if(d2 > r*r){ pruned.push(node); return; }
+  visited.push(node);
+  node.points.forEach(p=>candidates.push(p));
+  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>nnCollect(c,qx,qy,r,visited,pruned,candidates)); }
+}
+$('bNNSearch').onclick = ()=>{
+  const qx=30+Math.random()*340, qy=30+Math.random()*340, r=70;
+  const visited=[], pruned=[], candidates=[];
+  nnCollect(root, qx,qy,r, visited, pruned, candidates);
+  let nearest=null, bestD=Infinity;
+  candidates.forEach(p=>{ const d=Math.hypot(p.x-qx,p.y-qy); if(d<bestD){ bestD=d; nearest=p; } });
+  nnState={qx,qy,r,visited,pruned,nearest};
+  draw();
+  $('nnStats').innerHTML = nearest
+    ? 'Kiểm tra <b>'+visited.length+'</b> ô, CẮT NHÁNH <b>'+pruned.length+'</b> ô · gần nhất cách <b>'+bestD.toFixed(1)+'</b>px.'
+    : 'Không có ghim nào trong bán kính '+r+'px — bấm lại để thử điểm khác.';
+};
+$('bNNClear').onclick = ()=>{ nnState=null; draw(); $('nnStats').innerHTML=''; };
 
 /* ---- one shared script: automatic play or one-step-at-a-time ---- */
 const DUP_POINT={x:137.3,y:84.6};
