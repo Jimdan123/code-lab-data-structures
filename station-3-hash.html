@@ -51,6 +51,11 @@
   .dish.problem{--card-c:var(--lacquer);}
   .dish.bad{--card-c:#A0522D;}
   .dish.idea{--card-c:var(--wasabi);}
+  .dish.usecase{--card-c:var(--indigo);}
+  .dish ul{margin:6px 0 0 16px;padding:0;font-size:13.5px;color:var(--soy);}
+  .dish li{margin-bottom:4px;}
+  .dish li:last-child{margin-bottom:0;}
+  .dish li b{color:var(--card-c);}
 
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
@@ -197,6 +202,40 @@
             </table></div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">04</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
+    <div class="k-menu">
+      <div class="dish idea">
+        <div class="ic">✅</div>
+        <h3>Ưu điểm</h3>
+        <ul>
+          <li>Tra cứu/thêm/xoá trung bình <b>O(1)</b> — cực nhanh.</li>
+          <li>Không cần dữ liệu có thứ tự trước.</li>
+          <li>Khoá linh hoạt: chuỗi, số, hay bất kỳ kiểu băm được.</li>
+        </ul>
+      </div>
+      <div class="dish problem">
+        <div class="ic">❌</div>
+        <h3>Nhược điểm</h3>
+        <ul>
+          <li><b>Không giữ thứ tự</b> chèn (trừ biến thể như LinkedHashMap).</li>
+          <li>Trường hợp xấu nhất <b>O(n)</b> nếu hàm băm tệ, va chạm nhiều.</li>
+          <li>Tốn bộ nhớ cho bucket rỗng, cần <b>resize</b> khi tải cao.</li>
+        </ul>
+      </div>
+      <div class="dish usecase">
+        <div class="ic">🧩</div>
+        <h3>Thường dùng ở đâu?</h3>
+        <ul>
+          <li>Object/dictionary trong JS, Python dict, Java HashMap.</li>
+          <li>Cache — bộ nhớ đệm kết quả tính toán, chỉ mục database.</li>
+          <li>Đếm tần suất từ, phát hiện phần tử trùng lặp.</li>
+          <li>Kiểm tra tồn tại nhanh (set membership).</li>
+        </ul>
       </div>
     </div>
   </section>

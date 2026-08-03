@@ -51,6 +51,11 @@
   .dish.problem{--card-c:var(--lacquer);}
   .dish.bad{--card-c:#A0522D;}
   .dish.idea{--card-c:var(--wasabi);}
+  .dish.usecase{--card-c:var(--indigo);}
+  .dish ul{margin:6px 0 0 16px;padding:0;font-size:13.5px;color:var(--soy);}
+  .dish li{margin-bottom:4px;}
+  .dish li:last-child{margin-bottom:0;}
+  .dish li b{color:var(--card-c);}
 
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
@@ -175,6 +180,39 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">04</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
+    <div class="k-menu">
+      <div class="dish idea">
+        <div class="ic">✅</div>
+        <h3>Ưu điểm</h3>
+        <ul>
+          <li>Truy vấn đoạn (tổng/min/max…) và cập nhật 1 phần tử đều <b>O(log n)</b>.</li>
+          <li>Linh hoạt: đổi phép gộp (tổng, min, max, gcd…) là dùng cho bài toán khác.</li>
+          <li>Nhanh hơn hẳn tính lại từ đầu mỗi lần hỏi (O(n) mỗi câu hỏi).</li>
+        </ul>
+      </div>
+      <div class="dish problem">
+        <div class="ic">❌</div>
+        <h3>Nhược điểm</h3>
+        <ul>
+          <li>Tốn bộ nhớ hơn mảng gốc (khoảng <b>4×N</b> ô).</li>
+          <li>Cài đặt phức tạp hơn, dễ sai off-by-one khi mới học.</li>
+          <li>Phải <b>xây lại cả cây</b> nếu đổi kích thước mảng gốc.</li>
+        </ul>
+      </div>
+      <div class="dish usecase">
+        <div class="ic">🧩</div>
+        <h3>Thường dùng ở đâu?</h3>
+        <ul>
+          <li>Truy vấn khoảng trong thi đấu lập trình (competitive programming).</li>
+          <li>Range query trên dữ liệu lớn — vd tổng doanh thu theo khoảng ngày.</li>
+          <li>Lịch đặt phòng/tài nguyên chồng lấn, biến thể interval tree.</li>
+        </ul>
       </div>
     </div>
   </section>

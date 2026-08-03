@@ -499,6 +499,26 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
   <!-- ══ 06 · Stack vs Heap + security + ứng dụng ══ -->
   <section>
     <h2><span class="tag">06</span> Stack vs Heap — và vì sao hacker mê stack</h2>
+
+    <div class="stcard" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
+      <div>
+        <h3 style="color:var(--wasabi);font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:8px;">✅ Ưu điểm</h3>
+        <ul style="margin-left:18px;font-size:14px;line-height:1.7;">
+          <li><code>push</code>/<code>pop</code> <b>O(1)</b>, cực đơn giản để cài đặt.</li>
+          <li>Khớp tự nhiên với cấu trúc lồng nhau (ngoặc, hàm gọi hàm).</li>
+          <li>Không cần thanh ghi/con trỏ phức tạp — chỉ 1 chỉ số đỉnh (<code>top</code>).</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--lacquer);font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:8px;">❌ Nhược điểm</h3>
+        <ul style="margin-left:18px;font-size:14px;line-height:1.7;">
+          <li>Chỉ truy cập được <b>đỉnh</b> — muốn lấy phần tử giữa phải pop hết bên trên.</li>
+          <li>Kích thước có giới hạn — đệ quy quá sâu gây <b>stack overflow</b>.</li>
+          <li>Không hỗ trợ tìm kiếm nhanh, phải duyệt tuần tự nếu cần.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="duo">
       <table>
         <tr><th></th><th>🥞 Stack</th><th>🍲 Heap</th></tr>
