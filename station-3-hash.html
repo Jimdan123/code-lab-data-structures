@@ -94,13 +94,12 @@
   .hash-trace .step.final{margin-top:6px;padding-top:8px;border-top:1px dashed #D8CDB6;font-weight:800;}
   @keyframes hashStepIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
 
-  .mini-buckets{display:flex;flex-direction:column;gap:4px;}
-  .mini-bucket{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:center;background:#14261C;border-radius:8px;padding:5px 8px;min-height:26px;transition:box-shadow .2s;}
-  .mini-bucket.flash{box-shadow:0 0 0 2px var(--gold);}
-  .mini-bucket .midx{color:#9FB8A8;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:800;}
-  .mini-bucket .mitems{display:flex;gap:5px;flex-wrap:wrap;}
-  .mini-bucket .mchip{background:#1B2330;color:#fff;border:1.5px solid var(--green);border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;}
-  .mini-bucket .mchip.blue{border-color:#5AA0FF;}
+  .mini-strip{display:flex;gap:3px;}
+  .mini-cell{flex:1;min-width:0;background:#14261C;border-radius:6px;padding:4px 2px;text-align:center;transition:box-shadow .2s;}
+  .mini-cell.flash{box-shadow:0 0 0 2px var(--gold);}
+  .mini-cell .midx{display:block;color:#7C9184;font-family:'JetBrains Mono',monospace;font-size:8.5px;}
+  .mini-cell .mchip{display:block;background:#1B2330;color:#fff;border:1px solid var(--green);border-radius:4px;font-size:9px;font-weight:700;padding:0 2px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mini-cell .mchip.blue{border-color:#5AA0FF;}
 
   .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
   .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
@@ -200,39 +199,23 @@
               <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
             </div>
           </div>
-          <div class="card"><h3>Minh hoạ trực tiếp · Chaining vs Open Addressing</h3>
-            <div class="legend">Cùng chèn <b>Minh, An, Mai</b> — An và Mai CÙNG băm ra một ô. Xem 2 cách xử lý va chạm khác nhau ra sao, không chỉ đọc mô tả.</div>
-            <div class="row" style="margin:10px 0">
-              <button id="bCollideDemo">▶ Chèn cả 3, xem cả 2 cách</button>
-              <button id="bCollideReset" class="ghost">↺ Reset</button>
+          <div class="card"><h3>Minh hoạ · Chaining vs Open Addressing</h3>
+            <div class="row" style="margin-bottom:8px">
+              <button id="bCollideDemo">▶ Chèn Minh, An, Mai</button>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-              <div>
-                <div style="text-align:center;font-weight:800;color:var(--green);font-size:12.5px;margin-bottom:6px;">🔗 Chaining (Java HashMap)</div>
-                <div id="bucketsChain"></div>
-              </div>
-              <div>
-                <div style="text-align:center;font-weight:800;color:#3B78C4;font-size:12.5px;margin-bottom:6px;">➡️ Open Addressing (Python dict)</div>
-                <div id="bucketsOpen"></div>
-              </div>
-            </div>
-            <div class="legend" id="collideNarr" style="margin-top:10px;min-height:36px;"></div>
+            <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:3px;">🔗 Chaining</div>
+            <div id="bucketsChain"></div>
+            <div style="font-size:11px;font-weight:800;color:#3B78C4;margin:8px 0 3px;">➡️ Open Addressing</div>
+            <div id="bucketsOpen"></div>
+            <div class="legend" id="collideNarr" style="margin-top:8px;min-height:18px;"></div>
           </div>
-          <div class="card"><h3>Minh hoạ trực tiếp · SipHash vs hàm băm kiểu Java</h3>
-            <div class="legend">« ngây thơ » (h = k % m) chỉ là lý thuyết nền — hai hàm THẬT đang chạy trong Python/Rust và Java thì khác hẳn nhau. Gõ 1 khoá, xem cả 2 tính ra sao.</div>
-            <div class="row" style="margin:10px 0">
+          <div class="card"><h3>Minh hoạ · SipHash vs hàm băm kiểu Java</h3>
+            <div class="row" style="margin-bottom:8px">
               <input type="text" id="sipInput" value="Mai" maxlength="14">
-              <button id="bSipDemo">🔍 So sánh 2 hàm băm</button>
+              <button id="bSipDemo">🔍 So sánh</button>
               <button id="bReseed" class="ghost">🎲 Đổi seed</button>
             </div>
             <div id="sipTrace" class="hash-trace"></div>
-            <div class="legend" style="margin-top:9px"><b>So sánh ngôn ngữ:</b></div>
-            <div style="overflow-x:auto"><table class="summary">
-              <tr><th>Ngôn ngữ</th><th>Va chạm</th><th>Hàm băm</th><th>Vì sao</th></tr>
-              <tr><td>Python</td><td>Open addressing</td><td>SipHash (seed)</td><td>an toàn mặc định (chống DoS)</td></tr>
-              <tr><td>Java</td><td>Chaining + treeify</td><td>31·h+c → trộn bit</td><td>tương thích cũ; cây đỏ-đen cứu bucket dài</td></tr>
-              <tr><td>Rust</td><td>Open (SwissTable)</td><td>SipHash</td><td>an toàn mặc định + dò SIMD siêu nhanh</td></tr>
-            </table></div>
           </div>
         </div>
       </div>
@@ -477,15 +460,14 @@ const COLLIDE_KEYS=['Minh','An','Mai'];
 let chainDemoTable, openDemoTable, collideBusy=false;
 function renderMiniBuckets(elId, tbl, flashIdx, chipClass){
   const el=$(elId); if(!el) return; el.innerHTML='';
-  const wrap=document.createElement('div'); wrap.className='mini-buckets';
+  const wrap=document.createElement('div'); wrap.className='mini-strip';
   for(let i=0;i<M;i++){
-    const row=document.createElement('div'); row.className='mini-bucket'+(i===flashIdx?' flash':'');
-    const idxEl=document.createElement('div'); idxEl.className='midx'; idxEl.textContent='['+i+']';
-    const itemsEl=document.createElement('div'); itemsEl.className='mitems';
+    const cell=document.createElement('div'); cell.className='mini-cell'+(i===flashIdx?' flash':'');
+    const idxEl=document.createElement('span'); idxEl.className='midx'; idxEl.textContent=i;
+    cell.appendChild(idxEl);
     const items = Array.isArray(tbl[i]) ? tbl[i] : (tbl[i]!=null ? [tbl[i]] : []);
-    items.forEach(k=>{ const c=document.createElement('span'); c.className='mchip'+(chipClass?(' '+chipClass):''); c.textContent=k; itemsEl.appendChild(c); });
-    row.appendChild(idxEl); row.appendChild(itemsEl);
-    wrap.appendChild(row);
+    items.forEach(k=>{ const c=document.createElement('span'); c.className='mchip'+(chipClass?(' '+chipClass):''); c.textContent=k; cell.appendChild(c); });
+    wrap.appendChild(cell);
   }
   el.appendChild(wrap);
 }
@@ -494,13 +476,13 @@ function resetCollideDemo(){
   openDemoTable=Array(M).fill(null);
   renderMiniBuckets('bucketsChain', chainDemoTable, null);
   renderMiniBuckets('bucketsOpen', openDemoTable, null, 'blue');
-  $('collideNarr').innerHTML='Bấm ▶ để chèn lần lượt <b>Minh, An, Mai</b> — An và Mai cùng băm ra 1 ô, xem 2 cách xử lý.';
+  $('collideNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm ▶ để xem 2 cách xử lý.';
 }
 async function runCollideDemo(){
   if(collideBusy) return;
   collideBusy=true; CL.lock(['bCollideDemo'],true);
   resetCollideDemo();
-  await nap(400);
+  await nap(300);
   for(const key of COLLIDE_KEYS){
     const idx = hashFn(key);
     chainDemoTable[idx].push(key);
@@ -510,17 +492,15 @@ async function runCollideDemo(){
     openDemoTable[oidx]=key;
     renderMiniBuckets('bucketsOpen', openDemoTable, oidx, 'blue');
     if(probes===0){
-      $('collideNarr').innerHTML='<b>'+key+'</b> băm ra ô <b>'+idx+'</b> — còn trống, cả 2 cách đặt thẳng vào đó.';
+      $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trống).';
     } else {
-      $('collideNarr').innerHTML='<b>'+key+'</b> băm ra ô <b>'+idx+'</b> — đã CÓ người! <b style="color:var(--green)">Chaining</b>: nối thêm vào list ngay tại ô '+idx+'. <b style="color:#3B78C4">Open addressing</b>: phải dò tiếp '+probes+' ô mới có chỗ trống, cuối cùng nằm ở ô <b>'+oidx+'</b>.';
+      $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trùng!) · Chaining: ở lại ô '+idx+' · Open addressing: dò tới ô <b>'+oidx+'</b> ('+probes+' bước)';
     }
-    await nap(1500);
+    await nap(1200);
   }
-  $('collideNarr').innerHTML += '<br><br>👉 Chaining luôn ở ĐÚNG ô băm ra — chỉ dài thêm list. Open addressing phải DỜI đi chỗ khác — càng nhiều va chạm càng dò xa, càng chậm.';
   CL.lock(['bCollideDemo'],false); collideBusy=false;
 }
 $('bCollideDemo').onclick = runCollideDemo;
-$('bCollideReset').onclick = ()=>{ if(collideBusy) return; resetCollideDemo(); };
 
 /* ---- SipHash vs hàm băm kiểu Java, minh hoạ trực tiếp ---- */
 let sipSeed = Math.floor(Math.random()*0xFFFFFFFF);
@@ -542,12 +522,10 @@ async function runSipDemo(){
   const key = $('sipInput').value.trim() || 'Mai';
   const el = $('sipTrace'); el.innerHTML='';
   const jh=javaStyleHash(key), ji=jh%M;
-  traceRow(el, '<b style="color:var(--green)">Java-style</b> (31·h + mã ký tự, KHÔNG seed): hash("'+key+'") = '+jh+' → % '+M+' = <b>'+ji+'</b>');
+  traceRow(el, '<b style="color:var(--green)">Java</b>: hash("'+key+'") % '+M+' = <b>'+ji+'</b> (không seed, luôn cố định)');
   await nap(600);
   const sh=simpleSipHash(key, sipSeed), si=sh%M;
-  traceRow(el, '<b style="color:#3B78C4">SipHash</b> (rút gọn minh hoạ, seed = '+sipSeed+'): hash("'+key+'") = '+sh+' → % '+M+' = <b style="color:var(--lacquer)">'+si+'</b>');
-  await nap(700);
-  traceRow(el, '👉 Đổi seed (🎲) rồi băm lại CÙNG "'+key+'": Java-style luôn ra <b>'+ji+'</b> — kẻ tấn công đoán được, có thể cố tình tạo hàng loạt key cùng ô để "đánh sập" hiệu năng (DoS). SipHash đổi kết quả theo seed bí mật → không đoán trước được.', true);
+  traceRow(el, '<b style="color:#3B78C4">SipHash</b> (seed='+sipSeed+'): hash("'+key+'") % '+M+' = <b style="color:var(--lacquer)">'+si+'</b>', true);
   CL.lock(['bSipDemo','bReseed'],false); sipDemoBusy=false;
 }
 $('bSipDemo').onclick = runSipDemo;
