@@ -144,27 +144,24 @@
     </div>
 
     <div id="themeView">
-      <div class="k-main">
-        <div class="tray"><div class="bar"><span class="dot" style="background:#EE6F57"></span><span class="dot" style="background:#D9A441"></span><span class="dot" style="background:#6E9A50"></span>&nbsp;hotel.js</div>
-          <div class="code-title" style="padding:10px 18px 0">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
-          <div class="code" id="code"></div>
-        </div>
-        <div class="k-scene">
-          <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem 3 vị khách check-in tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-          <div class="k-controls">
-            <div class="row" style="gap:8px">
-              <button class="play-btn" id="bPlay">▶ Tự động</button>
-              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
-            </div>
-            <div class="k-side"><button id="bReset">↺ Reset</button></div>
+      <div class="k-scene" style="max-width:640px;margin:0 auto;">
+        <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem 3 vị khách check-in tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
+        <div class="k-controls">
+          <div class="row" style="gap:8px">
+            <button class="play-btn" id="bPlay">▶ Tự động</button>
+            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
           </div>
+          <div class="k-side"><button id="bReset">↺ Reset</button></div>
         </div>
       </div>
     </div>
 
     <div id="techView" style="display:none">
       <div class="wrap">
+        <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+          <div class="code-title">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
+          <div class="code" id="code"></div></div></div>
         <div class="col-viz">
           <div class="card"><h3>Bảng băm (M = 8 ô, chaining)</h3>
             <svg id="svg" viewBox="0 0 560 330" preserveAspectRatio="xMidYMid meet"></svg>

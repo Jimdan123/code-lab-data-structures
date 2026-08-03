@@ -144,27 +144,24 @@
     </div>
 
     <div id="themeView">
-      <div class="k-main">
-        <div class="tray"><div class="bar"><span class="dot" style="background:#EE6F57"></span><span class="dot" style="background:#D9A441"></span><span class="dot" style="background:#6E9A50"></span>&nbsp;drawer.js</div>
-          <div class="code-title" style="padding:10px 18px 0">// build dựng cây · sum hỏi đoạn · update sửa 1 ô</div>
-          <div class="code" id="code"></div>
-        </div>
-        <div class="k-scene">
-          <svg id="svgTheme" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ca làm việc tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-          <div class="k-controls">
-            <div class="row" style="gap:8px">
-              <button class="play-btn" id="bPlay">▶ Tự động</button>
-              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
-            </div>
-            <div class="k-side"><button id="bReset">↺ Reset</button></div>
+      <div class="k-scene" style="max-width:740px;margin:0 auto;">
+        <svg id="svgTheme" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ca làm việc tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
+        <div class="k-controls">
+          <div class="row" style="gap:8px">
+            <button class="play-btn" id="bPlay">▶ Tự động</button>
+            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
           </div>
+          <div class="k-side"><button id="bReset">↺ Reset</button></div>
         </div>
       </div>
     </div>
 
     <div id="techView" style="display:none">
       <div class="wrap">
+        <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+          <div class="code-title">// build dựng cây · sum hỏi đoạn · update sửa 1 ô</div>
+          <div class="code" id="code"></div></div></div>
         <div class="col-viz">
           <div class="card"><h3>Cây đoạn (a = [5,2,2,1,5,2,1,2])</h3>
             <svg id="svg" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
