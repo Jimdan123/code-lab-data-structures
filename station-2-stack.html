@@ -1,225 +1,803 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Lab · Stack</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trạm 2 · Stack &amp; Call Stack · Giải phẫu stack frame</title>
 <link rel="stylesheet" href="style.css">
-<style>:root{--accent:#B9770E;}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rice:#FBF5E9;
+    --tatami:#F1E7D2;
+    --nori:#1B2420;
+    --indigo:#2C4066;
+    --indigo-deep:#22314E;
+    --salmon:#EE6F57;
+    --salmon-soft:#FBD9CE;
+    --wasabi:#6E9A50;
+    --wasabi-soft:#E4EED9;
+    --soy:#4A3A2A;
+    --soy-light:#8A7660;
+    --lacquer:#C0442F;
+    --gold:#D9A441;
+    --radius:18px;
+    --shadow:0 10px 30px rgba(43,38,28,.10);
+    /* màu frame */
+    --f-libc:#8A8578;
+    --f-main:#2C4066;
+    --f-sum:#EE6F57;
+    --f-sq:#6E9A50;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--rice);color:var(--soy);line-height:1.6}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:radial-gradient(rgba(74,58,42,.05) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+  .stwrap{position:relative;z-index:1;max-width:1220px;margin:0 auto;padding:0 20px 80px}
+
+  /* ── Rèm noren ── */
+  header{
+    position:relative;z-index:1;margin:-20px -22px 0;background:linear-gradient(180deg,var(--indigo-deep),var(--indigo));
+    color:#F6F1E4;padding:44px 20px 58px;text-align:center;
+  }
+  header::after{
+    content:"";position:absolute;left:0;right:0;bottom:-16px;height:32px;
+    background-image:radial-gradient(circle at 16px 0, var(--indigo) 16px, transparent 17px);
+    background-size:32px 32px;background-repeat:repeat-x;
+  }
+  #toolbox{margin:18px 0 0;}
+  .eyebrow{
+    display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--gold);border:1px solid rgba(217,164,65,.5);
+    border-radius:999px;padding:4px 14px;margin-bottom:14px;
+  }
+  h1{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(30px,4.6vw,52px);line-height:1.12}
+  h1 .accent{color:#FFB3A0}
+  .sub{max-width:700px;margin:12px auto 0;color:#D8DEEC;font-size:15.5px}
+  .sub b{color:#fff}
+  .sub code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.12);padding:1px 6px;border-radius:5px}
+
+  h2{font-family:'Baloo 2',cursive;font-weight:700;font-size:24px;color:var(--indigo);display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  h2 .tag{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;background:var(--indigo);color:#F6F1E4;border-radius:6px;padding:3px 8px;letter-spacing:.08em}
+  section{margin-top:56px}
+  .lead{max-width:860px;font-size:15px;margin-bottom:18px}
+  code, .lead code, td code, .note code, li code, .q code{font-family:'JetBrains Mono',monospace;background:var(--tatami);padding:1px 6px;border-radius:5px;font-size:.92em;color:var(--lacquer)}
+
+  .stcard{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+
+  /* ── 01: LIFO chồng đĩa mini ── */
+  .lifo{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:stretch}
+  @media(max-width:900px){.lifo{grid-template-columns:1fr}}
+  .plates{display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;min-height:230px;gap:4px;padding-top:26px}
+  .plate{
+    width:120px;height:20px;border-radius:50%/60%;background:linear-gradient(#fff,#EFE6D3);
+    border:2px solid #D9452F;box-shadow:0 3px 5px rgba(0,0,0,.15);position:relative;
+    animation:drop .25s ease;
+  }
+  .plate.top::after{
+    content:"TOP ← chỉ đụng được đĩa này";position:absolute;left:132px;top:-2px;white-space:nowrap;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--lacquer);font-weight:700;
+  }
+  @keyframes drop{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+  .lifo-note{font-size:14.5px}
+  .lifo-note ul{margin:10px 0 14px 18px}
+  .lifo-note li{margin-bottom:6px}
+  .mini-btns{display:flex;gap:10px;flex-wrap:wrap}
+
+  button{
+    font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;border:none;border-radius:12px;
+    padding:10px 18px;cursor:pointer;transition:transform .12s, box-shadow .12s, filter .12s;
+    box-shadow:0 3px 0 rgba(0,0,0,.18);
+  }
+  button:hover{transform:translateY(-2px);filter:brightness(1.05)}
+  button:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .b-green{background:var(--wasabi);color:#fff}
+  .b-salmon{background:var(--salmon);color:#fff}
+  .b-ghost{background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none}
+  .b-ghost:hover{background:var(--indigo);color:#fff}
+  .b-dark{background:var(--nori);color:#F6F1E4}
+
+  /* ── 02: bản đồ bộ nhớ ── */
+  .memmap{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
+  @media(max-width:900px){.memmap{grid-template-columns:1fr}}
+  .memcol{font-family:'JetBrains Mono',monospace;font-size:13px}
+  .memrow{border:2px solid var(--soy);border-bottom:none;padding:10px 14px;position:relative;background:#fff}
+  .memrow:last-child{border-bottom:2px solid var(--soy);border-radius:0 0 12px 12px}
+  .memrow:first-child{border-radius:12px 12px 0 0}
+  .memrow .nm{font-weight:700}
+  .memrow .d{font-family:'Be Vietnam Pro',sans-serif;font-size:12.5px;color:var(--soy-light)}
+  .memrow.stackz{background:var(--salmon-soft)}
+  .memrow.heapz{background:var(--wasabi-soft)}
+  .memrow.gap{background:repeating-linear-gradient(45deg,#fff,#fff 8px,var(--tatami) 8px,var(--tatami) 16px);text-align:center;color:var(--soy-light)}
+  .memrow .addr{position:absolute;right:10px;top:8px;font-size:11px;color:var(--soy-light)}
+  .memside li{margin-bottom:10px;font-size:14.5px}
+  .memside ul{margin-left:18px}
+
+  /* ── 03: giải phẫu frame ── */
+  .anatomy{display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start}
+  @media(max-width:980px){.anatomy{grid-template-columns:1fr}}
+  .frame-diagram{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+  .fr-row{border:2px solid var(--indigo);border-bottom:none;background:#fff;padding:9px 12px;position:relative}
+  .fr-row:first-child{border-radius:12px 12px 0 0}
+  .fr-row:last-child{border-bottom:2px solid var(--indigo);border-radius:0 0 12px 12px}
+  .fr-row .who{font-family:'Be Vietnam Pro',sans-serif;font-size:11.5px;color:var(--soy-light)}
+  .fr-row .ptr{position:absolute;right:-86px;top:50%;transform:translateY(-50%);font-weight:700;font-size:12px}
+  .fr-row .ptr.pw{color:var(--salmon)}
+  .fr-row .ptr.pr{color:var(--wasabi)}
+  @media(max-width:980px){.fr-row .ptr{position:static;transform:none;display:inline-block;margin-left:8px}}
+  .fr-row.hi{background:var(--salmon-soft)}
+  .fr-row.lo{background:var(--wasabi-soft)}
+  .dircap{font-family:'Be Vietnam Pro',sans-serif;font-size:12px;color:var(--soy-light);margin:4px 2px}
+
+  .prolog{background:var(--nori);border-radius:14px;overflow:hidden}
+  .prolog .hd{background:#121a17;color:#9FB8A8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 16px;letter-spacing:.08em}
+  .prolog pre{padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#E9EFE8;overflow-x:auto}
+  .k{color:#F2A7B3}.f{color:#F5C97B}.n{color:#9CC5F0}.c{color:#7E9488;font-style:italic}
+
+  /* ── 04: SIMULATOR ── */
+  .sim{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+  @media(max-width:1040px){.sim{grid-template-columns:1fr}}
+  .sim-left{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+  .codebox{background:var(--nori);border-radius:14px;overflow:hidden}
+  .codebox .hd{display:flex;align-items:center;gap:8px;background:#121a17;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#9FB8A8;letter-spacing:.08em}
+  .codebox .dot{width:9px;height:9px;border-radius:50%}
+  .csrc{padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:#E9EFE8;overflow-x:auto}
+  .cl{padding:0 18px 0 10px;white-space:pre;display:flex}
+  .cl .ln{width:26px;flex:none;text-align:right;margin-right:12px;color:#59695f;user-select:none}
+  .cl.on{background:rgba(217,164,65,.18);box-shadow:inset 3px 0 0 var(--gold)}
+
+  .asmline{
+    font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--nori);color:#F5C97B;
+    border-radius:12px;padding:12px 16px;display:flex;gap:10px;align-items:baseline;
+  }
+  .asmline .lbl{color:#9FB8A8;font-size:11px;letter-spacing:.1em;flex:none}
+
+  .regs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  @media(max-width:700px){.regs{grid-template-columns:repeat(3,1fr)}}
+  .reg{background:#fff;border-radius:10px;padding:8px 10px;text-align:center;box-shadow:var(--shadow)}
+  .reg .rn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--soy-light);letter-spacing:.08em}
+  .reg .rv{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--indigo);transition:color .2s}
+  .reg.chg .rv{color:var(--lacquer)}
+  .reg.ptrreg .rv{font-size:11.5px}
+
+  .note{
+    background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;
+    padding:12px 16px;font-size:14.5px;min-height:66px;
+  }
+  .note b{color:var(--indigo)}
+
+  .sim-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .stepcnt{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--soy-light);margin-left:auto}
+
+  /* cột stack RAM */
+  .ramcol{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .ramcol h3{font-family:'Baloo 2',cursive;color:var(--indigo);font-size:17px;margin-bottom:2px}
+  .ramcol .capline{font-size:12px;color:var(--soy-light);margin-bottom:10px}
+  .ram{font-family:'JetBrains Mono',monospace;font-size:12px}
+  .slotrow{
+    display:grid;grid-template-columns:64px 1fr 74px;gap:8px;align-items:center;
+    border-radius:8px;padding:7px 10px;margin-bottom:4px;border-left:6px solid transparent;
+    background:var(--tatami);transition:background .25s,opacity .25s;position:relative;
+  }
+  .slotrow .a{color:var(--soy-light);font-size:11px}
+  .slotrow .lb{font-weight:500}
+  .slotrow .pt{text-align:right;font-weight:700;font-size:11px}
+  .slotrow .pt .sp{color:var(--lacquer)}
+  .slotrow .pt .bp{color:var(--indigo)}
+  .slotrow.f-libc{border-left-color:var(--f-libc)}
+  .slotrow.f-main{border-left-color:var(--f-main)}
+  .slotrow.f-sum{border-left-color:var(--f-sum)}
+  .slotrow.f-sq{border-left-color:var(--f-sq)}
+  .slotrow.junk{opacity:.42;background:#EDE7DA}
+  .slotrow.junk .lb{text-decoration:line-through;text-decoration-thickness:1px}
+  .slotrow.junk::after{content:"rác";position:absolute;right:8px;top:-7px;font-size:10px;background:#B9AE99;color:#fff;border-radius:6px;padding:0 6px}
+  .slotrow.fresh{animation:pushIn .3s ease}
+  @keyframes pushIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+  .ram-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;font-family:'Be Vietnam Pro',sans-serif}
+  .ram-legend span{display:inline-flex;align-items:center;gap:5px}
+  .ram-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .growcap{text-align:center;font-size:11.5px;color:var(--soy-light);font-family:'Be Vietnam Pro',sans-serif;margin:6px 0}
+  .outbox{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:9px 12px;min-height:38px}
+  .outbox::before{content:"stdout / exit ▸ ";color:#7E9488;font-size:11px}
+
+  /* ── 05: overflow ── */
+  .ovf{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+  @media(max-width:900px){.ovf{grid-template-columns:1fr}}
+  .ovf-meter{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .meter{
+    height:260px;border:2px solid var(--soy);border-radius:12px;position:relative;overflow:hidden;
+    background:repeating-linear-gradient(0deg,#fff,#fff 12px,#FBF7EE 12px,#FBF7EE 24px);
+  }
+  .meter .fill{
+    position:absolute;top:0;left:0;right:0;height:0%;
+    background:linear-gradient(180deg,var(--salmon),var(--lacquer));
+    transition:height .12s linear;
+  }
+  .meter .limitline{position:absolute;left:0;right:0;bottom:0;border-top:3px dashed var(--lacquer);padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--lacquer);background:rgba(255,255,255,.7)}
+  .meter .toplbl{position:absolute;top:4px;right:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--soy-light)}
+  .ovf-stats{display:flex;gap:14px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:13px}
+  .ovf-stats b{color:var(--indigo)}
+  .ovf-err{
+    display:none;margin-top:10px;background:#2A1210;color:#FF9C8A;border-radius:10px;
+    padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;
+  }
+  .ovf-err.show{display:block;animation:pop .3s ease}
+  .ovf-note{font-size:14.5px}
+  .ovf-note ul{margin:8px 0 0 18px}
+  .ovf-note li{margin-bottom:8px}
+
+  /* ── 06: bảng & thẻ ── */
+  .duo{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:start}
+  @media(max-width:980px){.duo{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  th{background:var(--indigo);color:#F6F1E4;font-family:'Baloo 2',cursive;font-size:15px;padding:10px 14px;text-align:left}
+  td{padding:10px 14px;border-bottom:1px solid #EFE6D3;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;color:var(--indigo);width:150px}
+  .sec-card{background:linear-gradient(135deg,#2A1210,#3A1B14);color:#F2DFD5;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .sec-card h3{font-family:'Baloo 2',cursive;font-size:19px;color:#FFB3A0;margin-bottom:8px}
+  .sec-card p{font-size:14px;margin-bottom:10px}
+  .sec-card code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.12);padding:1px 6px;border-radius:5px;font-size:12.5px;color:#FFD9CE}
+  .sec-card ul{margin-left:18px;font-size:13.5px}
+  .sec-card li{margin-bottom:5px}
+
+  .apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+  .chip{background:var(--tatami);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .chip .em{font-size:24px}
+  .chip .t{font-size:13.5px}
+  .chip .t b{display:block;color:var(--indigo);font-size:14px}
+
+  /* ── quiz ── */
+  .quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-top:22px}
+  .quiz h3{font-family:'Baloo 2',cursive;font-size:19px;color:var(--soy);margin-bottom:10px}
+  .quiz .q{font-size:15.5px;margin-bottom:14px}
+  .opts{display:flex;flex-wrap:wrap;gap:10px}
+  .opts .opt{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-size:14px}
+  .opt.correct{background:var(--wasabi);border-color:var(--wasabi);color:#fff}
+  .opt.wrong{background:var(--lacquer);border-color:var(--lacquer);color:#fff}
+  .reveal{display:none;margin-top:16px;background:#fff;border-radius:12px;padding:16px 18px;font-size:14.5px;border-left:5px solid var(--wasabi)}
+  .reveal.show{display:block;animation:pop .3s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .foot-disc{font-size:12.5px;color:var(--soy-light);margin-top:14px}
+  footer{margin-top:70px;text-align:center;font-size:13px;color:var(--soy-light)}
+  footer .lantern{font-size:22px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
-  <div class="toolbox" id="toolbox"></div>
 
-  <div class="station-h">🍽️ Trạm 2 · Chồng khay Căng-tin <span style="color:var(--muted);font-weight:600">(stack, LIFO)</span></div>
-  <p class="station-s">Chỉ thêm/bớt ở <b>trên cùng</b> — khay chồng ai lên sau lấy trước.</p>
+<header>
+  <div class="eyebrow">TRẠM 2 · CẤU TRÚC DỮ LIỆU</div>
+  <h1>Stack &amp; Call Stack<br><span class="accent">CPU gọi hàm như thế nào? 🍡</span></h1>
+  <p class="sub">Từ chồng đĩa LIFO đến <b>giải phẫu một stack frame thật</b>: <code>call</code> đẩy địa chỉ trả về, prologue cất <code>rbp</code>, biến cục bộ nằm ở đâu, <code>leave / ret</code> thu dọn ra sao — và vì sao đệ quy vô hạn làm chương trình… nổ.</p>
+</header>
 
-  <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> Gọi hàm lồng nhau (đệ quy) — máy phải nhớ "đang làm dở ở đâu" của MỌI lời gọi chưa xong, đúng thứ tự để quay lại.</div>
-    <div><span class="wt">❌ Không có cơ chế nhớ thứ tự:</span> quay lại nhầm chỗ, hoặc phải tự quản lý bằng tay — dễ sai.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> mỗi lần gọi hàm → chồng thêm 1 <b>khay</b> lên đỉnh; hàm xong → lấy khay đó ra (LIFO) — khớp hoàn hảo thứ tự return của đệ quy.</div>
-  </div>
+<div class="stwrap">
 
-  <div class="viewtoggle" id="viewtoggle">
-    <button class="vt-btn active" data-view="theme">🍽️ Xem theo chủ đề</button>
-    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-  </div>
+  <div id="toolbox"></div>
 
-  <div id="themeView">
-    <div class="stage">
-      <svg id="svgTheme" viewBox="0 0 380 340" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem đầu bếp chồng khay tính giai thừa(3) — rồi xem chuyện gì xảy ra nếu QUÊN dừng lại.</div>
-      <div class="row" style="margin-top:14px;justify-content:space-between">
-        <button class="play-btn" id="bPlay">▶ Play</button>
-        <div class="side-controls">
-          <button id="bReset2">↺ Reset</button>
+  <!-- ══ 01 · LIFO ══ -->
+  <section>
+    <h2><span class="tag">01</span> LIFO trong 10 giây</h2>
+    <div class="stcard lifo">
+      <div>
+        <div class="plates" id="plates"></div>
+        <div class="mini-btns" style="justify-content:center;margin-top:10px">
+          <button class="b-green" id="pPush">push</button>
+          <button class="b-salmon" id="pPop">pop</button>
+        </div>
+      </div>
+      <div class="lifo-note">
+        <p>Ở quán kaiten-zushi, đĩa ăn xong được <b>chồng lên nhau</b> để tính tiền — muốn lấy đĩa dưới cùng thì phải nhấc hết đĩa bên trên. Đó chính là <b>Stack</b>: <b>L</b>ast-<b>I</b>n, <b>F</b>irst-<b>O</b>ut.</p>
+        <ul>
+          <li><code>push(x)</code> — đặt lên đỉnh · <b>O(1)</b></li>
+          <li><code>pop()</code> — nhấc từ đỉnh · <b>O(1)</b></li>
+          <li><code>peek()</code> — nhìn đỉnh, không nhấc · <b>O(1)</b></li>
+          <li>Chỉ một điểm truy cập duy nhất: <b>TOP</b>. Không chen ngang, không lấy giữa chừng.</li>
+        </ul>
+        <p>Đơn giản vậy thôi — nhưng đây là cấu trúc mà <b>mọi CPU trên hành tinh dùng hàng tỷ lần mỗi giây</b> để quản lý lời gọi hàm. Phần còn lại của trạm này mổ xẻ đúng chuyện đó.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 02 · Bản đồ bộ nhớ ══ -->
+  <section>
+    <h2><span class="tag">02</span> Stack nằm ở đâu trong bộ nhớ tiến trình?</h2>
+    <div class="memmap">
+      <div class="memcol">
+        <div class="dircap">địa chỉ cao (vd. 0x7ffd… trên Linux x86-64)</div>
+        <div class="memrow stackz"><span class="nm">STACK ⬇</span> <span class="addr">↓ mọc xuống</span><div class="d">frame của các hàm đang chạy · cấp phát tự động · giới hạn ~8 MB (ulimit -s)</div></div>
+        <div class="memrow gap">… khoảng trống (mmap, thư viện .so) …</div>
+        <div class="memrow heapz"><span class="nm">HEAP ⬆</span> <span class="addr">↑ mọc lên</span><div class="d">malloc / new / đối tượng JS · sống tới khi free hoặc GC dọn</div></div>
+        <div class="memrow"><span class="nm">.bss / .data</span><div class="d">biến toàn cục (chưa/đã khởi tạo)</div></div>
+        <div class="memrow"><span class="nm">.text</span><div class="d">mã máy của chương trình — chính là nơi <b>địa chỉ trả về</b> trỏ tới!</div></div>
+        <div class="dircap">địa chỉ thấp</div>
+      </div>
+      <div class="stcard memside">
+        <ul>
+          <li><b>Stack mọc từ địa chỉ cao xuống thấp.</b> "Push" thực chất là <code>rsp = rsp − 8</code> rồi ghi giá trị vào <code>[rsp]</code> — vì vậy push/pop nhanh khủng khiếp: <b>chỉ là một phép trừ/cộng con trỏ</b>, không đi tìm chỗ trống như heap.</li>
+          <li>Thanh ghi <b><code>rsp</code></b> (stack pointer) luôn trỏ đúng <b>đỉnh stack</b> — ô có địa chỉ thấp nhất đang dùng.</li>
+          <li>Thanh ghi <b><code>rbp</code></b> (base/frame pointer) trỏ <b>mốc cố định của frame hiện tại</b>: biến cục bộ nằm ở <code>rbp − k</code>, tham số tràn nằm ở <code>rbp + k</code>.</li>
+          <li>Mỗi <b>thread có stack riêng</b>; heap thì các thread dùng chung — một lý do stack "tự nhiên" an toàn hơn với đa luồng.</li>
+          <li>Stack và heap mọc <b>ngược chiều nhau</b> vào vùng trống ở giữa — tận dụng không gian, hai bên không cần biết trước bên kia to cỡ nào.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 03 · Giải phẫu frame ══ -->
+  <section>
+    <h2><span class="tag">03</span> Giải phẫu một stack frame (x86-64 · System V ABI)</h2>
+    <p class="lead">Mỗi lời gọi hàm tạo ra một <b>frame</b> — "khay đồ nghề" riêng của hàm đó trên stack. Frame được dựng bởi 3 lệnh <b>prologue</b> và dỡ bởi 2 lệnh <b>epilogue</b>:</p>
+    <div class="anatomy">
+      <div>
+        <div class="dircap">địa chỉ cao — phần của hàm gọi (caller)</div>
+        <div class="frame-diagram">
+          <div class="fr-row"><b>đối số thứ 7, 8, …</b><div class="who">6 đối số đầu đi bằng thanh ghi: rdi, rsi, rdx, rcx, r8, r9 — chỉ số 7 trở đi mới nằm trên stack</div></div>
+          <div class="fr-row hi"><b>địa chỉ trả về</b><div class="who">lệnh <code>call</code> tự push — trỏ về lệnh kế tiếp trong caller (.text)</div></div>
+          <div class="fr-row"><b>saved rbp</b><span class="ptr pw">← rbp</span><div class="who">prologue cất rbp của caller để lát nữa khôi phục</div></div>
+          <div class="fr-row"><b>biến cục bộ</b><div class="who">int x, mảng, struct… — truy cập qua <code>rbp − k</code></div></div>
+          <div class="fr-row lo"><b>vùng tạm / căn lề</b><span class="ptr pr">← rsp</span><div class="who">rsp phải chia hết cho 16 trước mỗi <code>call</code> (ABI bắt buộc)</div></div>
+        </div>
+        <div class="dircap">địa chỉ thấp — đỉnh stack, nơi frame kế tiếp sẽ mọc</div>
+      </div>
+      <div class="prolog">
+        <div class="hd">prologue &amp; epilogue · "nghi thức vào – ra" của mọi hàm</div>
+<pre><span class="c">; ── caller ──────────────────────────────</span>
+<span class="f">call</span>  ham_kia        <span class="c">; = push rip_kế_tiếp + jmp ham_kia</span>
+
+<span class="c">; ── PROLOGUE (dựng frame) ───────────────</span>
+<span class="f">push</span>  <span class="n">rbp</span>            <span class="c">; 1. cất mốc frame của caller</span>
+<span class="f">mov</span>   <span class="n">rbp</span>, <span class="n">rsp</span>       <span class="c">; 2. đặt mốc frame MỚI</span>
+<span class="f">sub</span>   <span class="n">rsp</span>, <span class="n">N</span>         <span class="c">; 3. "xin" N byte cho biến cục bộ</span>
+
+<span class="c">; … thân hàm: đọc/ghi [rbp − k] …</span>
+<span class="c">; … kết quả trả về đặt vào rax/eax …</span>
+
+<span class="c">; ── EPILOGUE (dỡ frame) ─────────────────</span>
+<span class="f">leave</span>                <span class="c">; = mov rsp,rbp + pop rbp</span>
+<span class="f">ret</span>                  <span class="c">; pop địa chỉ trả về → nạp vào rip</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 04 · SIMULATOR ══ -->
+  <section>
+    <h2><span class="tag">04</span> Mô phỏng call stack — từng lệnh một 🔬</h2>
+    <p class="lead">Ta chạy chương trình C bên dưới đúng theo cách CPU chạy (tinh thần <code>gcc -O0</code>, x86-64). Quan sát: <code>call</code> push địa chỉ trả về, đối số đi qua <b>rdi/rsi</b> rồi bị "spill" xuống frame, kết quả trả về nằm trong <b>rax</b>, và frame cũ trở thành <b>rác</b> chứ không hề bị xoá.</p>
+
+    <div class="sim">
+      <div class="sim-left">
+        <div class="codebox">
+          <div class="hd">
+            <span class="dot" style="background:#EE6F57"></span>
+            <span class="dot" style="background:#D9A441"></span>
+            <span class="dot" style="background:#6E9A50"></span>
+            &nbsp;program.c · dòng đang chạy được tô sáng
+          </div>
+          <div class="csrc" id="csrc"></div>
+        </div>
+
+        <div class="asmline"><span class="lbl">CPU ĐANG CHẠY ▸</span><span id="asm">—</span></div>
+
+        <div class="regs" id="regs"></div>
+
+        <div class="note" id="simnote">Bấm <b>▶ Tiến</b> để chạy từng bước, hoặc <b>▶▶ Tự động</b> để xem cả vở kịch.</div>
+
+        <div class="sim-controls">
+          <button class="b-ghost" id="sFirst">⏮</button>
+          <button class="b-ghost" id="sPrev">◀ Lùi</button>
+          <button class="b-green" id="sNext">Tiến ▶</button>
+          <button class="b-ghost" id="sLast">⏭</button>
+          <button class="b-dark" id="sAuto">▶▶ Tự động</button>
+          <span class="stepcnt" id="stepcnt"></span>
+        </div>
+      </div>
+
+      <div class="ramcol">
+        <h3>RAM · vùng stack</h3>
+        <div class="capline">mỗi hàng = 1 ô 8 byte (đã đơn giản hoá) · địa chỉ cao ở trên</div>
+        <div class="growcap">⬇ stack mọc xuống ⬇</div>
+        <div class="ram" id="ram"></div>
+        <div class="ram-legend">
+          <span><i style="background:var(--f-libc)"></i>libc</span>
+          <span><i style="background:var(--f-main)"></i>main</span>
+          <span><i style="background:var(--f-sum)"></i>sum_sq</span>
+          <span><i style="background:var(--f-sq)"></i>square</span>
+          <span><i style="background:#B9AE99"></i>rác (đã pop)</span>
+        </div>
+        <div class="outbox" id="simout"></div>
+      </div>
+    </div>
+    <p class="foot-disc">⚠️ Đã đơn giản hoá để dễ theo dõi: mỗi giá trị chiếm trọn một ô 8 byte (thực tế <code>int</code> chiếm 4 byte và được xếp sát nhau), một vài offset/thanh ghi tạm được làm tròn. Cấu trúc frame, thứ tự push/pop và vai trò các thanh ghi đúng theo System V AMD64 ABI.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz">
+      <h3>🤔 Kiểm tra nhanh #1</h3>
+      <p class="q">Bản thân lệnh <code>call</code> đẩy thứ gì lên stack?</p>
+      <div class="opts" data-quiz>
+        <button class="opt" data-a="0">Các đối số của hàm</button>
+        <button class="opt" data-a="1">Địa chỉ trả về (địa chỉ lệnh kế tiếp)</button>
+        <button class="opt" data-a="0">Thanh ghi rbp của caller</button>
+      </div>
+      <div class="reveal">
+        <b>Đúng — chỉ địa chỉ trả về!</b> <code>call f</code> = <code>push rip_kế_tiếp</code> + <code>jmp f</code>. Đối số (6 cái đầu) đã nằm sẵn trong thanh ghi <code>rdi, rsi, rdx, rcx, r8, r9</code> từ trước; còn <code>rbp</code> là do <b>prologue của hàm được gọi</b> tự push ở bước đầu tiên (<code>push rbp</code>). Ba "thủ phạm" khác nhau, ba thời điểm khác nhau — xem lại bước 6→7 trong mô phỏng.
+      </div>
+    </div>
+
+    <!-- Quiz 2 -->
+    <div class="quiz">
+      <h3>🤔 Kiểm tra nhanh #2</h3>
+      <p class="q">Khi một hàm <code>return</code>, dữ liệu trong frame của nó sẽ ra sao?</p>
+      <div class="opts" data-quiz>
+        <button class="opt" data-a="0">Bị ghi đè ngay lập tức bằng 0</button>
+        <button class="opt" data-a="0">Được chuyển sang heap để giữ lại</button>
+        <button class="opt" data-a="1">Vẫn nằm nguyên trong RAM — chỉ có rsp dịch lên, vùng đó thành "rác"</button>
+      </div>
+      <div class="reveal">
+        <b>Chuẩn!</b> <code>leave/ret</code> chỉ dịch chuyển <code>rsp</code> — không ai đi xoá bộ nhớ cả (xoá thì tốn thời gian vô ích). Vùng cũ trở thành "rác" và sẽ bị <b>frame kế tiếp ghi đè</b> — trong mô phỏng, frame của <code>square(4)</code> đè lên đúng địa chỉ của <code>square(3)</code>. Đây cũng là lý do bug kinh điển trong C: <code>return &amp;bien_cuc_bo;</code> — con trỏ trỏ vào vùng rác, đọc ra giá trị "ma" (<b>dangling pointer</b> / use-after-return).
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 05 · Stack overflow ══ -->
+  <section>
+    <h2><span class="tag">05</span> Khi chồng đĩa chạm trần: Stack Overflow 💥</h2>
+    <div class="ovf">
+      <div class="stcard ovf-note">
+        <p>Stack có <b>giới hạn cứng</b> (Linux mặc định ~8 MB/thread; V8 của Chrome/Node giới hạn theo số frame, cỡ ~10.000). Mỗi lời gọi hàm "ăn" một frame — đệ quy không có điểm dừng sẽ ăn sạch:</p>
+        <div class="prolog" style="margin:12px 0">
+          <div class="hd">boom.js</div>
+<pre><span class="k">function</span> <span class="f">boom</span>() {
+  <span class="k">return</span> <span class="f">boom</span>();   <span class="c">// gọi chính mình, không điều kiện dừng</span>
+}
+<span class="f">boom</span>();</pre>
+        </div>
+        <ul>
+          <li>Mỗi frame ở đây chỉ vài chục byte, nhưng <b>hàng vạn frame</b> thì trần nào cũng thủng.</li>
+          <li>Đệ quy đúng cách = luôn có <b>base case</b> (điều kiện dừng) + mỗi lần gọi phải <b>tiến gần</b> base case hơn.</li>
+          <li>Với dữ liệu sâu (cây, đồ thị lớn), dân chuyên đổi đệ quy thành <b>vòng lặp + stack tự quản trên heap</b> — cùng thuật toán, trần cao hơn hàng nghìn lần.</li>
+          <li>Fun fact: trang hỏi-đáp lập trình lớn nhất thế giới đặt tên theo đúng lỗi này. 😄</li>
+        </ul>
+      </div>
+      <div class="ovf-meter">
+        <div class="meter">
+          <div class="toplbl">đáy stack (địa chỉ cao)</div>
+          <div class="fill" id="ovfFill"></div>
+          <div class="limitline">giới hạn stack — vượt là chết</div>
+        </div>
+        <div class="ovf-stats">
+          <span>độ sâu: <b id="ovfDepth">0</b></span>
+          <span>đã dùng: <b id="ovfBytes">0 KB</b></span>
+        </div>
+        <div class="mini-btns">
+          <button class="b-salmon" id="ovfGo">💥 Gọi boom()</button>
+          <button class="b-ghost" id="ovfReset">↺ Reset</button>
+        </div>
+        <div class="ovf-err" id="ovfErr">
+Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
+&nbsp;&nbsp;at boom (boom.js:2)<br>
+&nbsp;&nbsp;at boom (boom.js:2)<br>
+&nbsp;&nbsp;at boom (boom.js:2)<br>
+&nbsp;&nbsp;… ×10 000 dòng giống hệt nhau …<br><br>
+<span style="color:#9FB8A8">// bản C thì phũ hơn: Segmentation fault (core dumped)</span>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="techView" style="display:none">
-    <div class="wrap">
-      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-        <div class="code-title">// mỗi lời gọi = 1 khung PUSH · return = POP</div>
-        <div class="code" id="code"></div></div></div>
-      <div class="col-viz">
-        <div class="card"><h3>Call Stack <span id="statebadge"></span></h3>
-          <svg id="svg" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="legend">Khung dưới cùng = lời gọi ĐẦU tiên · khung trên cùng (viền xanh dương) = đang chạy · mỗi return → POP khung trên cùng</div>
-        </div>
-        <div class="card"><h3>Điều khiển thủ công</h3>
-          <div class="row">
-            <button id="bRun">▶ factorial(3)</button>
-            <button id="bOverflow" class="ghost">💥 Demo Stack Overflow</button>
-            <button id="bReset" class="ghost">↺ Reset</button>
-          </div>
-        </div>
-        <div class="card"><h3>2 cách dựng Stack (tham khảo)</h3>
-          <div class="row" style="align-items:flex-start;gap:16px">
-            <div style="flex:1;min-width:170px">
-              <span class="tag">A · Mảng + top</span>
-              <div class="code" style="margin-top:8px;padding:8px 4px">
-                <div class="cl">int s[N]; int top = -1;</div>
-                <div class="cl">push: s[++top] = x;</div>
-                <div class="cl">pop:  return s[top--];</div>
-              </div>
-            </div>
-            <div style="flex:1;min-width:170px">
-              <span class="tag">B · Linked List</span>
-              <div class="code" style="margin-top:8px;padding:8px 4px">
-                <div class="cl">Node* head = NULL;</div>
-                <div class="cl">push: n-&gt;next=head; head=n;</div>
-                <div class="cl">pop:  head = head-&gt;next;</div>
-              </div>
-            </div>
-          </div>
-          <div class="legend" style="margin-top:8px">Cả hai LIFO · O(1). Mảng: resize khó khi đầy. List: tốn con trỏ hơn nhưng không giới hạn kích thước.</div>
-        </div>
+  <!-- ══ 06 · Stack vs Heap + security + ứng dụng ══ -->
+  <section>
+    <h2><span class="tag">06</span> Stack vs Heap — và vì sao hacker mê stack</h2>
+    <div class="duo">
+      <table>
+        <tr><th></th><th>🥞 Stack</th><th>🍲 Heap</th></tr>
+        <tr><td>Cấp phát</td><td>Tự động — chỉ cần <code>sub rsp, N</code>, một lệnh duy nhất</td><td><code>malloc</code>/<code>new</code> phải <b>đi tìm</b> khối trống phù hợp</td></tr>
+        <tr><td>Tốc độ</td><td>Cực nhanh, cache-friendly (dữ liệu nóng nằm sát nhau)</td><td>Chậm hơn; dễ phân mảnh (fragmentation)</td></tr>
+        <tr><td>Kích thước</td><td>Nhỏ, cố định (~1–8 MB mỗi thread)</td><td>Lớn — giới hạn bởi RAM/OS</td></tr>
+        <tr><td>Vòng đời</td><td>Gắn với hàm: <code>ret</code> là hết — dọn dẹp <b>miễn phí</b></td><td>Tự quản (<code>free</code>) hoặc chờ Garbage Collector</td></tr>
+        <tr><td>Đa luồng</td><td>Mỗi thread một stack riêng</td><td>Dùng chung → cần khoá/đồng bộ</td></tr>
+        <tr><td>Lỗi kinh điển</td><td>Stack overflow · dangling pointer (use-after-return)</td><td>Memory leak · use-after-free · double free</td></tr>
+      </table>
+      <div class="sec-card">
+        <h3>🔓 Buffer overflow — cú hack huyền thoại</h3>
+        <p>Nhìn lại giải phẫu frame: <b>biến cục bộ nằm ngay dưới địa chỉ trả về</b>. Nếu code bất cẩn kiểu <code>char ten[16]; gets(ten);</code> mà kẻ tấn công gõ 200 ký tự?</p>
+        <p>Dữ liệu tràn qua <code>ten</code>, đè lên <b>saved rbp</b>, rồi đè luôn <b>địa chỉ trả về</b>. Khi hàm <code>ret</code>, CPU ngoan ngoãn nhảy tới… địa chỉ do hacker chọn. Toàn quyền điều khiển chương trình chỉ bằng một chuỗi ký tự!</p>
+        <ul>
+          <li><b>Stack canary</b> — đặt giá trị "chim hoàng yến" trước ret addr, bị đè là báo động</li>
+          <li><b>NX bit</b> — cấm thực thi mã nằm trên stack</li>
+          <li><b>ASLR</b> — xáo trộn địa chỉ để hacker khó nhắm</li>
+        </ul>
       </div>
     </div>
-  </div>
 
-  <div class="quiz" id="quiz"><div class="q">❓ Nếu hàm đệ quy KHÔNG có ca gốc (base case) thì điều gì xảy ra?</div>
-    <button data-a="safe">Chương trình tự dừng an toàn</button>
-    <button data-a="slow">Chạy chậm nhưng vẫn ra kết quả đúng</button>
-    <button data-a="overflow">Ngăn xếp phình to mãi → STACK OVERFLOW</button>
-    <div class="fb" id="quizFb"></div>
-  </div>
+    <div class="apps">
+      <div class="chip"><span class="em">↩️</span><div class="t"><b>Undo / Redo</b>mỗi thao tác push vào stack lịch sử</div></div>
+      <div class="chip"><span class="em">🕸️</span><div class="t"><b>DFS duyệt đồ thị</b>đệ quy = call stack, hoặc stack tự quản</div></div>
+      <div class="chip"><span class="em">🧮</span><div class="t"><b>Tính biểu thức</b>trung tố → hậu tố, máy ảo dạng stack (JVM!)</div></div>
+      <div class="chip"><span class="em">🧩</span><div class="t"><b>Kiểm tra ngoặc</b><code>{[()]}</code> — mở thì push, đóng thì pop &amp; so khớp</div></div>
+      <div class="chip"><span class="em">🌐</span><div class="t"><b>Nút Back trình duyệt</b>hai stack: back &amp; forward</div></div>
+      <div class="chip"><span class="em">🐞</span><div class="t"><b>Stack trace khi crash</b>debugger in call stack — giờ bạn đọc hiểu nó rồi!</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="lantern">🏮</div>
+    Trạm 2 · Stack &amp; Call Stack — trạm trước: Circular Buffer 🍣 · Irasshaimase!
+  </footer>
+</div>
 
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
-renderToolbox('stack');
-initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
+  CL.renderToolbox('stack');
 
-const CODE=[
- ['<span class="kw">async function</span> <span class="fn">factorial</span>(n) {'],
- ['  pushFrame(n);                          <span class="cm">// gọi → đẩy khung mới lên ĐỈNH</span>'],
- ['  <span class="kw">let</span> result;'],
- ['  <span class="kw">if</span> (n &lt;= 1) {'],
- ['    result = 1;                          <span class="cm">// ca gốc (base case)</span>'],
- ['  } <span class="kw">else</span> {'],
- ['    result = n * <span class="kw">await</span> factorial(n - 1); <span class="cm">// gọi đệ quy, CHỜ kết quả</span>'],
- ['  }'],
- ['  setResult(result);'],
- ['  popFrame();                            <span class="cm">// trả về xong → gỡ khung khỏi đỉnh</span>'],
- ['  <span class="kw">return</span> result;'],
- ['}'],
- [''],
- ['<span class="cm">// ⚠ KHÔNG có ca gốc → STACK OVERFLOW:</span>'],
- ['<span class="kw">function</span> <span class="fn">f</span>(n) { <span class="kw">return</span> f(n + 1); }'],
-];
-renderCode('code', CODE);
-const L={sig:0, push:1, baseChk:3, baseSet:4, elseRecurse:6, setRes:8, pop:9, ret:10, overflowSig:14};
+  /* ═══ 01 · LIFO plates ═══ */
+  const platesEl = document.getElementById('plates');
+  function renderPlates(n){
+    platesEl.innerHTML = '';
+    for(let i=0;i<n;i++){
+      const p=document.createElement('div');
+      p.className='plate'+(i===n-1?' top':'');
+      platesEl.appendChild(p);
+    }
+  }
+  let nPlates=3; renderPlates(nPlates);
+  document.getElementById('pPush').onclick=()=>{ if(nPlates<8){nPlates++;renderPlates(nPlates);} };
+  document.getElementById('pPop').onclick =()=>{ if(nPlates>0){nPlates--;renderPlates(nPlates);} };
 
-let callStack=[], busy=false;
+  /* ═══ 04 · CALL STACK SIMULATOR ═══ */
+  const C_SRC = [
+    'int square(int x) {',
+    '    int y = x * x;',
+    '    return y;',
+    '}',
+    'int sum_sq(int a, int b) {',
+    '    int s = square(a) + square(b);',
+    '    return s;',
+    '}',
+    'int main(void) {',
+    '    int r = sum_sq(3, 4);',
+    '    return r;',
+    '}'
+  ];
 
-function drawTech(){
-  const el=$('svg'); if(!el) return; el.innerHTML='';
-  const W=380, BASEY=300, FW=280, X=(W-FW)/2;
-  const n=callStack.length;
-  const FH = n>0 ? Math.min(54, (BASEY-20)/n) : 54;
-  callStack.forEach((f,i)=>{
-    const y = BASEY - (i+1)*FH;
-    const isTop = (i===n-1);
-    const fill = f.overflow ? '#3A1414' : '#14261C';
-    const stroke = f.overflow ? 'var(--red)' : (isTop ? '#5AA0FF' : 'var(--green)');
-    const g=SVG('g',{transform:'translate('+X+','+y+')'});
-    g.appendChild(SVG('rect',{width:FW,height:FH-6,rx:8,fill,stroke,'stroke-width':isTop?3:2}));
-    const t1=SVG('text',{x:14,y:Math.min(20,FH-10),fill:'#fff','font-size':Math.min(13,FH-8),'font-weight':700});
-    t1.textContent = f.label || ('factorial(n='+f.n+')');
-    g.appendChild(t1);
-    if(f.result!=null && FH>26){ const t2=SVG('text',{x:14,y:Math.min(38,FH-4),fill:'#9FE0A0','font-size':11,'font-weight':700}); t2.textContent='result = '+f.result; g.appendChild(t2); }
-    el.appendChild(g);
+  // ── dựng danh sách bước ──
+  const HI = 0x7ffd2000;
+  const addr = i => '…' + (HI - 8*(i+1)).toString(16).slice(-4);
+  const steps = [];
+  let mem = [], sp = 0, bp = -1;
+  let regs = {rdi:'—', rsi:'—', rax:'—', rbx:'—'};
+  let out = '';
+  function push(label,val,cls,frame){
+    const slot={label,val,cls,frame};
+    if(sp < mem.length) mem[sp]=slot; else mem.push(slot);
+    sp++;
+  }
+  function snap(cLine, asm, note){
+    steps.push({
+      mem: JSON.parse(JSON.stringify(mem)),
+      sp, bp, regs: {...regs}, out, cLine, asm, note
+    });
+  }
+  function setVal(i, v){ mem[i].val = v; mem[i].label = mem[i].label.replace(/=.*$/,'= '+v); }
+
+  // trước main
+  push('ret addr → libc', '', 'ret', 'libc');
+  snap(8, 'call main', 'Trước cả <b>main</b>: thư viện khởi động (libc) gọi <code>call main</code> → <b>địa chỉ trả về</b> (nằm trong vùng .text của libc) đã được push sẵn lên đỉnh stack. Mọi hàm — kể cả main — đều được "ai đó" gọi.');
+
+  // main prologue
+  push('saved rbp (libc)', '', 'sbp', 'main');
+  snap(8, 'push rbp', '<b>Prologue của main, lệnh 1:</b> cất mốc frame (<code>rbp</code>) của caller vào stack — để lúc return còn khôi phục nguyên trạng.');
+  bp = 1;
+  snap(8, 'mov rbp, rsp', '<b>Lệnh 2:</b> <code>rbp</code> nay trỏ đúng ô vừa push — đây là <b>mốc cố định</b> của frame main. Từ giờ, mọi biến cục bộ của main đều tính theo <code>rbp − k</code>.');
+  push('r = ?', '?', 'local', 'main');
+  push('(đệm 8B — căn lề 16)', '', 'pad', 'main');
+  snap(9, 'sub rsp, 16', '<b>Lệnh 3:</b> "xin" 16 byte cho biến cục bộ <code>r</code> (+ đệm). Vì sao 16 mà không phải 8? ABI x86-64 bắt buộc <code>rsp</code> chia hết cho 16 trước mỗi <code>call</code> — compiler tự thêm đệm.');
+
+  regs.rdi = 3;
+  snap(9, 'mov edi, 3', 'Chuẩn bị gọi <code>sum_sq(3, 4)</code>. Theo System V AMD64: <b>6 đối số đầu đi bằng thanh ghi</b> <code>rdi, rsi, rdx, rcx, r8, r9</code> — nhanh hơn hẳn đi qua RAM. Đối số 1 = 3 → <code>rdi</code>.');
+  regs.rsi = 4;
+  snap(9, 'mov esi, 4', 'Đối số 2 = 4 → <code>rsi</code>. (Chỉ khi có đối số thứ 7 trở đi chúng mới phải nằm trên stack.)');
+
+  push('ret addr → main:10', '', 'ret', 'sum');
+  snap(9, 'call sum_sq', '<b>call = push + jmp:</b> CPU push địa chỉ của <b>lệnh kế tiếp trong main</b> (để biết đường về), rồi nhảy <code>rip</code> tới <code>sum_sq</code>. Chú ý: call KHÔNG push đối số, KHÔNG push rbp — chỉ đúng một thứ: địa chỉ trả về.');
+
+  // sum_sq prologue
+  push('saved rbp (main)', '', 'sbp', 'sum');
+  snap(4, 'push rbp', 'Vào <code>sum_sq</code> — prologue quen thuộc lặp lại: cất <code>rbp</code> của main. Giá trị được cất chính là <b>địa chỉ</b> ô mốc của frame main → các saved-rbp tạo thành <b>chuỗi móc xích</b> mà debugger lần theo để in stack trace!');
+  bp = 5;
+  snap(4, 'mov rbp, rsp', 'Đặt mốc frame mới cho <code>sum_sq</code>. Mốc của main không mất — nó đang nằm an toàn trong ô "saved rbp".');
+  push('s = ?', '?', 'local', 'sum');
+  push('a = ?', '?', 'local', 'sum');
+  push('b = ?', '?', 'local', 'sum');
+  snap(4, 'sub rsp, 24', 'Xin chỗ cho <code>s</code> và hai bản sao của đối số <code>a, b</code>.');
+  setVal(7, 3);
+  snap(4, 'mov [rbp−16], edi', '<b>Spill:</b> ở <code>-O0</code>, compiler chép đối số từ thanh ghi xuống frame (<code>a = 3</code>) để debugger nhìn thấy được và thanh ghi được rảnh tay. (Bật <code>-O2</code> là bước này biến mất — mọi thứ ở lì trong thanh ghi.)');
+  setVal(8, 4);
+  snap(4, 'mov [rbp−24], esi', 'Tương tự: <code>b = 4</code> xuống frame.');
+
+  regs.rdi = 3;
+  snap(5, 'mov edi, [rbp−16]', 'Tính <code>square(a)</code> trước: nạp lại <code>a</code> từ frame vào <code>rdi</code> làm đối số.');
+  push('ret addr → sum_sq:6', '', 'ret', 'sq');
+  snap(5, 'call square', '<code>call</code> lần nữa: push địa chỉ quay về giữa dòng 6 của <code>sum_sq</code>, nhảy tới <code>square</code>. Stack đã chồng <b>3 tầng frame</b>: main → sum_sq → square.');
+
+  // square #1
+  push('saved rbp (sum_sq)', '', 'sbp', 'sq');
+  snap(1, 'push rbp', 'Prologue của <code>square</code> — vẫn đúng nghi thức đó, hàm nào cũng thế.');
+  bp = 10;
+  snap(1, 'mov rbp, rsp', 'Mốc frame của <code>square</code>.');
+  push('x = ?', '?', 'local', 'sq');
+  push('y = ?', '?', 'local', 'sq');
+  snap(1, 'sub rsp, 16', 'Chỗ cho <code>x</code> (bản spill của đối số) và <code>y</code>.');
+  setVal(11, 3);
+  snap(1, 'mov [rbp−8], edi', 'Spill đối số: <code>x = 3</code>.');
+  setVal(12, 9); regs.rax = 9;
+  snap(2, 'mov eax,[rbp−8] · imul eax,eax', 'Thân hàm: <code>y = 3 × 3 = 9</code>. Theo ABI, <b>giá trị trả về được đặt vào <code>rax</code></b> (bản 32-bit: <code>eax</code>) — caller sẽ đến đó mà nhận.');
+
+  sp = bp + 1; sp--; bp = 5;
+  snap(2, 'leave', '<b>Epilogue, lệnh 1 — <code>leave</code></b> = <code>mov rsp,rbp</code> (vứt biến cục bộ) + <code>pop rbp</code> (khôi phục mốc của sum_sq). Nhìn cột RAM: các ô của square <b>mờ đi thành "rác"</b> — dữ liệu 3, 9 vẫn nằm y nguyên trong RAM, chỉ là rsp không còn bảo kê vùng đó nữa.');
+  sp--;
+  snap(5, 'ret', '<b><code>ret</code></b> pop địa chỉ trả về → nạp vào <code>rip</code> → CPU quay đúng chỗ giữa dòng 6 của <code>sum_sq</code>. Kết quả 9 đi theo trong <code>rax</code>.');
+
+  regs.rbx = 9;
+  snap(5, 'mov ebx, eax', 'Giữ tạm kết quả 9 vào <code>rbx</code> (thanh ghi callee-saved) — vì <code>rax</code> sắp bị lời gọi <code>square(b)</code> ghi đè.');
+  regs.rdi = 4;
+  snap(5, 'mov edi, [rbp−24]', 'Nạp <code>b = 4</code> vào <code>rdi</code>, chuẩn bị lời gọi thứ hai.');
+
+  // square #2 — tua nhanh, tái sử dụng ô rác
+  push('ret addr → sum_sq:6', '', 'ret', 'sq');
+  push('saved rbp (sum_sq)', '', 'sbp', 'sq');
+  bp = 10;
+  push('x = 4', 4, 'local', 'sq');
+  push('y = ?', '?', 'local', 'sq');
+  snap(1, 'call square → push rbp → mov rbp,rsp → sub rsp,16 → spill', '<b>Tua nhanh cả prologue.</b> Điểm đắt giá nhất nằm ở cột RAM: frame của <code>square(4)</code> mọc lên <b>đè đúng những địa chỉ</b> mà square(3) vừa bỏ lại — "rác" bị ghi đè, bộ nhớ được tái chế tự động, miễn phí. Đây là lý do stack rẻ hơn heap.');
+  setVal(12, 16); regs.rax = 16;
+  snap(2, 'imul → eax = 16', '<code>y = 4 × 4 = 16</code> → vào <code>rax</code>.');
+  sp = bp; bp = 5; sp--;
+  snap(3, 'leave · ret', 'Epilogue lần hai: frame square(4) thành rác, CPU về lại <code>sum_sq</code> với 16 trong <code>rax</code>.');
+
+  setVal(6, 25); regs.rax = 25;
+  snap(5, 'add eax, ebx · mov [rbp−8], eax', 'Cộng hai kết quả: <code>s = 9 + 16 = 25</code>, cất vào frame. (9 nãy giờ vẫn kiên nhẫn ngồi trong <code>rbx</code>.)');
+
+  sp = bp; bp = 1;
+  snap(6, 'mov eax,[rbp−8] · leave', '<code>return s</code>: nạp 25 vào <code>rax</code>, rồi <code>leave</code> — toàn bộ frame <code>sum_sq</code> (kèm a, b, s) thành rác.');
+  sp--;
+  snap(9, 'ret', 'Về tới <code>main</code>, mang theo 25 trong <code>rax</code>. Để ý stack lúc này: y hệt trước khi gọi <code>sum_sq</code> — <b>cân bằng push/pop tuyệt đối</b>, đó là hợp đồng của mọi hàm tử tế.');
+
+  setVal(2, 25);
+  snap(9, 'mov [rbp−8], eax', '<code>r = 25</code> — kết quả cuối cùng nằm trong frame của main.');
+  regs.rax = 25;
+  sp = bp + 1; sp--; sp--; bp = -1;  // leave (rsp=rbp, pop rbp) + ret → stack rỗng
+  out = 'exit code = 25 · sum_sq(3,4) = 25 ✓';
+  snap(10, 'mov eax,[rbp−8] · leave · ret', '<code>return r</code> → main cũng leave/ret nốt, trả 25 về libc làm <b>exit code</b>. Toàn bộ stack thành rác trong… 2 lệnh. Không <code>free()</code>, không garbage collector — dọn dẹp bằng đúng một phép gán con trỏ. Đó là vẻ đẹp của stack. 🍡');
+
+  // ── render simulator ──
+  const csrcEl = document.getElementById('csrc');
+  C_SRC.forEach((l,i)=>{
+    const d=document.createElement('div');
+    d.className='cl'; d.dataset.i=i;
+    d.innerHTML='<span class="ln">'+(i+1)+'</span><span>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>';
+    csrcEl.appendChild(d);
   });
-}
-function drawPlates(){
-  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
-  const CX=190, BASEY=310;
-  const n=callStack.length;
-  const GAP = n>0 ? Math.min(30, (BASEY-60)/n) : 30;
-  callStack.forEach((f,i)=>{
-    const y = BASEY - (i+1)*GAP;
-    const isTop=(i===n-1), topple=f.overflow;
-    const jx = topple ? Math.sin(i*13.37)*70 : 0;
-    const jr = topple ? Math.sin(i*7.77)*40 : 0;
-    const g=SVG('g',{transform:'translate('+(CX+jx)+','+y+') rotate('+jr+')'});
-    g.appendChild(SVG('ellipse',{rx:88,ry:16,fill: topple?'#F7D9D9':'#FFF6E9', stroke: topple?'var(--red)':(isTop?'#5AA0FF':'#D9A441'), 'stroke-width':isTop?3:2}));
-    const t=SVG('text',{x:0,y:5,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#7A5312'}); t.textContent = f.label ? f.label.replace(/^f\(n=/,'').replace(')','') : f.n;
-    g.appendChild(t);
-    el.appendChild(g);
+
+  const REGNAMES=['rdi','rsi','rax','rbx','rsp','rbp'];
+  const regsEl=document.getElementById('regs');
+  REGNAMES.forEach(rn=>{
+    const d=document.createElement('div');
+    d.className='reg'+((rn==='rsp'||rn==='rbp')?' ptrreg':'');
+    d.id='reg-'+rn;
+    d.innerHTML='<div class="rn">'+rn+'</div><div class="rv">—</div>';
+    regsEl.appendChild(d);
   });
-  if(callStack.some(f=>f.overflow)){
-    el.appendChild((()=>{ const t=SVG('text',{x:CX,y:38,'text-anchor':'middle','font-size':30}); t.textContent='💥'; return t; })());
+
+  const ramEl=document.getElementById('ram');
+  const asmEl=document.getElementById('asm');
+  const noteEl=document.getElementById('simnote');
+  const outEl=document.getElementById('simout');
+  const cntEl=document.getElementById('stepcnt');
+  let cur=0, prevRegs={}, prevSp=0, autoT=null;
+
+  const FR={libc:'f-libc',main:'f-main',sum:'f-sum',sq:'f-sq'};
+
+  function show(i){
+    cur=Math.max(0,Math.min(steps.length-1,i));
+    const s=steps[cur];
+
+    // C highlight
+    csrcEl.querySelectorAll('.cl').forEach(d=>d.classList.toggle('on',+d.dataset.i===s.cLine));
+    asmEl.textContent=s.asm;
+    noteEl.innerHTML=s.note;
+    outEl.textContent=s.out;
+    cntEl.textContent='bước '+(cur+1)+' / '+steps.length;
+
+    // regs
+    const rspv = s.sp>0 ? addr(s.sp-1) : '—';
+    const rbpv = s.bp>=0 ? addr(s.bp) : '—';
+    const vals={...s.regs, rsp:rspv, rbp:rbpv};
+    REGNAMES.forEach(rn=>{
+      const el=document.getElementById('reg-'+rn);
+      el.querySelector('.rv').textContent=vals[rn];
+      el.classList.toggle('chg', prevRegs[rn]!==undefined && prevRegs[rn]!==vals[rn]);
+    });
+    prevRegs=vals;
+
+    // RAM
+    ramEl.innerHTML='';
+    s.mem.forEach((slot,idx)=>{
+      const live = idx < s.sp;
+      const d=document.createElement('div');
+      d.className='slotrow '+(FR[slot.frame]||'')+(live?'':' junk')+((live && idx===s.sp-1 && s.sp>prevSp)?' fresh':'');
+      let pt='';
+      if(live && idx===s.sp-1) pt+='<span class="sp">◀ rsp</span> ';
+      if(live && idx===s.bp)  pt+='<span class="bp">◀ rbp</span>';
+      d.innerHTML='<span class="a">'+addr(idx)+'</span><span class="lb">'+slot.label+'</span><span class="pt">'+pt+'</span>';
+      ramEl.appendChild(d);
+    });
+    prevSp=s.sp;
   }
-}
-function draw(){ drawPlates(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bPlay','bReset2','bRun','bOverflow','bReset'], b); }
+  function stopAuto(){ if(autoT){clearInterval(autoT);autoT=null;document.getElementById('sAuto').textContent='▶▶ Tự động';} }
+  document.getElementById('sNext').onclick=()=>{stopAuto();show(cur+1);};
+  document.getElementById('sPrev').onclick=()=>{stopAuto();show(cur-1);};
+  document.getElementById('sFirst').onclick=()=>{stopAuto();show(0);};
+  document.getElementById('sLast').onclick=()=>{stopAuto();show(steps.length-1);};
+  document.getElementById('sAuto').onclick=function(){
+    if(autoT){stopAuto();return;}
+    this.textContent='⏸ Dừng';
+    if(cur>=steps.length-1) show(0);
+    autoT=setInterval(()=>{ if(cur>=steps.length-1) stopAuto(); else show(cur+1); },2600);
+  };
+  show(0);
 
-async function factorial(n){
-  hl(L.sig); narrate('Gọi <b>factorial('+n+')</b> — chồng khay mới lên ĐỈNH.'); await nap(500);
-  hl(L.push); callStack.push({n,result:null}); draw(); await nap(650);
-  hl(L.baseChk); narrate('Kiểm tra ca gốc: <b>n &lt;= 1</b>? ('+n+' &lt;= 1 là <b>'+(n<=1)+'</b>)'); await nap(700);
-  let result;
-  if(n<=1){
-    hl(L.baseSet); result=1; narrate('<b>Ca gốc</b>: n=1 → result = 1.'); await nap(750);
-  } else {
-    hl(L.elseRecurse); narrate('Chưa tới gốc → gọi đệ quy <b>factorial('+(n-1)+')</b>, CHỜ kết quả trả về…'); await nap(700);
-    const sub = await factorial(n-1);
-    result = n*sub;
-    narrate('Quay lại <b>factorial('+n+')</b>: result = '+n+' × '+sub+' = <b>'+result+'</b>.'); await nap(750);
+  /* ═══ 05 · overflow demo ═══ */
+  const fill=document.getElementById('ovfFill');
+  const dEl=document.getElementById('ovfDepth');
+  const bEl=document.getElementById('ovfBytes');
+  const errEl=document.getElementById('ovfErr');
+  const FRAME_B=48, LIMIT=10000;
+  let depth=0, ovfT=null;
+  function ovfStop(){ if(ovfT){clearInterval(ovfT);ovfT=null;} }
+  function ovfRender(){
+    dEl.textContent=depth.toLocaleString('vi-VN');
+    bEl.textContent=Math.round(depth*FRAME_B/1024)+' KB';
+    fill.style.height=Math.min(100, depth/LIMIT*100)+'%';
   }
-  hl(L.setRes); callStack[callStack.length-1].result=result; draw(); await nap(650);
-  hl(L.pop); callStack.pop(); draw();
-  narrate('<b>factorial('+n+')</b> trả về '+result+' — lấy khay khỏi đỉnh (POP).'); await nap(750);
-  hl(L.ret);
-  return result;
-}
+  document.getElementById('ovfGo').onclick=()=>{
+    ovfStop(); errEl.classList.remove('show'); depth=0;
+    ovfT=setInterval(()=>{
+      depth+=Math.floor(120+Math.random()*260);
+      if(depth>=LIMIT){ depth=LIMIT; ovfRender(); ovfStop(); errEl.classList.add('show'); return; }
+      ovfRender();
+    },40);
+  };
+  document.getElementById('ovfReset').onclick=()=>{ ovfStop(); depth=0; ovfRender(); errEl.classList.remove('show'); };
+  ovfRender();
 
-async function runOverflow(){
-  hl(L.overflowSig);
-  narrate('😱 Giờ tưởng tượng đầu bếp <b>QUÊN</b> dừng lại: <code>f(n){ return f(n+1); }</code> — KHÔNG có ca gốc…'); await nap(1000);
-  const MAX_FRAMES=16;
-  for(let i=1;i<=MAX_FRAMES;i++){
-    callStack.push({n:i, result:null, label:'f(n='+i+')'});
-    draw();
-    narrate('Chồng thêm khay <b>f('+i+')</b> — không bao giờ dừng để lấy khay ra…');
-    await nap(160);
-  }
-  callStack.forEach(f=>f.overflow=true); draw();
-  narrate('<b style="color:var(--red)">STACK OVERFLOW 💥 sập cả chồng!</b> — không có ca gốc để dừng lại, chồng khay đổ.');
-  await nap(1700);
-}
-
-$('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); callStack=[]; draw();
-  narrate('👨‍🍳 Đầu bếp tính giai thừa(3) — mỗi bước tính lại chồng thêm 1 khay…'); await nap(700);
-  const r = await factorial(3);
-  narrate('✅ Xong! factorial(3) = <b>'+r+'</b>. Chồng khay rỗng trở lại.'); await nap(1300);
-  callStack=[]; draw();
-  await runOverflow();
-  lock(false);
-};
-$('bReset2').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset. Bấm ▶ Play để chạy lại.'); };
-
-$('bRun').onclick=async()=>{
-  if(busy)return; lock(true); callStack=[]; draw();
-  const r = await factorial(3);
-  narrate('Xong! <b>factorial(3) = '+r+'</b>. Ngăn xếp rỗng trở lại.');
-  lock(false);
-};
-$('bReset').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset.'); };
-$('bOverflow').onclick=async()=>{ if(busy)return; lock(true); callStack=[]; draw(); await runOverflow(); lock(false); };
-
-initQuiz('quiz','stack',{
-  safe:{ok:false,msg:'Sai — không có cơ chế nào tự dừng nếu bạn không viết ca gốc.'},
-  slow:{ok:false,msg:'Sai — nó không chỉ chậm, nó sẽ PHÌNH TO tới khi hết bộ nhớ/giới hạn.'},
-  overflow:{ok:true,msg:'Đúng! Mỗi lời gọi PUSH thêm 1 khung, không bao giờ pop → STACK OVERFLOW.'}
-});
-
-draw();
+  /* ═══ quiz ═══ */
+  document.querySelectorAll('[data-quiz]').forEach(box=>{
+    const reveal=box.parentElement.querySelector('.reveal');
+    box.querySelectorAll('.opt').forEach(b=>{
+      b.onclick=()=>{
+        box.querySelectorAll('.opt').forEach(o=>{
+          o.classList.remove('correct','wrong');
+          if(o.dataset.a==='1') o.classList.add('correct');
+        });
+        if(b.dataset.a!=='1') b.classList.add('wrong');
+        reveal.classList.add('show');
+        if(b.dataset.a==='1') CL.markDone('stack');
+      };
+    });
+  });
 })();
 </script>
 </body>
