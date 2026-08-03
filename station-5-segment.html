@@ -151,10 +151,13 @@
         </div>
         <div class="k-scene">
           <svg id="svgTheme" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm ▶ Play để xem một ca làm việc: bó tiền → khách hỏi tổng → khách đổi tiền lẻ.</div>
+          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ca làm việc tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
           <div class="k-controls">
-            <button class="play-btn" id="bPlay">▶ Play</button>
-            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
+            <div class="row" style="gap:8px">
+              <button class="play-btn" id="bPlay">▶ Tự động</button>
+              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+            </div>
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
       </div>
@@ -172,7 +175,6 @@
               <button id="bBuild">▶ Xây cây (build)</button>
               <button id="bSum" class="ghost" disabled>▶ Truy vấn sum(1..6)</button>
               <button id="bUpdate" class="ghost" disabled>✏️ update(a[2] = 9)</button>
-              <button id="bReset" class="ghost">↺ Reset</button>
             </div>
           </div>
         </div>
@@ -294,7 +296,9 @@ function drawCash(){
   });
 }
 function draw(){ drawCash(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bBuild','bSum','bUpdate','bReset','bPlay','bReset2'], b); if(!b){ CL.lock(['bSum','bUpdate'], !built); } }
+function lock(b){ busy=b; CL.lock(['bBuild','bSum','bUpdate','bReset','bPlay'], b); if(!b){ CL.lock(['bSum','bUpdate'], !built); } }
+function lockStep(b){ CL.lock(['bStep'], b); }
+function resetState(){ seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw(); hl(); CL.lock(['bSum','bUpdate'], true); }
 
 async function build(v,l,r){
   curV=v; draw(); hl(L.buildSig); await nap(140);
@@ -331,27 +335,52 @@ async function update(v,l,r,p,x){
   narrate('Bó lại: $'+seg[2*v]+' + $'+seg[2*v+1]+' = <b>$'+seg[v]+'</b>.'); await nap(340);
 }
 
+/* ---- one shared script: automatic play or one-step-at-a-time ---- */
+let lastSumResult=0;
+const SCRIPT=[
+  {narrate:'🧑‍💼 Đầu ca làm việc: đếm và bó tiền từng ngăn kéo lại…', pause:600},
+  {op:'build'},
+  {narrate:()=>'✅ Bó xong! Tổng cả ngăn kéo = <b>$'+seg[1]+'</b>.', pause:1200},
+  {narrate:'🙋 Khách hỏi: "Từ ngăn 1 tới ngăn 6 có bao nhiêu tiền?"', pause:900},
+  {op:'sum'},
+  {narrate:()=>'💬 Trả lời ngay: <b>$'+lastSumResult+'</b> — chỉ cộng vài bó, không đếm lại từng tờ!', pause:1500},
+  {narrate:'💱 Một khách đổi tiền lẻ ở ngăn 2 — 2 tờ đổi thành 9 tờ.', pause:900},
+  {op:'update'},
+  {narrate:'Xong! Chỉ tính lại các bó PHÍA TRÊN ngăn 2 — không phải đếm lại cả ngăn kéo.', pause:0},
+];
+async function runBeat(beat){
+  if(beat.op==='build'){ await build(1,0,N-1); curV=null; draw(); built=true; CL.lock(['bSum','bUpdate'], false); }
+  else if(beat.op==='sum'){ caseOf={}; curV=null; draw(); lastSumResult=await sumQ(1,0,N-1,1,6); curV=null; draw(); }
+  else if(beat.op==='update'){ caseOf={}; curV=null; draw(); await update(1,0,N-1,2,9); curV=null; draw(); }
+  else narrate(typeof beat.narrate==='function' ? beat.narrate() : beat.narrate);
+}
+
+$('bReset').onclick=()=>{
+  if(busy)return;
+  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
+};
+
 $('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw();
-  narrate('🧑‍💼 Đầu ca làm việc: đếm và bó tiền từng ngăn kéo lại…'); await nap(600);
-  await build(1,0,N-1);
-  curV=null; draw(); built=true;
-  narrate('✅ Bó xong! Tổng cả ngăn kéo = <b>$'+seg[1]+'</b>.'); await nap(1200);
-
-  narrate('🙋 Khách hỏi: "Từ ngăn 1 tới ngăn 6 có bao nhiêu tiền?"'); await nap(900);
-  caseOf={}; curV=null; draw();
-  const result = await sumQ(1,0,N-1,1,6);
-  curV=null; draw();
-  narrate('💬 Trả lời ngay: <b>$'+result+'</b> — chỉ cộng vài bó, không đếm lại từng tờ!'); await nap(1500);
-
-  narrate('💱 Một khách đổi tiền lẻ ở ngăn 2 — 2 tờ đổi thành 9 tờ.'); await nap(900);
-  caseOf={}; curV=null; draw();
-  await update(1,0,N-1,2,9);
-  curV=null; draw();
-  narrate('Xong! Chỉ tính lại các bó PHÍA TRÊN ngăn 2 — không phải đếm lại cả ngăn kéo.');
+  if(busy)return; lock(true); resetState();
+  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
   lock(false);
 };
-$('bReset2').onclick=()=>{ if(busy)return; seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw(); hl(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); };
+
+let stepMode=false, stepIdx=0;
+$('bStep').onclick=async()=>{
+  if(busy)return;
+  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
+  if(stepIdx>=SCRIPT.length){
+    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+    return;
+  }
+  lockStep(true);
+  await runBeat(SCRIPT[stepIdx]);
+  stepIdx++;
+  lockStep(false);
+  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+};
 
 $('bBuild').onclick=async()=>{
   if(busy)return; lock(true); seg=new Array(4*N).fill(0); caseOf={}; curV=null; draw();
@@ -376,11 +405,6 @@ $('bUpdate').onclick=async()=>{
   curV=null; draw();
   narrate('Cập nhật xong — chỉ 1 đường từ gốc xuống lá rồi lên: O(log n).');
   lock(false);
-};
-$('bReset').onclick=()=>{
-  if(busy)return; seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw(); hl();
-  CL.lock(['bSum','bUpdate'], true);
-  narrate('Đã reset. Bấm ▶ Xây cây (build) trước.');
 };
 
 initQuiz('quiz','segment',{

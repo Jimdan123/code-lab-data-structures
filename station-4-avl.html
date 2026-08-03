@@ -151,10 +151,13 @@
         </div>
         <div class="k-scene">
           <svg id="svgTheme" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm ▶ Play để treo lần lượt 1→7 quả cân — xem mobile tự lắc rồi thẳng lại.</div>
+          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để treo lần lượt 1→7 quả cân tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
           <div class="k-controls">
-            <button class="play-btn" id="bPlay">▶ Play</button>
-            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
+            <div class="row" style="gap:8px">
+              <button class="play-btn" id="bPlay">▶ Tự động</button>
+              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+            </div>
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
       </div>
@@ -172,7 +175,6 @@
               <input type="number" id="val" value="50">
               <button id="bIns">Chèn</button>
               <button id="bDemo" class="ghost">▶ Chèn 1→7 (nhanh)</button>
-              <button id="bReset" class="ghost">↺ Reset</button>
             </div>
           </div>
         </div>
@@ -286,8 +288,10 @@ function drawMobile(pos){
 }
 function draw(){ const pos=computeLayout(); drawTech(pos); drawMobile(pos); }
 function narrate(h){ NARR(h); }
-function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset','bPlay','bReset2'],b);}
+function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset','bPlay'],b);}
+function lockStep(b){ CL.lock(['bStep'], b); }
 function setRot(kind){ const b=$('rotbadge'); if(b) b.innerHTML = kind? '<span class="badge rot">⟳ XOAY '+kind+'</span>':''; }
+function resetState(){ root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); hl(); }
 
 /* Chèn TỪNG BƯỚC (đệ quy async) */
 async function ins(node,x){
@@ -343,18 +347,48 @@ async function showComparisonFlourish(){
   ghost.remove();
 }
 
+/* ---- one shared script: automatic play or one-step-at-a-time ---- */
+const SCRIPT=[
+  {narrate:'🎐 Treo lần lượt các quả cân 1, 2, 3, 4, 5, 6, 7…', pause:700},
+  {op:'insert', val:1}, {op:'insert', val:2}, {op:'insert', val:3}, {op:'insert', val:4},
+  {op:'insert', val:5}, {op:'insert', val:6}, {op:'insert', val:7},
+  {op:'flourish'},
+  {narrate:'Hết! Mobile vẫn thấp & cân sau khi treo đủ 7 quả — nhờ tự xoay mỗi khi lệch quá 1 tầng.', pause:0},
+];
+async function runBeat(beat){
+  if(beat.op==='insert') await doInsert(beat.val);
+  else if(beat.op==='flourish') await showComparisonFlourish();
+  else narrate(beat.narrate);
+}
+
+$('bReset').onclick=()=>{
+  if(busy)return;
+  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
+};
+
 $('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw();
-  narrate('🎐 Treo lần lượt các quả cân 1, 2, 3, 4, 5, 6, 7…'); await nap(700);
-  for(let k=1;k<=7;k++){ await doInsert(k); }
-  await showComparisonFlourish();
-  narrate('Hết! Mobile vẫn thấp & cân sau khi treo đủ 7 quả — nhờ tự xoay mỗi khi lệch quá 1 tầng.');
+  if(busy)return; lock(true); resetState();
+  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
   lock(false);
 };
-$('bReset2').onclick=()=>{ if(busy)return; root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); hl(); };
+
+let stepMode=false, stepIdx=0;
+$('bStep').onclick=async()=>{
+  if(busy)return;
+  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
+  if(stepIdx>=SCRIPT.length){
+    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+    return;
+  }
+  lockStep(true);
+  await runBeat(SCRIPT[stepIdx]);
+  stepIdx++;
+  lockStep(false);
+  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+};
 
 $('bIns').onclick=async ()=>{ if(busy)return; lock(true); await doInsert(+$('val').value); $('val').value=+$('val').value+10; lock(false); };
-$('bReset').onclick=()=>{ if(busy)return; root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); narrate('Đã xoá cây.'); hl(); };
 $('bDemo').onclick=async ()=>{ if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null; draw();
   for(let k=1;k<=7;k++){ root=insertSync(root,k); flashV=k; draw(); narrate('Chèn nhanh <b>'+k+'</b> (đã tự cân).'); await nap(430); }
   flashV=null; draw();

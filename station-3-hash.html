@@ -151,10 +151,13 @@
         </div>
         <div class="k-scene">
           <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm ▶ Play để xem 3 vị khách check-in — và chuyện gì xảy ra khi 2 người trùng phòng.</div>
+          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem 3 vị khách check-in tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
           <div class="k-controls">
-            <button class="play-btn" id="bPlay">▶ Play</button>
-            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
+            <div class="row" style="gap:8px">
+              <button class="play-btn" id="bPlay">▶ Tự động</button>
+              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+            </div>
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
       </div>
@@ -172,7 +175,6 @@
               <button id="bMinh">Chèn 'Minh'</button>
               <button id="bAn">Chèn 'An'</button>
               <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
-              <button id="bReset" class="ghost">↺ Reset</button>
             </div>
           </div>
           <div class="card"><h3>Tham khảo · 2 phe xử lý va chạm</h3>
@@ -300,7 +302,9 @@ function drawHotel(){
   }
 }
 function draw(){ drawHotel(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bPlay','bReset2','bMinh','bAn','bMai','bReset'], b); }
+function lock(b){ busy=b; CL.lock(['bPlay','bReset','bMinh','bAn','bMai'], b); }
+function lockStep(b){ CL.lock(['bStep'], b); }
+function resetState(){ table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; draw(); hl(); }
 
 async function doInsert(key){
   lobbyName=key; draw();
@@ -325,21 +329,49 @@ async function doInsert(key){
   flashBucket=null; draw(); hl();
 }
 
+/* ---- one shared script: automatic play or one-step-at-a-time ---- */
+const SCRIPT=[
+  {op:'insert', key:'Minh'},
+  {op:'insert', key:'An'},
+  {narrate:'👀 Một vị khách nữa sắp tới — tên hoàn toàn khác, nhưng để xem phòng nào…', pause:1000},
+  {op:'insert', key:'Mai'},
+  {narrate:'Hết lượt check-in hôm nay — mỗi khách đều được xếp phòng ngay lập tức, kể cả khi trùng phòng.', pause:0},
+];
+async function runBeat(beat){
+  if(beat.op==='insert') await doInsert(beat.key);
+  else narrate(beat.narrate);
+}
+
+$('bReset').onclick=()=>{
+  if(busy)return;
+  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
+};
+
 $('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; draw();
-  await doInsert('Minh');
-  await doInsert('An');
-  narrate('👀 Một vị khách nữa sắp tới — tên hoàn toàn khác, nhưng để xem phòng nào…'); await nap(1000);
-  await doInsert('Mai');
-  narrate('Hết lượt check-in hôm nay — mỗi khách đều được xếp phòng ngay lập tức, kể cả khi trùng phòng.');
+  if(busy)return; lock(true); resetState();
+  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
   lock(false);
 };
-$('bReset2').onclick=()=>{ if(busy)return; table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; draw(); hl(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); };
+
+let stepMode=false, stepIdx=0;
+$('bStep').onclick=async()=>{
+  if(busy)return;
+  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
+  if(stepIdx>=SCRIPT.length){
+    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+    return;
+  }
+  lockStep(true);
+  await runBeat(SCRIPT[stepIdx]);
+  stepIdx++;
+  lockStep(false);
+  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+};
 
 $('bMinh').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Minh'); lock(false); };
 $('bAn').onclick=async()=>{ if(busy)return; lock(true); await doInsert('An'); lock(false); };
 $('bMai').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Mai'); lock(false); };
-$('bReset').onclick=()=>{ if(busy)return; table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; draw(); hl(); narrate('Đã reset.'); };
 
 initQuiz('quiz','hash',{
   bug:{ok:false,msg:'Sai — nó không hiếm. Với đủ số key, va chạm gần như chắc chắn xảy ra (nghịch lý ngày sinh: chỉ 23 người đã >50% trùng ngày sinh).'},

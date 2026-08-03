@@ -151,10 +151,13 @@
         </div>
         <div class="k-scene">
           <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="ticker" id="narr">Bấm ▶ Play để xem người dùng thả ghim khắp thành phố — và chuyện gì xảy ra khi nhiều đơn trùng một địa chỉ.</div>
+          <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ngày thả ghim tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
           <div class="k-controls">
-            <button class="play-btn" id="bPlay">▶ Play</button>
-            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
+            <div class="row" style="gap:8px">
+              <button class="play-btn" id="bPlay">▶ Tự động</button>
+              <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+            </div>
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
       </div>
@@ -172,7 +175,6 @@
               <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
               <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
               <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
-              <button id="bReset" class="ghost">↺ Reset</button>
             </div>
           </div>
           <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
@@ -292,7 +294,8 @@ function drawMap(){
   drawMapNode(root, el);
 }
 function draw(){ drawMap(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset','bPlay','bReset2'], b); }
+function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset','bPlay'], b); }
+function lockStep(b){ CL.lock(['bStep'], b); }
 function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; draw(); hl(); }
 
 async function insertRec(node,p,verbose){
@@ -321,24 +324,53 @@ async function insertRec(node,p,verbose){
   return await insertRec(child.node,p,verbose);
 }
 
+/* ---- one shared script: automatic play or one-step-at-a-time ---- */
+const DUP_POINT={x:137.3,y:84.6};
+const SCRIPT=[
+  {narrate:'🗺️ Ứng dụng bản đồ: người dùng thả ghim khắp thành phố…', pause:500},
+  {op:'scatter'},
+  {narrate:'📍 Vùng ĐÔNG tự động chia nhỏ để tra cứu nhanh, vùng THƯA vẫn giữ nguyên 1 ô lớn.', pause:1700},
+  {narrate:'🏢 Giờ thử: rất nhiều đơn hàng cùng MỘT toà nhà (trùng địa chỉ)…', pause:900},
+  {op:'resetForDup'},
+  {op:'pileDup'},
+  {narrate:'Bản đồ đã chia nhỏ liên tục xuống tới độ sâu tối đa. Thả thêm 1 ghim nữa…', pause:900},
+  {op:'insertVerboseDup'},
+  {narrate:'Xong! Ô đó GIỮ NGUYÊN các ghim dư, không chia mãi — nhờ giới hạn MAX_DEPTH.', pause:0},
+];
+async function runBeat(beat){
+  if(beat.op==='scatter'){ for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); draw(); await nap(70); } curNode=null; flashPoint=null; draw(); }
+  else if(beat.op==='resetForDup'){ resetTree(); }
+  else if(beat.op==='pileDup'){ for(let i=0;i<24;i++){ await insertRec(root,DUP_POINT,false); draw(); await nap(35); } }
+  else if(beat.op==='insertVerboseDup'){ await insertRec(root,DUP_POINT,true); curNode=null; flashPoint=null; draw(); hl(); }
+  else narrate(beat.narrate);
+}
+
+$('bReset').onclick=()=>{
+  if(busy)return;
+  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  resetTree(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
+};
+
 $('bPlay').onclick=async()=>{
   if(busy)return; lock(true); resetTree();
-  narrate('🗺️ Ứng dụng bản đồ: người dùng thả ghim khắp thành phố…'); await nap(500);
-  for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); draw(); await nap(70); }
-  curNode=null; flashPoint=null; draw();
-  narrate('📍 Vùng ĐÔNG tự động chia nhỏ để tra cứu nhanh, vùng THƯA vẫn giữ nguyên 1 ô lớn.'); await nap(1700);
-
-  narrate('🏢 Giờ thử: rất nhiều đơn hàng cùng MỘT toà nhà (trùng địa chỉ)…'); await nap(900);
-  resetTree();
-  const p={x:137.3,y:84.6};
-  for(let i=0;i<24;i++){ await insertRec(root,p,false); draw(); await nap(35); }
-  narrate('Bản đồ đã chia nhỏ liên tục xuống tới độ sâu tối đa. Thả thêm 1 ghim nữa…'); await nap(900);
-  await insertRec(root,p,true);
-  curNode=null; flashPoint=null; draw(); hl();
-  narrate('Xong! Ô đó GIỮ NGUYÊN các ghim dư, không chia mãi — nhờ giới hạn MAX_DEPTH.');
+  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
   lock(false);
 };
-$('bReset2').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); };
+
+let stepMode=false, stepIdx=0;
+$('bStep').onclick=async()=>{
+  if(busy)return;
+  if(!stepMode){ stepMode=true; stepIdx=0; resetTree(); $('bPlay').disabled=true; }
+  if(stepIdx>=SCRIPT.length){
+    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+    return;
+  }
+  lockStep(true);
+  await runBeat(SCRIPT[stepIdx]);
+  stepIdx++;
+  lockStep(false);
+  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+};
 
 $('bOne').onclick=async()=>{
   if(busy)return; lock(true);
@@ -366,7 +398,6 @@ $('bMax').onclick=async()=>{
   curNode=null; flashPoint=null; draw(); hl();
   lock(false);
 };
-$('bReset').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ✏️ Thêm 1 điểm hoặc ▶ Rải 30 điểm.'); };
 
 initQuiz('quiz','quadtree',{
   split:{ok:false,msg:'Sai — MAX_DEPTH có nghĩa là KHÔNG chẻ tiếp nữa, dù ô vẫn đầy.'},
