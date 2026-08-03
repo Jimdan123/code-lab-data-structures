@@ -1,93 +1,223 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Lab · Hash Table</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trạm 3 · Hash Table · Lễ tân Khách sạn</title>
 <link rel="stylesheet" href="style.css">
-<style>:root{--accent:#9A6708;}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rice:#FBF5E9; --tatami:#F1E7D2; --nori:#1B2420;
+    --indigo:#2C4066; --indigo-deep:#22314E;
+    --salmon:#EE6F57; --wasabi:#6E9A50; --wasabi-soft:#E4EED9;
+    --soy:#4A3A2A; --soy-light:#8A7660;
+    --lacquer:#C0442F; --gold:#D9A441;
+    --accent:#9A6708;
+    --radius:18px; --shadow:0 10px 30px rgba(43,38,28,.10);
+  }
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--rice);color:var(--soy);}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:radial-gradient(rgba(74,58,42,.05) 1px, transparent 1px);background-size:22px 22px;
+  }
+  .k-wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto 40px;}
+
+  .k-noren{position:relative;margin:-20px -22px 22px;background:linear-gradient(180deg,var(--indigo-deep),var(--indigo));color:#F6F1E4;padding:36px 20px 50px;text-align:center;}
+  .k-noren::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:28px;
+    background-image:radial-gradient(circle at 14px 0, var(--indigo) 14px, transparent 15px);background-size:28px 28px;background-repeat:repeat-x;}
+  .k-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+    border:1px solid rgba(217,164,65,.5);border-radius:999px;padding:4px 13px;margin-bottom:12px;}
+  .k-noren h1{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(26px,4vw,42px);line-height:1.15;}
+  .k-noren h1 .accent{color:#FFB3A0;}
+  .k-noren .sub2{max-width:620px;margin:10px auto 0;color:#D8DEEC;font-size:14.5px;}
+  .k-noren .sub2 b{color:#fff;}
+
+  #toolbox{margin:18px 0 0;}
+
+  .k-h2{font-family:'Baloo 2',cursive;font-weight:700;font-size:21px;color:var(--indigo);display:flex;align-items:center;gap:9px;margin:0 0 13px;}
+  .k-h2 .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;background:var(--indigo);color:#F6F1E4;border-radius:6px;padding:3px 8px;letter-spacing:.08em;}
+  .k-section{margin-top:36px;}
+
+  .k-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:900px){.k-menu{grid-template-columns:1fr;}}
+  .dish{background:#fff;border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);border-top:5px solid var(--card-c,var(--indigo));}
+  .dish .ic{font-size:24px;}
+  .dish h3{font-family:'Baloo 2',cursive;font-size:16px;margin:6px 0 4px;color:var(--card-c,var(--indigo));}
+  .dish p{font-size:13.5px;color:var(--soy);margin:0;}
+  .dish p b{color:var(--card-c);}
+  .dish.problem{--card-c:var(--lacquer);}
+  .dish.bad{--card-c:#A0522D;}
+  .dish.idea{--card-c:var(--wasabi);}
+
+  .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
+  .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
+  .k-chip .em{font-size:22px;}
+  .k-chip .t{font-size:12.5px;}
+  .k-chip .t b{display:block;color:var(--indigo);font-size:13px;}
+  .k-chip .t code{font-family:'JetBrains Mono',monospace;background:#fff;border-radius:5px;padding:1px 6px;font-size:11.5px;color:var(--lacquer);}
+
+  .viewtoggle{margin-top:6px;}
+  .k-main{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start;}
+  @media(max-width:980px){.k-main{grid-template-columns:1fr;}}
+
+  .tray{background:var(--nori);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .tray .bar{display:flex;align-items:center;gap:8px;background:#121a17;padding:11px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#9FB8A8;letter-spacing:.06em;}
+  .tray .bar .dot{width:9px;height:9px;border-radius:50%;}
+  .tray .code{background:transparent;padding:14px 18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;}
+  .tray .cl{color:#E9EFE8;}
+  .tray .cl .kw{color:#F2A7B3;} .tray .cl .fn{color:#F5C97B;} .tray .cl .cm{color:#7E9488;font-style:italic;} .tray .cl .st{color:#A8D5A2;}
+  .tray .cl.hl{background:#324237;border-left-color:var(--gold);}
+  .tray .code-title{color:#8ea0b8;}
+
+  .k-scene{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+
+  .ticker{margin:16px auto 0;max-width:560px;background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13.5px;min-height:20px;}
+  .ticker b{color:var(--indigo);}
+
+  .k-controls{display:flex;flex-wrap:wrap;gap:9px;justify-content:space-between;align-items:center;margin-top:16px;}
+  .k-controls .play-btn{font-family:'Baloo 2',cursive;}
+  .k-side{display:flex;gap:8px;}
+  .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
+  .k-side button:hover{background:var(--indigo);color:#fff;}
+
+  .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
+  .k-quiz button{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-family:'Be Vietnam Pro',sans-serif;font-weight:700;border-radius:10px;padding:8px 14px;}
+  .k-quiz .fb{border-radius:12px;padding:12px 15px;font-size:13.5px;background:#fff;border-left:5px solid var(--wasabi);}
+  .k-quiz .fb.no{border-left-color:var(--lacquer);}
+
+  footer.k-footer{margin-top:50px;text-align:center;font-size:12.5px;color:var(--soy-light);}
+</style>
 </head>
 <body>
-  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
-  <div class="toolbox" id="toolbox"></div>
+<div class="k-wrap">
 
-  <div class="station-h">🛎️ Trạm 3 · Lễ tân Khách sạn <span style="color:var(--muted);font-weight:600">(hash table)</span></div>
-  <p class="station-s">Khách tới → lễ tân tính ngay số phòng → đi <b>thẳng</b> tới đó, không dò từng cửa.</p>
-
-  <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> Tra cứu theo KHÓA (tên, id, từ) trong tập dữ liệu lớn mà không phải dò từng phần tử.</div>
-    <div><span class="wt">❌ Không đánh số phòng:</span> phải gõ TỪNG phòng dọc hành lang tới khi trúng — O(n).</div>
-    <div><span class="wt">💡 Ý tưởng:</span> hàm băm biến tên khách thành 1 <b>SỐ PHÒNG</b> cố định; nếu 2 khách trùng phòng (va chạm) thì ở CHUNG (chaining).</div>
+  <div class="k-noren">
+    <div class="k-eyebrow">Trạm 3 · Cấu trúc dữ liệu</div>
+    <h1>Hash Table<br><span class="accent">= Lễ tân khách sạn 🛎️</span></h1>
+    <p class="sub2">Khách tới → lễ tân <b>tính ngay</b> số phòng → đi thẳng tới đó, không dò từng cửa. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
   </div>
 
-  <div class="viewtoggle" id="viewtoggle">
-    <button class="vt-btn active" data-view="theme">🛎️ Xem theo chủ đề</button>
-    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-  </div>
+  <div id="toolbox"></div>
 
-  <div id="themeView">
-    <div class="stage">
-      <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem 3 vị khách check-in — và chuyện gì xảy ra khi 2 người trùng phòng.</div>
-      <div class="row" style="margin-top:14px;justify-content:space-between">
-        <button class="play-btn" id="bPlay">▶ Play</button>
-        <div class="side-controls">
-          <button id="bReset2">↺ Reset</button>
-        </div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">01</span> Vì sao cần bảng băm?</h2>
+    <div class="k-menu">
+      <div class="dish problem">
+        <div class="ic">🎯</div>
+        <h3>Bài toán</h3>
+        <p>Tra cứu theo <b>KHÓA</b> (tên, id, từ) trong tập dữ liệu lớn mà không phải dò từng phần tử.</p>
+      </div>
+      <div class="dish bad">
+        <div class="ic">❌</div>
+        <h3>Không đánh số phòng thì sao?</h3>
+        <p>Phải gõ <b>TỪNG</b> phòng dọc hành lang tới khi trúng — chậm dần theo số khách, <b>O(n)</b>.</p>
+      </div>
+      <div class="dish idea">
+        <div class="ic">💡</div>
+        <h3>Ý tưởng</h3>
+        <p>Hàm băm biến tên khách thành 1 <b>SỐ PHÒNG</b> cố định; nếu 2 khách trùng phòng (va chạm) thì ở <b>CHUNG</b> (chaining).</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="techView" style="display:none">
-    <div class="wrap">
-      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-        <div class="code-title">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
-        <div class="code" id="code"></div></div></div>
-      <div class="col-viz">
-        <div class="card"><h3>Bảng băm (M = 8 ô, chaining)</h3>
-          <svg id="svg" viewBox="0 0 560 330" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="legend">Ô = chỉ số bucket · vòng tròn nối tiếp = danh sách liên kết (chaining) trong ô đó</div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">02</span> Từ điển khách sạn ↔ khoa học máy tính</h2>
+    <div class="k-map">
+      <div class="k-chip"><span class="em">🏨</span><div class="t"><b>Khách sạn N phòng</b>mảng cố định <code>table[M]</code></div></div>
+      <div class="k-chip"><span class="em">🛎️</span><div class="t"><b>Lễ tân tính số phòng</b>hàm băm <code>hash(key)</code></div></div>
+      <div class="k-chip"><span class="em">🙋</span><div class="t"><b>2 khách trùng phòng</b>va chạm (collision)</div></div>
+      <div class="k-chip"><span class="em">🛏️</span><div class="t"><b>Ở chung phòng</b>nối chain (chaining)</div></div>
+      <div class="k-chip"><span class="em">📋</span><div class="t"><b>Sổ khách trong phòng</b>linked list tại bucket</div></div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">03</span> Chạy thử ngay tại quầy lễ tân</h2>
+
+    <div class="viewtoggle" id="viewtoggle">
+      <button class="vt-btn active" data-view="theme">🛎️ Xem theo chủ đề</button>
+      <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+    </div>
+
+    <div id="themeView">
+      <div class="k-main">
+        <div class="tray"><div class="bar"><span class="dot" style="background:#EE6F57"></span><span class="dot" style="background:#D9A441"></span><span class="dot" style="background:#6E9A50"></span>&nbsp;hotel.js</div>
+          <div class="code-title" style="padding:10px 18px 0">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
+          <div class="code" id="code"></div>
         </div>
-        <div class="card"><h3>Điều khiển thủ công</h3>
-          <div class="row">
-            <button id="bMinh">Chèn 'Minh'</button>
-            <button id="bAn">Chèn 'An'</button>
-            <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
-            <button id="bReset" class="ghost">↺ Reset</button>
+        <div class="k-scene">
+          <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="ticker" id="narr">Bấm ▶ Play để xem 3 vị khách check-in — và chuyện gì xảy ra khi 2 người trùng phòng.</div>
+          <div class="k-controls">
+            <button class="play-btn" id="bPlay">▶ Play</button>
+            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
           </div>
         </div>
-        <div class="card"><h3>Tham khảo · 2 phe xử lý va chạm</h3>
-          <div style="overflow-x:auto"><table class="summary">
-            <tr><th></th><th>Chaining (Java HashMap)</th><th>Open Addressing (Python dict)</th></tr>
-            <tr><td><b>Khi đụng</b></td><td>Nối thêm vào list của ô</td><td>Dò ô trống kế tiếp (probing)</td></tr>
-            <tr><td><b>Ưu điểm</b></td><td>Đơn giản, chịu tải cao, xóa dễ</td><td>Liền mảng, cache-friendly</td></tr>
-            <tr><td><b>Nhược điểm</b></td><td>Tốn con trỏ, hại cache</td><td>Nhạy tải (resize ~0.7), xóa phức tạp</td></tr>
-          </table></div>
-          <div class="legend" style="margin-top:9px"><b>3 tầng hàm băm:</b></div>
-          <div style="overflow-x:auto"><table class="summary">
-            <tr><th>Tầng</th><th>Công thức</th><th>Đặc điểm</th><th>Dùng bởi</th></tr>
-            <tr><td>« ngây thơ »</td><td>h = k % m</td><td>đơn giản; m sai (lũy thừa 2) → cụm</td><td>nền tảng, textbook</td></tr>
-            <tr><td>« khôn »</td><td>h = ⌊m·frac(k·A)⌋</td><td>trộn bit đều, ít nhạy m</td><td>Rust hashbrown</td></tr>
-            <tr><td>« hoang tưởng »</td><td>key+seed → crypto</td><td>chống DoS, chậm nhất</td><td>Python, Rust default</td></tr>
-          </table></div>
-          <div class="legend" style="margin-top:9px"><b>So sánh ngôn ngữ:</b></div>
-          <div style="overflow-x:auto"><table class="summary">
-            <tr><th>Ngôn ngữ</th><th>Va chạm</th><th>Hàm băm</th><th>Vì sao</th></tr>
-            <tr><td>Python</td><td>Open addressing</td><td>SipHash (seed)</td><td>an toàn mặc định (chống DoS)</td></tr>
-            <tr><td>Java</td><td>Chaining + treeify</td><td>31·h+c → trộn bit</td><td>tương thích cũ; cây đỏ-đen cứu bucket dài</td></tr>
-            <tr><td>Rust</td><td>Open (SwissTable)</td><td>SipHash</td><td>an toàn mặc định + dò SIMD siêu nhanh</td></tr>
-          </table></div>
+      </div>
+    </div>
+
+    <div id="techView" style="display:none">
+      <div class="wrap">
+        <div class="col-viz">
+          <div class="card"><h3>Bảng băm (M = 8 ô, chaining)</h3>
+            <svg id="svg" viewBox="0 0 560 330" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="legend">Ô = chỉ số bucket · vòng tròn nối tiếp = danh sách liên kết (chaining) trong ô đó</div>
+          </div>
+          <div class="card"><h3>Điều khiển thủ công</h3>
+            <div class="row">
+              <button id="bMinh">Chèn 'Minh'</button>
+              <button id="bAn">Chèn 'An'</button>
+              <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
+              <button id="bReset" class="ghost">↺ Reset</button>
+            </div>
+          </div>
+          <div class="card"><h3>Tham khảo · 2 phe xử lý va chạm</h3>
+            <div style="overflow-x:auto"><table class="summary">
+              <tr><th></th><th>Chaining (Java HashMap)</th><th>Open Addressing (Python dict)</th></tr>
+              <tr><td><b>Khi đụng</b></td><td>Nối thêm vào list của ô</td><td>Dò ô trống kế tiếp (probing)</td></tr>
+              <tr><td><b>Ưu điểm</b></td><td>Đơn giản, chịu tải cao, xóa dễ</td><td>Liền mảng, cache-friendly</td></tr>
+              <tr><td><b>Nhược điểm</b></td><td>Tốn con trỏ, hại cache</td><td>Nhạy tải (resize ~0.7), xóa phức tạp</td></tr>
+            </table></div>
+            <div class="legend" style="margin-top:9px"><b>3 tầng hàm băm:</b></div>
+            <div style="overflow-x:auto"><table class="summary">
+              <tr><th>Tầng</th><th>Công thức</th><th>Đặc điểm</th><th>Dùng bởi</th></tr>
+              <tr><td>« ngây thơ »</td><td>h = k % m</td><td>đơn giản; m sai (lũy thừa 2) → cụm</td><td>nền tảng, textbook</td></tr>
+              <tr><td>« khôn »</td><td>h = ⌊m·frac(k·A)⌋</td><td>trộn bit đều, ít nhạy m</td><td>Rust hashbrown</td></tr>
+              <tr><td>« hoang tưởng »</td><td>key+seed → crypto</td><td>chống DoS, chậm nhất</td><td>Python, Rust default</td></tr>
+            </table></div>
+            <div class="legend" style="margin-top:9px"><b>So sánh ngôn ngữ:</b></div>
+            <div style="overflow-x:auto"><table class="summary">
+              <tr><th>Ngôn ngữ</th><th>Va chạm</th><th>Hàm băm</th><th>Vì sao</th></tr>
+              <tr><td>Python</td><td>Open addressing</td><td>SipHash (seed)</td><td>an toàn mặc định (chống DoS)</td></tr>
+              <tr><td>Java</td><td>Chaining + treeify</td><td>31·h+c → trộn bit</td><td>tương thích cũ; cây đỏ-đen cứu bucket dài</td></tr>
+              <tr><td>Rust</td><td>Open (SwissTable)</td><td>SipHash</td><td>an toàn mặc định + dò SIMD siêu nhanh</td></tr>
+            </table></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="quiz" id="quiz"><div class="q">❓ Hai khóa khác nhau băm ra CÙNG một ô — đó là...?</div>
-    <button data-a="bug">Lỗi hiếm khi xảy ra</button>
-    <button data-a="onlybad">Chỉ xảy ra nếu hàm băm viết sai</button>
-    <button data-a="certain">Chuyện chắc chắn xảy ra (nghịch lý ngày sinh)</button>
-    <div class="fb" id="quizFb"></div>
-  </div>
+  <section class="k-section">
+    <div class="k-quiz">
+      <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho quầy lễ tân</h2>
+      <div class="q" id="quiz">Hai khóa khác nhau băm ra CÙNG một ô — đó là...?
+        <div class="row" style="margin-top:10px">
+          <button data-a="bug">Lỗi hiếm khi xảy ra</button>
+          <button data-a="onlybad">Chỉ xảy ra nếu hàm băm viết sai</button>
+          <button data-a="certain">Chuyện chắc chắn xảy ra (nghịch lý ngày sinh)</button>
+        </div>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="k-footer">🏮 Trạm 3 · Hash Table — hẹn gặp lại ở trạm kế tiếp.</footer>
+</div>
 
 <script src="common.js"></script>
 <script>

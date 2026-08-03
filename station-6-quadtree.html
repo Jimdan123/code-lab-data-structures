@@ -1,80 +1,210 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Lab · Quadtree</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trạm 6 · Quadtree · Bản đồ Ghim vị trí</title>
 <link rel="stylesheet" href="style.css">
-<style>:root{--accent:#1565C0;}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rice:#FBF5E9; --tatami:#F1E7D2; --nori:#1B2420;
+    --indigo:#2C4066; --indigo-deep:#22314E;
+    --salmon:#EE6F57; --wasabi:#6E9A50; --wasabi-soft:#E4EED9;
+    --soy:#4A3A2A; --soy-light:#8A7660;
+    --lacquer:#C0442F; --gold:#D9A441;
+    --accent:#1565C0;
+    --radius:18px; --shadow:0 10px 30px rgba(43,38,28,.10);
+  }
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--rice);color:var(--soy);}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:radial-gradient(rgba(74,58,42,.05) 1px, transparent 1px);background-size:22px 22px;
+  }
+  .k-wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto 40px;}
+
+  .k-noren{position:relative;margin:-20px -22px 22px;background:linear-gradient(180deg,var(--indigo-deep),var(--indigo));color:#F6F1E4;padding:36px 20px 50px;text-align:center;}
+  .k-noren::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:28px;
+    background-image:radial-gradient(circle at 14px 0, var(--indigo) 14px, transparent 15px);background-size:28px 28px;background-repeat:repeat-x;}
+  .k-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+    border:1px solid rgba(217,164,65,.5);border-radius:999px;padding:4px 13px;margin-bottom:12px;}
+  .k-noren h1{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(26px,4vw,42px);line-height:1.15;}
+  .k-noren h1 .accent{color:#FFB3A0;}
+  .k-noren .sub2{max-width:620px;margin:10px auto 0;color:#D8DEEC;font-size:14.5px;}
+  .k-noren .sub2 b{color:#fff;}
+
+  #toolbox{margin:18px 0 0;}
+
+  .k-h2{font-family:'Baloo 2',cursive;font-weight:700;font-size:21px;color:var(--indigo);display:flex;align-items:center;gap:9px;margin:0 0 13px;}
+  .k-h2 .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;background:var(--indigo);color:#F6F1E4;border-radius:6px;padding:3px 8px;letter-spacing:.08em;}
+  .k-section{margin-top:36px;}
+
+  .k-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:900px){.k-menu{grid-template-columns:1fr;}}
+  .dish{background:#fff;border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);border-top:5px solid var(--card-c,var(--indigo));}
+  .dish .ic{font-size:24px;}
+  .dish h3{font-family:'Baloo 2',cursive;font-size:16px;margin:6px 0 4px;color:var(--card-c,var(--indigo));}
+  .dish p{font-size:13.5px;color:var(--soy);margin:0;}
+  .dish p b{color:var(--card-c);}
+  .dish.problem{--card-c:var(--lacquer);}
+  .dish.bad{--card-c:#A0522D;}
+  .dish.idea{--card-c:var(--wasabi);}
+
+  .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
+  .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
+  .k-chip .em{font-size:22px;}
+  .k-chip .t{font-size:12.5px;}
+  .k-chip .t b{display:block;color:var(--indigo);font-size:13px;}
+  .k-chip .t code{font-family:'JetBrains Mono',monospace;background:#fff;border-radius:5px;padding:1px 6px;font-size:11.5px;color:var(--lacquer);}
+
+  .viewtoggle{margin-top:6px;}
+  .k-main{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start;}
+  @media(max-width:980px){.k-main{grid-template-columns:1fr;}}
+
+  .tray{background:var(--nori);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .tray .bar{display:flex;align-items:center;gap:8px;background:#121a17;padding:11px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#9FB8A8;letter-spacing:.06em;}
+  .tray .bar .dot{width:9px;height:9px;border-radius:50%;}
+  .tray .code{background:transparent;padding:14px 18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;}
+  .tray .cl{color:#E9EFE8;}
+  .tray .cl .kw{color:#F2A7B3;} .tray .cl .fn{color:#F5C97B;} .tray .cl .cm{color:#7E9488;font-style:italic;} .tray .cl .st{color:#A8D5A2;}
+  .tray .cl.hl{background:#324237;border-left-color:var(--gold);}
+  .tray .code-title{color:#8ea0b8;}
+
+  .k-scene{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+
+  .ticker{margin:16px auto 0;max-width:560px;background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13.5px;min-height:20px;}
+  .ticker b{color:var(--indigo);}
+
+  .k-controls{display:flex;flex-wrap:wrap;gap:9px;justify-content:space-between;align-items:center;margin-top:16px;}
+  .k-controls .play-btn{font-family:'Baloo 2',cursive;}
+  .k-side{display:flex;gap:8px;}
+  .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
+  .k-side button:hover{background:var(--indigo);color:#fff;}
+
+  .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
+  .k-quiz button{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-family:'Be Vietnam Pro',sans-serif;font-weight:700;border-radius:10px;padding:8px 14px;}
+  .k-quiz .fb{border-radius:12px;padding:12px 15px;font-size:13.5px;background:#fff;border-left:5px solid var(--wasabi);}
+  .k-quiz .fb.no{border-left-color:var(--lacquer);}
+
+  footer.k-footer{margin-top:50px;text-align:center;font-size:12.5px;color:var(--soy-light);}
+</style>
 </head>
 <body>
-  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
-  <div class="toolbox" id="toolbox"></div>
+<div class="k-wrap">
 
-  <div class="station-h">🗺️ Trạm 6 · Bản đồ Ghim vị trí <span style="color:var(--muted);font-weight:600">(quadtree)</span></div>
-  <p class="station-s">Vùng đông ghim tự chia nhỏ để tra cứu nhanh; vùng thưa vẫn giữ nguyên 1 ô lớn.</p>
-
-  <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> 1 triệu ghim trên bản đồ, phải trả lời "ghim nào trong khung nhìn?" MỖI khung hình (60 lần/giây).</div>
-    <div><span class="wt">❌ Quét thẳng:</span> kiểm tra từng ghim có trong khung không → hàng chục triệu phép so/giây.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> chia bản đồ thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</div>
+  <div class="k-noren">
+    <div class="k-eyebrow">Trạm 6 · Cấu trúc dữ liệu</div>
+    <h1>Quadtree<br><span class="accent">= Bản đồ ghim vị trí 🗺️</span></h1>
+    <p class="sub2">Vùng đông ghim tự chia nhỏ để tra cứu nhanh; vùng thưa vẫn giữ nguyên 1 ô lớn. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
   </div>
 
-  <div class="viewtoggle" id="viewtoggle">
-    <button class="vt-btn active" data-view="theme">🗺️ Xem theo chủ đề</button>
-    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-  </div>
+  <div id="toolbox"></div>
 
-  <div id="themeView">
-    <div class="stage">
-      <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem người dùng thả ghim khắp thành phố — và chuyện gì xảy ra khi nhiều đơn trùng một địa chỉ.</div>
-      <div class="row" style="margin-top:14px;justify-content:space-between">
-        <button class="play-btn" id="bPlay">▶ Play</button>
-        <div class="side-controls">
-          <button id="bReset2">↺ Reset</button>
-        </div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">01</span> Vì sao cần quadtree?</h2>
+    <div class="k-menu">
+      <div class="dish problem">
+        <div class="ic">🎯</div>
+        <h3>Bài toán</h3>
+        <p>1 triệu ghim trên bản đồ, phải trả lời "ghim nào trong khung nhìn?" <b>MỖI khung hình</b> (60 lần/giây).</p>
+      </div>
+      <div class="dish bad">
+        <div class="ic">❌</div>
+        <h3>Quét thẳng thì sao?</h3>
+        <p>Kiểm tra từng ghim có trong khung không → hàng chục triệu phép so/giây.</p>
+      </div>
+      <div class="dish idea">
+        <div class="ic">💡</div>
+        <h3>Ý tưởng</h3>
+        <p>Chia bản đồ thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="techView" style="display:none">
-    <div class="wrap">
-      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-        <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
-        <div class="code" id="code"></div></div></div>
-      <div class="col-viz">
-        <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
-          <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">02</span> Từ điển bản đồ ↔ khoa học máy tính</h2>
+    <div class="k-map">
+      <div class="k-chip"><span class="em">🗺️</span><div class="t"><b>Bản đồ</b>node gốc bao trọn không gian</div></div>
+      <div class="k-chip"><span class="em">📍</span><div class="t"><b>Ghim vị trí</b>điểm (point) được chèn</div></div>
+      <div class="k-chip"><span class="em">✂️</span><div class="t"><b>Chia 4 góc</b><code>subdivide()</code> → NW/NE/SW/SE</div></div>
+      <div class="k-chip"><span class="em">🧱</span><div class="t"><b>Giới hạn chẻ</b><code>MAX_DEPTH</code></div></div>
+      <div class="k-chip"><span class="em">🔍</span><div class="t"><b>Cắt cả nhánh không chạm</b>tăng tốc truy vấn vùng</div></div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">03</span> Thả ghim thử ngay</h2>
+
+    <div class="viewtoggle" id="viewtoggle">
+      <button class="vt-btn active" data-view="theme">🗺️ Xem theo chủ đề</button>
+      <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+    </div>
+
+    <div id="themeView">
+      <div class="k-main">
+        <div class="tray"><div class="bar"><span class="dot" style="background:#EE6F57"></span><span class="dot" style="background:#D9A441"></span><span class="dot" style="background:#6E9A50"></span>&nbsp;map.js</div>
+          <div class="code-title" style="padding:10px 18px 0">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
+          <div class="code" id="code"></div>
         </div>
-        <div class="card"><h3>Điều khiển thủ công</h3>
-          <div class="row">
-            <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
-            <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
-            <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
-            <button id="bReset" class="ghost">↺ Reset</button>
+        <div class="k-scene">
+          <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="ticker" id="narr">Bấm ▶ Play để xem người dùng thả ghim khắp thành phố — và chuyện gì xảy ra khi nhiều đơn trùng một địa chỉ.</div>
+          <div class="k-controls">
+            <button class="play-btn" id="bPlay">▶ Play</button>
+            <div class="k-side"><button id="bReset2">↺ Reset</button></div>
           </div>
         </div>
-        <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
-          <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm.</div>
-          <table class="summary" style="margin-top:9px">
-            <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
-            <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
-            <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
-          </table>
-          <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí.</div>
+      </div>
+    </div>
+
+    <div id="techView" style="display:none">
+      <div class="wrap">
+        <div class="col-viz">
+          <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
+            <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
+          </div>
+          <div class="card"><h3>Điều khiển thủ công</h3>
+            <div class="row">
+              <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
+              <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
+              <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
+              <button id="bReset" class="ghost">↺ Reset</button>
+            </div>
+          </div>
+          <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
+            <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm.</div>
+            <table class="summary" style="margin-top:9px">
+              <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
+              <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
+              <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
+            </table>
+            <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí.</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="quiz" id="quiz"><div class="q">❓ Nếu ô đã đủ CAP nhưng đã đạt MAX_DEPTH, chèn thêm điểm rơi vào đó thì sao?</div>
-    <button data-a="split">Chẻ tiếp thành 4 ô nhỏ hơn</button>
-    <button data-a="error">Báo lỗi, từ chối chèn</button>
-    <button data-a="keep">Ô giữ điểm dư, KHÔNG chẻ tiếp</button>
-    <div class="fb" id="quizFb"></div>
-  </div>
+  <section class="k-section">
+    <div class="k-quiz">
+      <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho bản đồ</h2>
+      <div class="q" id="quiz">Nếu ô đã đủ CAP nhưng đã đạt MAX_DEPTH, chèn thêm điểm rơi vào đó thì sao?
+        <div class="row" style="margin-top:10px">
+          <button data-a="split">Chẻ tiếp thành 4 ô nhỏ hơn</button>
+          <button data-a="error">Báo lỗi, từ chối chèn</button>
+          <button data-a="keep">Ô giữ điểm dư, KHÔNG chẻ tiếp</button>
+        </div>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="k-footer">🏮 Trạm 6 · Quadtree — hết vòng 6 trạm, hẹn gặp lại!</footer>
+</div>
 
 <script src="common.js"></script>
 <script>
