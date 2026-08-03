@@ -82,10 +82,17 @@
     </div>
   </div>
 
+  <div class="quiz" id="quiz"><div class="q">❓ Hai khóa khác nhau băm ra CÙNG một ô — đó là...?</div>
+    <button data-a="bug">Lỗi hiếm khi xảy ra</button>
+    <button data-a="onlybad">Chỉ xảy ra nếu hàm băm viết sai</button>
+    <button data-a="certain">Chuyện chắc chắn xảy ra (nghịch lý ngày sinh)</button>
+    <div class="fb" id="quizFb"></div>
+  </div>
+
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
 renderToolbox('hash');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -203,6 +210,12 @@ $('bMinh').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Minh')
 $('bAn').onclick=async()=>{ if(busy)return; lock(true); await doInsert('An'); lock(false); };
 $('bMai').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Mai'); lock(false); };
 $('bReset').onclick=()=>{ if(busy)return; table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; draw(); hl(); narrate('Đã reset.'); };
+
+initQuiz('quiz','hash',{
+  bug:{ok:false,msg:'Sai — nó không hiếm. Với đủ số key, va chạm gần như chắc chắn xảy ra (nghịch lý ngày sinh: chỉ 23 người đã >50% trùng ngày sinh).'},
+  onlybad:{ok:false,msg:'Sai — kể cả hàm băm TỐT vẫn va chạm, vì hữu hạn ô mà vô hạn khóa có thể.'},
+  certain:{ok:true,msg:'Đúng! Vô hạn key ép vào hữu hạn ô → chắc chắn có 2 key rơi cùng ô. Chaining/open addressing là cách xử lý, không phải cách "tránh".'}
+});
 
 draw();
 })();

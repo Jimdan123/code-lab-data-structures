@@ -1,67 +1,238 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Lab · Circular Buffer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trạm 1 · Circular Buffer · Băng chuyền Sushi</title>
 <link rel="stylesheet" href="style.css">
-<style>:root{--accent:#C0392B;}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rice:#FBF5E9; --tatami:#F1E7D2; --nori:#1B2420;
+    --indigo:#2C4066; --indigo-deep:#22314E;
+    --salmon:#EE6F57; --wasabi:#6E9A50; --wasabi-soft:#E4EED9;
+    --soy:#4A3A2A; --soy-light:#8A7660;
+    --lacquer:#C0442F; --gold:#D9A441;
+    --accent:#C0442F;
+    --radius:18px; --shadow:0 10px 30px rgba(43,38,28,.10);
+  }
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--rice);color:var(--soy);}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background-image:radial-gradient(rgba(74,58,42,.05) 1px, transparent 1px);background-size:22px 22px;
+  }
+  .k-wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto 40px;}
+
+  .k-noren{position:relative;margin:-20px -22px 22px;background:linear-gradient(180deg,var(--indigo-deep),var(--indigo));color:#F6F1E4;padding:36px 20px 50px;text-align:center;}
+  .k-noren::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:28px;
+    background-image:radial-gradient(circle at 14px 0, var(--indigo) 14px, transparent 15px);background-size:28px 28px;background-repeat:repeat-x;}
+  .k-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+    border:1px solid rgba(217,164,65,.5);border-radius:999px;padding:4px 13px;margin-bottom:12px;}
+  .k-noren h1{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(26px,4vw,42px);line-height:1.15;}
+  .k-noren h1 .accent{color:#FFB3A0;}
+  .k-noren .sub2{max-width:620px;margin:10px auto 0;color:#D8DEEC;font-size:14.5px;}
+  .k-noren .sub2 b{color:#fff;}
+
+  #toolbox{margin:18px 0 0;}
+
+  .k-h2{font-family:'Baloo 2',cursive;font-weight:700;font-size:21px;color:var(--indigo);display:flex;align-items:center;gap:9px;margin:0 0 13px;}
+  .k-h2 .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;background:var(--indigo);color:#F6F1E4;border-radius:6px;padding:3px 8px;letter-spacing:.08em;}
+  .k-section{margin-top:36px;}
+
+  .k-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:900px){.k-menu{grid-template-columns:1fr;}}
+  .dish{background:#fff;border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);border-top:5px solid var(--card-c,var(--indigo));}
+  .dish .ic{font-size:24px;}
+  .dish h3{font-family:'Baloo 2',cursive;font-size:16px;margin:6px 0 4px;color:var(--card-c,var(--indigo));}
+  .dish p{font-size:13.5px;color:var(--soy);margin:0;}
+  .dish p b{color:var(--card-c);}
+  .dish.problem{--card-c:var(--lacquer);}
+  .dish.bad{--card-c:#A0522D;}
+  .dish.idea{--card-c:var(--wasabi);}
+
+  .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
+  .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
+  .k-chip .em{font-size:22px;}
+  .k-chip .t{font-size:12.5px;}
+  .k-chip .t b{display:block;color:var(--indigo);font-size:13px;}
+  .k-chip .t code{font-family:'JetBrains Mono',monospace;background:#fff;border-radius:5px;padding:1px 6px;font-size:11.5px;color:var(--lacquer);}
+
+  .viewtoggle{margin-top:6px;}
+  .k-main{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start;}
+  @media(max-width:980px){.k-main{grid-template-columns:1fr;}}
+
+  .tray{background:var(--nori);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .tray .bar{display:flex;align-items:center;gap:8px;background:#121a17;padding:11px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#9FB8A8;letter-spacing:.06em;}
+  .tray .bar .dot{width:9px;height:9px;border-radius:50%;}
+  .tray .code{background:transparent;padding:14px 18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;}
+  .tray .cl{color:#E9EFE8;}
+  .tray .cl .kw{color:#F2A7B3;} .tray .cl .fn{color:#F5C97B;} .tray .cl .cm{color:#7E9488;font-style:italic;} .tray .cl .st{color:#A8D5A2;}
+  .tray .cl.hl{background:#324237;border-left-color:var(--gold);}
+  .tray .code-title{color:#8ea0b8;}
+
+  .belt-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+  .hud-board{max-width:220px;margin:0 auto 14px;text-align:center;background:var(--tatami);border-radius:14px;padding:9px 14px;}
+  .hud-board .cnt{font-family:'Baloo 2',cursive;font-weight:800;font-size:24px;color:var(--indigo);line-height:1.1;}
+  .hud-board .cnt small{font-size:14px;color:var(--soy-light);font-weight:700;}
+  .hud-board .state{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;border-radius:999px;padding:2px 9px;display:inline-block;margin-top:4px;background:#fff;color:var(--soy-light);}
+  .hud-board .state.full{background:var(--lacquer);color:#fff;}
+  .hud-board .state.emptyS{background:var(--indigo);color:#fff;}
+
+  .belt-stage{position:relative;width:100%;max-width:520px;aspect-ratio:1;margin:0 auto;}
+  .belt-track{position:absolute;inset:20%;border-radius:50%;border:12px solid var(--tatami);box-shadow:inset 0 0 0 2px #E0D3B8,0 0 0 2px #E0D3B8;}
+  .belt-dashes{position:absolute;inset:20%;border-radius:50%;border:2px dashed rgba(74,58,42,.3);}
+
+  .plate-slot{position:absolute;width:52px;height:52px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;
+    background:#FBF7EE;border:4px solid #D8CDB6;display:flex;align-items:center;justify-content:center;font-size:24px;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.06);transition:left .35s,top .35s,border-color .25s,background .25s,transform .25s;}
+  .plate-slot.occupied{background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.1);}
+  .plate-slot.flash{transform:translate(-50%,-50%) scale(1.22);box-shadow:0 0 0 6px rgba(110,154,80,.35),0 6px 14px rgba(0,0,0,.18);}
+  .plate-slot .idx-lbl{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--soy-light);}
+
+  .seat{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transition:left .35s,top .35s;text-align:center;font-size:26px;opacity:.55;}
+  .seat .chair{display:block;}
+  .seat.active{opacity:1;transform:translate(-50%,-50%) scale(1.28);filter:drop-shadow(0 4px 6px rgba(0,0,0,.2));}
+  .seat .flash-em{position:absolute;top:-14px;right:-10px;font-size:15px;opacity:0;transition:opacity .2s;}
+  .seat.active .flash-em{opacity:1;}
+
+  .chef{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:26px;transition:transform .2s;}
+  .chef.active{transform:translate(-50%,-50%) scale(1.3);filter:drop-shadow(0 3px 5px rgba(0,0,0,.25));}
+
+  .ticker{margin:16px auto 0;max-width:520px;background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13.5px;min-height:20px;}
+  .ticker b{color:var(--indigo);}
+
+  .k-controls{display:flex;flex-wrap:wrap;gap:9px;justify-content:space-between;align-items:center;margin-top:16px;}
+  .k-controls .play-btn{font-family:'Baloo 2',cursive;}
+  .k-side{display:flex;gap:8px;}
+  .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
+  .k-side button:hover{background:var(--indigo);color:#fff;}
+
+  .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
+  .k-quiz button{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-family:'Be Vietnam Pro',sans-serif;font-weight:700;border-radius:10px;padding:8px 14px;}
+  .k-quiz .fb{border-radius:12px;padding:12px 15px;font-size:13.5px;background:#fff;border-left:5px solid var(--wasabi);}
+  .k-quiz .fb.no{border-left-color:var(--lacquer);}
+
+  footer.k-footer{margin-top:50px;text-align:center;font-size:12.5px;color:var(--soy-light);}
+</style>
 </head>
 <body>
-  <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
-  <div class="toolbox" id="toolbox"></div>
+<div class="k-wrap">
 
-  <div class="station-h">🍣 Trạm 1 · Băng chuyền Sushi <span style="color:var(--muted);font-weight:600">(circular buffer)</span></div>
-  <p class="station-s">Chef bày đĩa, khách lấy đĩa — băng chuyền chỉ có <b>6 chỗ</b>, không phình to thêm.</p>
-
-  <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> Hàng đợi chạy liên tục (log, buffer mạng, băng chuyền) mà <b>không được cấp thêm bộ nhớ</b> mỗi lần có dữ liệu mới.</div>
-    <div><span class="wt">❌ Mảng thường:</span> đọc xong phải <b>dồn (shift)</b> cả mảng — chậm; hoặc cấp mảng mới mỗi lần đầy — tốn bộ nhớ.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> một mảng cố định; hai con trỏ tự <b>quay vòng</b> về đầu khi hết ô cuối.</div>
+  <div class="k-noren">
+    <div class="k-eyebrow">Trạm 1 · Cấu trúc dữ liệu</div>
+    <h1>Circular Buffer<br><span class="accent">= Băng chuyền sushi 🍣</span></h1>
+    <p class="sub2">Một mảng <b>N ô cố định</b>, hai con trỏ <b>w</b> (ghi) và <b>r</b> (đọc) — đi hết vòng thì tự <b>quay về đầu</b>. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
   </div>
 
-  <div class="viewtoggle" id="viewtoggle">
-    <button class="vt-btn active" data-view="theme">🍣 Xem theo chủ đề</button>
-    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-  </div>
+  <div id="toolbox"></div>
 
-  <div id="themeView">
-    <div class="stage">
-      <svg id="svgTheme" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem cả ngày ở quán sushi — sáng vắng, trưa đông, rồi vãn khách.</div>
-      <div class="row" style="margin-top:14px;justify-content:space-between">
-        <button class="play-btn" id="bPlay">▶ Play</button>
-        <div class="side-controls">
-          <button id="bReset">↺ Reset</button>
-        </div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">01</span> Vì sao cần bộ đệm vòng?</h2>
+    <div class="k-menu">
+      <div class="dish problem">
+        <div class="ic">🎯</div>
+        <h3>Bài toán</h3>
+        <p>Hàng đợi FIFO chạy <b>liên tục</b> (log, buffer mạng, băng chuyền…) nhưng <b>không được cấp thêm bộ nhớ</b> mỗi khi có dữ liệu mới.</p>
+      </div>
+      <div class="dish bad">
+        <div class="ic">🐌</div>
+        <h3>Mảng thường thì sao?</h3>
+        <p>Đọc xong phải <b>dồn (shift)</b> cả mảng — chậm; hoặc cấp mảng mới khi đầy — <b>tốn bộ nhớ</b>.</p>
+      </div>
+      <div class="dish idea">
+        <div class="ic">💡</div>
+        <h3>Ý tưởng</h3>
+        <p>Một vòng <b>N chỗ cố định</b>. Hai con trỏ <b>w</b>, <b>r</b> chạy quanh vòng, hết chỗ cuối thì <b>quay về đầu</b> nhờ <b>% N</b>.</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="techView" style="display:none">
-    <div class="wrap">
-      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-        <div class="code-title">// write() ghi ở w · read() đọc ở r · cả hai tự quay vòng</div>
-        <div class="code" id="code"></div></div></div>
-      <div class="col-viz">
-        <div class="card"><h3>Buffer <span id="statebadge"></span></h3>
-          <svg id="svgTech" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="legend"><b>w</b> = con trỏ GHI · <b>r</b> = con trỏ ĐỌC · <b>count</b> = số phần tử đang giữ</div>
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">02</span> Từ điển quán sushi ↔ khoa học máy tính</h2>
+    <div class="k-map">
+      <div class="k-chip"><span class="em">🛤️</span><div class="t"><b>Băng chuyền N chỗ</b>mảng cố định <code>buf[N]</code></div></div>
+      <div class="k-chip"><span class="em">🧑‍🍳</span><div class="t"><b>Bếp đặt đĩa</b>con trỏ ghi <code>w</code> → <code>write()</code></div></div>
+      <div class="k-chip"><span class="em">🥢</span><div class="t"><b>Khách gắp đĩa</b>con trỏ đọc <code>r</code> → <code>read()</code></div></div>
+      <div class="k-chip"><span class="em">🍽️</span><div class="t"><b>Số đĩa trên băng</b>biến đếm <code>count</code></div></div>
+      <div class="k-chip"><span class="em">🔁</span><div class="t"><b>Băng chạy hết vòng</b>quay đầu bằng <code>(i+1) % N</code></div></div>
+      <div class="k-chip"><span class="em">⏳</span><div class="t"><b>FIFO</b>đĩa đặt trước → ai đó gắp trước</div></div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">03</span> Chạy thử ngay tại quầy</h2>
+
+    <div class="viewtoggle" id="viewtoggle">
+      <button class="vt-btn active" data-view="theme">🍣 Xem theo chủ đề</button>
+      <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+    </div>
+
+    <div id="themeView">
+      <div class="k-main">
+        <div class="tray"><div class="bar"><span class="dot" style="background:#EE6F57"></span><span class="dot" style="background:#D9A441"></span><span class="dot" style="background:#6E9A50"></span>&nbsp;buffer.js</div>
+          <div class="code-title" style="padding:10px 18px 0">// write() ghi ở w · read() đọc ở r · cả hai tự quay vòng</div>
+          <div class="code" id="code"></div>
         </div>
-        <div class="card"><h3>Điều khiển thủ công</h3>
-          <div class="row">
-            <button id="bWrite">✍️ Ghi 1</button>
-            <button id="bRead">📖 Đọc 1</button>
+        <div class="belt-card">
+          <div class="hud-board">
+            <div class="cnt"><span id="cntNum">0</span><small> / 6 đĩa</small></div>
+            <div class="state" id="hudState">BĂNG TRỐNG</div>
+          </div>
+          <div class="belt-stage" id="beltStage">
+            <div class="belt-track"></div>
+            <div class="belt-dashes"></div>
+          </div>
+          <div class="ticker" id="narr">Bấm ▶ Play để xem cả ngày ở quán sushi — sáng vắng, trưa đông, rồi vãn khách. Chú ý: quán có <b>2 đầu bếp</b> đứng bếp giữa và <b>6 khách</b> ngồi quanh băng, không phải chỉ 1 người!</div>
+          <div class="k-controls">
+            <button class="play-btn" id="bPlay">▶ Play</button>
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <div id="techView" style="display:none">
+      <div class="wrap">
+        <div class="col-viz">
+          <div class="card"><h3>Buffer <span id="statebadge"></span></h3>
+            <svg id="svgTech" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="legend"><b>w</b> = con trỏ GHI · <b>r</b> = con trỏ ĐỌC · <b>count</b> = số phần tử đang giữ</div>
+          </div>
+          <div class="card"><h3>Điều khiển thủ công</h3>
+            <div class="row">
+              <button id="bWrite">✍️ Ghi 1</button>
+              <button id="bRead">📖 Đọc 1</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <div class="k-quiz">
+      <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho cả quán</h2>
+      <div class="q" id="quiz">Nếu <b>w</b> và <b>r</b> đang ở CÙNG một ô, băng chuyền đang ĐẦY hay RỖNG?
+        <div class="row" style="margin-top:10px">
+          <button data-a="full">Chắc chắn ĐẦY</button>
+          <button data-a="empty">Chắc chắn RỖNG</button>
+          <button data-a="unknown">Không thể biết chỉ từ w, r</button>
+        </div>
+        <div class="fb" id="quizFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="k-footer">🏮 Trạm 1 · Circular Buffer — hẹn gặp lại ở trạm kế tiếp.</footer>
+</div>
 
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz} = CL;
 renderToolbox('circular');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -89,18 +260,22 @@ const CODE=[
 renderCode('code', CODE);
 const L={wSig:4, wFull:5, wSet:6, wAdv:7, wInc:8, wRet:9, rSig:12, rEmpty:13, rGet:14, rAdv:15, rDec:16, rRet:17};
 
-const N=6, CX=240, CY=190, RAD=130, CELLR=24;
-let buf=new Array(N).fill(null), w=0, r=0, count=0, busy=false;
-let flashCell=null, flashFull=false, flashEmpty=false;
+const N=6;
+const CHEFS=['🧑‍🍳','👩‍🍳'];
+const SEATS=['🧑','👩','🧓','👨‍🦱','👵','🧔'];
+const PLATE_RIMS=['#EE6F57','#D9A441','#6E9A50','#2C4066'];
+let buf=new Array(N).fill(null), plateColor=new Array(N).fill(null), w=0, r=0, count=0, busy=false;
+let flashCell=null, flashFull=false, flashEmpty=false, activeChef=null, activeSeat=null, writeCount=0;
 
+/* ---- Technical view (unchanged abstract SVG) ---- */
+const CX=240, CY=190, RAD=130, CELLR=24;
 function angleOf(i){ return -Math.PI/2 + i*(2*Math.PI/N); }
 function cellPos(i){ const a=angleOf(i); return {x:CX+RAD*Math.cos(a), y:CY+RAD*Math.sin(a), a}; }
 function labelPos(i, sign){ const {a}=cellPos(i); const ox=CX+(RAD+42)*Math.cos(a), oy=CY+(RAD+42)*Math.sin(a);
   const px=-Math.sin(a), py=Math.cos(a); return {x:ox+sign*17*px, y:oy+sign*17*py}; }
-
-/* ---- Technical view (abstract buffer + pointers) ---- */
 function drawTech(){
   const el=$('svgTech'); if(!el) return; el.innerHTML='';
+  const SVG=CL.svg;
   el.appendChild(SVG('circle',{cx:CX,cy:CY,r:RAD,fill:'none',stroke:'#DDE2E9','stroke-width':2,'stroke-dasharray':'4 4'}));
   for(let i=0;i<N;i++){
     const {x,y}=cellPos(i);
@@ -125,30 +300,55 @@ function setBadge(kind){
   b.innerHTML = kind==='full' ? '<span class="badge warn">ĐẦY</span>' : kind==='empty' ? '<span class="badge info">RỖNG</span>' : '';
 }
 
-/* ---- Theme view (sushi belt) ---- */
-let themeBadge='';
-function drawTheme(){
-  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
-  el.appendChild(SVG('circle',{cx:CX,cy:CY,r:RAD,fill:'none',stroke:'#E8C9A0','stroke-width':10,'stroke-dasharray':'2 26','stroke-linecap':'round'}));
-  for(let i=0;i<N;i++){
-    const {x,y}=cellPos(i);
-    const occupied = buf[i]!=null;
-    const isFlash = (i===flashCell);
-    const g=SVG('g',{transform:'translate('+x+','+y+')'});
-    g.appendChild(SVG('circle',{r:26, fill: occupied?'#FFF6E9':'#FBEFE3', stroke: isFlash?'#5FA05F':'#E8C9A0', 'stroke-width': isFlash?3:2}));
-    const t=SVG('text',{x:0,y:8,'text-anchor':'middle','font-size':22}); t.textContent = occupied ? buf[i] : '';
-    g.appendChild(t);
-    el.appendChild(g);
-    if(i===w){ const sign=(w===r)?-1:0; const p=labelPos(w,sign);
-      const wt=SVG('text',{x:p.x,y:p.y,'text-anchor':'middle','font-size':22}); wt.textContent='🧑‍🍳'; el.appendChild(wt); }
-    if(i===r){ const sign=(w===r)?1:0; const p=labelPos(r,sign);
-      const rt=SVG('text',{x:p.x,y:p.y,'text-anchor':'middle','font-size':22}); rt.textContent='🧍'; el.appendChild(rt); }
-  }
-  const ct=SVG('text',{x:CX,y:CY-6,'text-anchor':'middle',fill:'var(--ink)','font-size':15,'font-weight':800}); ct.textContent=count+' / '+N+' đĩa';
-  el.appendChild(ct);
-  if(themeBadge){ const bt=SVG('text',{x:CX,y:CY+18,'text-anchor':'middle',fill: themeBadge==='ĐẦY'?'var(--red)':'var(--blue)','font-size':17,'font-weight':900}); bt.textContent=themeBadge; el.appendChild(bt); }
+/* ---- Theme view: realistic kaiten-zushi scene (DOM + CSS) ---- */
+const stage = $('beltStage');
+const plateEls=[], seatEls=[], chefEls=[];
+for(let i=0;i<N;i++){
+  const p=document.createElement('div'); p.className='plate-slot empty';
+  p.innerHTML='<span class="idx-lbl">['+i+']</span><span class="food"></span>';
+  stage.appendChild(p); plateEls.push(p);
 }
-function draw(){ drawTheme(); drawTech(); }
+for(let i=0;i<N;i++){
+  const s=document.createElement('div'); s.className='seat';
+  s.innerHTML='<span class="chair">'+SEATS[i]+'</span><span class="flash-em">🥢</span>';
+  stage.appendChild(s); seatEls.push(s);
+}
+for(let i=0;i<2;i++){
+  const c=document.createElement('div'); c.className='chef'; c.textContent=CHEFS[i];
+  stage.appendChild(c); chefEls.push(c);
+}
+function place(){
+  const rect = stage.getBoundingClientRect();
+  if(!rect.width) return;
+  const cx=rect.width/2, cy=rect.height/2;
+  const Rbelt = rect.width*0.30, Rseat = rect.width*0.485, Rchef = rect.width*0.11;
+  for(let i=0;i<N;i++){
+    const a=angleOf(i);
+    plateEls[i].style.left=(cx+Rbelt*Math.cos(a))+'px'; plateEls[i].style.top=(cy+Rbelt*Math.sin(a))+'px';
+    seatEls[i].style.left=(cx+Rseat*Math.cos(a))+'px'; seatEls[i].style.top=(cy+Rseat*Math.sin(a))+'px';
+  }
+  const chefAngles=[-Math.PI/2-0.55, -Math.PI/2+0.55];
+  chefEls.forEach((c,i)=>{ c.style.left=(cx+Rchef*Math.cos(chefAngles[i]))+'px'; c.style.top=(cy+Rchef*Math.sin(chefAngles[i]))+'px'; });
+}
+window.addEventListener('resize', place);
+
+function renderTheme(){
+  for(let i=0;i<N;i++){
+    const occupied = buf[i]!=null;
+    plateEls[i].classList.toggle('empty', !occupied);
+    plateEls[i].classList.toggle('occupied', occupied);
+    plateEls[i].classList.toggle('flash', i===flashCell);
+    plateEls[i].style.borderColor = occupied ? (plateColor[i]||'#D8CDB6') : '#D8CDB6';
+    plateEls[i].querySelector('.food').textContent = occupied ? buf[i] : '';
+  }
+  seatEls.forEach((s,i)=> s.classList.toggle('active', i===activeSeat));
+  chefEls.forEach((c,i)=> c.classList.toggle('active', i===activeChef));
+  $('cntNum').textContent = count;
+  const stateEl = $('hudState');
+  stateEl.className = 'state' + (count===N?' full':count===0?' emptyS':'');
+  stateEl.textContent = count===N ? 'ĐẦY' : count===0 ? 'TRỐNG' : 'ĐANG PHỤC VỤ';
+}
+function draw(){ renderTheme(); drawTech(); place(); }
 
 function lock(b){ busy=b; CL.lock(['bPlay','bReset','bWrite','bRead'], b); }
 
@@ -156,42 +356,48 @@ async function doWrite(val){
   hl(L.wSig); await nap(120);
   hl(L.wFull);
   if(count===N){
-    flashFull=true; setBadge('full'); themeBadge='ĐẦY'; draw();
-    narrate('<b style="color:var(--red)">ĐẦY</b> (count = N = '+N+') → chef <b>PHẢI CHỜ</b>, không bày đè lên đĩa chưa ai lấy.');
+    flashFull=true; setBadge('full'); draw();
+    narrate('<b style="color:var(--lacquer)">ĐẦY</b> (count = N = '+N+') → bếp <b>PHẢI CHỜ</b>, không bày đè lên đĩa chưa ai lấy.');
     await nap(700); flashFull=false; draw();
     return false;
   }
-  hl(L.wSet); buf[w]=val; flashCell=w; themeBadge=''; setBadge(''); draw();
-  narrate('Đặt <b>'+val+'</b> vào ô <b>w = '+w+'</b>.'); await nap(420);
+  buf[w]=val; plateColor[w]=PLATE_RIMS[writeCount%PLATE_RIMS.length]; activeChef=writeCount%2; writeCount++;
+  hl(L.wSet); flashCell=w; setBadge(''); draw();
+  narrate('Bếp '+CHEFS[activeChef]+' đặt <b>'+val+'</b> vào ô <b>w = '+w+'</b>.'); await nap(420);
   hl(L.wAdv);
   const wrapped=(w===N-1), oldW=w; w=(w+1)%N; draw();
-  narrate(wrapped ? 'w đi hết ô cuối ['+oldW+'] → <b style="color:var(--amber)">QUAY VỀ ô đầu</b> [0].' : 'w nhích sang ô kế: ['+oldW+'] → ['+w+'].');
+  narrate(wrapped ? 'w đi hết ô cuối ['+oldW+'] → <b style="color:var(--gold)">QUAY VỀ ô đầu</b> [0].' : 'w nhích sang ô kế: ['+oldW+'] → ['+w+'].');
   await nap(420);
   hl(L.wInc); count++; draw(); await nap(300);
-  hl(L.wRet); flashCell=null; draw();
+  hl(L.wRet); flashCell=null; activeChef=null; draw();
   return true;
 }
 async function doRead(){
   hl(L.rSig); await nap(120);
   hl(L.rEmpty);
   if(count===0){
-    flashEmpty=true; setBadge('empty'); themeBadge='TRỐNG'; draw();
-    narrate('<b style="color:var(--blue)">RỖNG</b> (count = 0) → chef chưa kịp bày, khách <b>phải ĐỢI</b>.');
+    flashEmpty=true; setBadge('empty'); draw();
+    narrate('<b style="color:var(--indigo)">RỖNG</b> (count = 0) → bếp chưa kịp bày, khách <b>phải ĐỢI</b>.');
     await nap(700); flashEmpty=false; draw();
     return null;
   }
-  hl(L.rGet); const val=buf[r]; flashCell=r; themeBadge=''; setBadge(''); draw();
-  narrate('Khách lấy <b>'+val+'</b> ở ô <b>r = '+r+'</b>.'); await nap(420);
-  buf[r]=null;
+  const val=buf[r]; activeSeat=r;
+  hl(L.rGet); flashCell=r; setBadge(''); draw();
+  narrate('Khách '+SEATS[r]+' ở ghế ['+r+'] gắp <b>'+val+'</b>.'); await nap(420);
+  buf[r]=null; plateColor[r]=null;
   hl(L.rAdv);
   const wrapped=(r===N-1), oldR=r; r=(r+1)%N; draw();
-  narrate(wrapped ? 'r đi hết ô cuối ['+oldR+'] → <b style="color:var(--amber)">QUAY VỀ ô đầu</b> [0].' : 'r nhích sang ô kế: ['+oldR+'] → ['+r+'].');
+  narrate(wrapped ? 'r đi hết ô cuối ['+oldR+'] → <b style="color:var(--gold)">QUAY VỀ ô đầu</b> [0].' : 'r nhích sang ô kế: ['+oldR+'] → ['+r+'].');
   await nap(420);
   hl(L.rDec); count--; draw(); await nap(300);
-  hl(L.rRet); flashCell=null; draw();
+  hl(L.rRet); flashCell=null; activeSeat=null; draw();
   return val;
 }
-function resetState(){ buf=new Array(N).fill(null); w=0; r=0; count=0; flashCell=null; flashFull=false; flashEmpty=false; themeBadge=''; setBadge(''); hl(); draw(); }
+function resetState(){
+  buf=new Array(N).fill(null); plateColor=new Array(N).fill(null); w=0; r=0; count=0; writeCount=0;
+  flashCell=null; flashFull=false; flashEmpty=false; activeChef=null; activeSeat=null;
+  setBadge(''); hl(); draw();
+}
 
 $('bWrite').onclick=async()=>{ if(busy)return; lock(true); await doWrite('🍣'); lock(false); };
 $('bRead').onclick=async()=>{ if(busy)return; lock(true); await doRead(); lock(false); };
@@ -199,22 +405,29 @@ $('bReset').onclick=()=>{ if(busy)return; resetState(); narrate('Đã reset. B�
 
 $('bPlay').onclick=async()=>{
   if(busy)return; lock(true); resetState();
-  narrate('🌅 Sáng sớm, quán vắng khách — chef tranh thủ bày sẵn cả băng chuyền…'); await nap(900);
+  narrate('🌅 Sáng sớm, quán vắng khách — <b>2 đầu bếp</b> tranh thủ bày sẵn cả băng chuyền…'); await nap(900);
   const morning=['🍣','🍣','🍤','🍳','🐟','🦀'];
   for(const f of morning) await doWrite(f);
-  narrate('📦 Băng chuyền ĐẦY cứng — chef phải dừng tay, chưa ai tới lấy cả.'); await nap(1400);
+  narrate('📦 Băng chuyền ĐẦY cứng — bếp phải dừng tay, khách chưa tới lấy cả.'); await nap(1400);
 
-  narrate('🍽️ Giờ trưa — khách ùn ùn kéo tới, lấy sạch từng đĩa…'); await nap(900);
+  narrate('🍽️ Giờ trưa — <b>6 khách ngồi quanh băng</b> lần lượt gắp sạch từng đĩa khi đĩa lướt qua chỗ mình…'); await nap(1000);
   for(let i=0;i<6;i++) await doRead();
-  narrate('🈳 Sạch trơn — băng chuyền TRỐNG. Nhìn kỹ: chef và khách đang đứng CÙNG một ô [0], y hệt lúc NÃY ĐẦY!'); await nap(1900);
-  narrate('👉 ĐẦY và RỖNG trông giống hệt nhau qua vị trí chef/khách — chỉ số đĩa (<b>count</b>) mới nói lên sự thật.'); await nap(1800);
+  narrate('🈳 Sạch trơn — băng chuyền TRỐNG. Nhìn kỹ: w và r cùng chỉ về ghế [0], y hệt lúc NÃY ĐẦY!'); await nap(1900);
+  narrate('👉 ĐẦY và RỖNG trông giống hệt nhau qua vị trí w/r — chỉ số đĩa (<b>count</b>) mới nói lên sự thật.'); await nap(1800);
 
-  narrate('🌇 Chiều muộn, vài khách lẻ tẻ ghé qua — chef bày thêm vài đĩa mới…'); await nap(900);
+  narrate('🌇 Chiều muộn, vài khách lẻ tẻ ghé qua — bếp bày thêm vài đĩa mới, đĩa màu khác vì giá khác (như quán thật)…'); await nap(1000);
   await doWrite('🍣'); await doWrite('🦐');
-  narrate('Hết ngày! Băng chuyền vẫn chạy êm — 6 ô cố định, không bao giờ phình to hay tràn bộ nhớ.');
+  narrate('Hết ngày! Băng chuyền vẫn chạy êm — 6 ô cố định, 2 bếp + 6 khách, không bao giờ phình to hay tràn bộ nhớ.');
   lock(false);
 };
 
+initQuiz('quiz','circular',{
+  full:{ok:false,msg:'Sai — w==r cũng xảy ra khi RỖNG. Không thể chắc chắn chỉ từ con trỏ.'},
+  empty:{ok:false,msg:'Sai — w==r cũng xảy ra khi ĐẦY. Không thể chắc chắn chỉ từ con trỏ.'},
+  unknown:{ok:true,msg:'Đúng! w==r xảy ra ở CẢ hai đầu (đầy và rỗng) — phải nhìn count để biết chắc.'}
+});
+
+place();
 draw();
 })();
 </script>

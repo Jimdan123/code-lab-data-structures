@@ -80,10 +80,17 @@
     </div>
   </div>
 
+  <div class="quiz" id="quiz"><div class="q">❓ Nếu hàm đệ quy KHÔNG có ca gốc (base case) thì điều gì xảy ra?</div>
+    <button data-a="safe">Chương trình tự dừng an toàn</button>
+    <button data-a="slow">Chạy chậm nhưng vẫn ra kết quả đúng</button>
+    <button data-a="overflow">Ngăn xếp phình to mãi → STACK OVERFLOW</button>
+    <div class="fb" id="quizFb"></div>
+  </div>
+
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
 renderToolbox('stack');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -205,6 +212,12 @@ $('bRun').onclick=async()=>{
 };
 $('bReset').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset.'); };
 $('bOverflow').onclick=async()=>{ if(busy)return; lock(true); callStack=[]; draw(); await runOverflow(); lock(false); };
+
+initQuiz('quiz','stack',{
+  safe:{ok:false,msg:'Sai — không có cơ chế nào tự dừng nếu bạn không viết ca gốc.'},
+  slow:{ok:false,msg:'Sai — nó không chỉ chậm, nó sẽ PHÌNH TO tới khi hết bộ nhớ/giới hạn.'},
+  overflow:{ok:true,msg:'Đúng! Mỗi lời gọi PUSH thêm 1 khung, không bao giờ pop → STACK OVERFLOW.'}
+});
 
 draw();
 })();

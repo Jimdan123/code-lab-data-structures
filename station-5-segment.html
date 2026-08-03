@@ -60,10 +60,17 @@
     </div>
   </div>
 
+  <div class="quiz" id="quiz"><div class="q">❓ Khi đoạn của 1 node GIAO một phần với đoạn truy vấn (không NGOÀI, không TRỌN), thuật toán làm gì?</div>
+    <button data-a="zero">Trả về 0 luôn</button>
+    <button data-a="grab">Bốc thẳng seg[v]</button>
+    <button data-a="split">Chẻ đôi, đệ quy cả 2 con rồi cộng lại (DÍNH)</button>
+    <div class="fb" id="quizFb"></div>
+  </div>
+
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
 renderToolbox('segment');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -245,6 +252,12 @@ $('bReset').onclick=()=>{
   CL.lock(['bSum','bUpdate'], true);
   narrate('Đã reset. Bấm ▶ Xây cây (build) trước.');
 };
+
+initQuiz('quiz','segment',{
+  zero:{ok:false,msg:'Sai — trả về 0 là ca NGOÀI, không phải DÍNH.'},
+  grab:{ok:false,msg:'Sai — bốc thẳng seg[v] là ca TRỌN, không phải DÍNH.'},
+  split:{ok:true,msg:'Đúng! Ca DÍNH (giao một phần) phải chẻ đôi, đệ quy cả 2 con rồi cộng kết quả lại.'}
+});
 
 draw();
 })();

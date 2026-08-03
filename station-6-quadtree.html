@@ -69,10 +69,17 @@
     </div>
   </div>
 
+  <div class="quiz" id="quiz"><div class="q">❓ Nếu ô đã đủ CAP nhưng đã đạt MAX_DEPTH, chèn thêm điểm rơi vào đó thì sao?</div>
+    <button data-a="split">Chẻ tiếp thành 4 ô nhỏ hơn</button>
+    <button data-a="error">Báo lỗi, từ chối chèn</button>
+    <button data-a="keep">Ô giữ điểm dư, KHÔNG chẻ tiếp</button>
+    <div class="fb" id="quizFb"></div>
+  </div>
+
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
 renderToolbox('quadtree');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -230,6 +237,12 @@ $('bMax').onclick=async()=>{
   lock(false);
 };
 $('bReset').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ✏️ Thêm 1 điểm hoặc ▶ Rải 30 điểm.'); };
+
+initQuiz('quiz','quadtree',{
+  split:{ok:false,msg:'Sai — MAX_DEPTH có nghĩa là KHÔNG chẻ tiếp nữa, dù ô vẫn đầy.'},
+  error:{ok:false,msg:'Sai — không có lỗi gì cả, điểm vẫn được chèn, chỉ là ô giữ dư ra thôi.'},
+  keep:{ok:true,msg:'Đúng! MAX_DEPTH chặn đệ quy subdivide() vô hạn — ô đã chạm đáy thì cứ giữ điểm dư, không chẻ thêm.'}
+});
 
 draw();
 })();
