@@ -201,6 +201,10 @@
       <div class="wrap">
         <div class="col-viz">
           <div class="card"><h3>Buffer <span id="statebadge"></span></h3>
+            <p style="font-size:13.5px;line-height:1.55;margin-bottom:10px;">
+              Về mặt kỹ thuật, circular buffer chỉ là <b>một mảng <code>buf[N]</code> kích thước cố định</b> cộng thêm hai chỉ số <b>w</b> (ghi tiếp theo) và <b>r</b> (đọc tiếp theo). Không có gì thật sự "xoay" trong bộ nhớ — khi một chỉ số vượt quá ô cuối cùng <code>N-1</code>, phép toán <code>(i + 1) % N</code> đơn giản đưa nó quay lại ô 0. Xem mảng phẳng ngay bên dưới trước để thấy rõ w, r đang ở đâu, rồi cùng dữ liệu ấy được vẽ lại thành vòng tròn để thấy trực quan việc "quay vòng".
+            </p>
+            <svg id="svgArrayLine" viewBox="0 0 480 100" preserveAspectRatio="xMidYMid meet" style="height:100px;background:transparent;"></svg>
             <svg id="svgTech" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
             <div class="legend"><b>w</b> = con trỏ GHI · <b>r</b> = con trỏ ĐỌC · <b>count</b> = số phần tử đang giữ</div>
           </div>
@@ -303,6 +307,36 @@ function setBadge(kind){
   b.innerHTML = kind==='full' ? '<span class="badge warn">ĐẦY</span>' : kind==='empty' ? '<span class="badge info">RỖNG</span>' : '';
 }
 
+/* ---- flat array strip: same buf/w/r, drawn as a plain array first (bridges into the ring above) ---- */
+function drawArrayLine(){
+  const el=$('svgArrayLine'); if(!el) return; el.innerHTML='';
+  const SVG=CL.svg;
+  const cellW=50, gap=8, cellH=40;
+  const totalW=N*cellW+(N-1)*gap, startX=(480-totalW)/2, y=32;
+  for(let i=0;i<N;i++){
+    const x=startX+i*(cellW+gap);
+    const isFlash=(i===flashCell);
+    const fill = isFlash ? '#0A5A3A' : '#14261C';
+    const stroke = isFlash ? '#5FE0A0' : 'var(--green)';
+    el.appendChild(SVG('rect',{x,y,width:cellW,height:cellH,rx:8,fill,stroke,'stroke-width':2}));
+    const t=SVG('text',{x:x+cellW/2,y:y+cellH/2+5,'text-anchor':'middle',fill:'#fff','font-size':16,'font-weight':800});
+    t.textContent = buf[i]!=null ? '●' : '·';
+    el.appendChild(t);
+    const idxT=SVG('text',{x:x+cellW/2,y:y-8,'text-anchor':'middle','font-size':10,fill:'var(--muted)'});
+    idxT.textContent='['+i+']';
+    el.appendChild(idxT);
+    let ptrLabel='', ptrColor='var(--green)';
+    if(i===w && i===r){ ptrLabel='▼w ▲r'; ptrColor='var(--gold)'; }
+    else if(i===w){ ptrLabel='▼w'; ptrColor='var(--green)'; }
+    else if(i===r){ ptrLabel='▲r'; ptrColor='var(--blue)'; }
+    if(ptrLabel){
+      const pt=SVG('text',{x:x+cellW/2,y:y+cellH+18,'text-anchor':'middle','font-size':12,'font-weight':800,fill:ptrColor});
+      pt.textContent=ptrLabel;
+      el.appendChild(pt);
+    }
+  }
+}
+
 /* ---- Theme view: realistic kaiten-zushi scene (DOM + CSS) ---- */
 const stage = $('beltStage');
 const plateEls=[], seatEls=[], chefEls=[];
@@ -351,7 +385,7 @@ function renderTheme(){
   stateEl.className = 'state' + (count===N?' full':count===0?' emptyS':'');
   stateEl.textContent = count===N ? 'ĐẦY' : count===0 ? 'TRỐNG' : 'ĐANG PHỤC VỤ';
 }
-function draw(){ renderTheme(); drawTech(); place(); }
+function draw(){ renderTheme(); drawTech(); drawArrayLine(); place(); }
 
 function lock(b){ busy=b; CL.lock(['bPlay','bReset','bWrite','bRead'], b); }
 function lockStep(b){ CL.lock(['bStep'], b); }
