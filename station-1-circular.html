@@ -204,6 +204,7 @@
             <p style="font-size:13.5px;line-height:1.55;margin-bottom:10px;">
               Về mặt kỹ thuật, circular buffer chỉ là <b>một mảng <code>buf[N]</code> kích thước cố định</b> cộng thêm hai chỉ số <b>w</b> (ghi tiếp theo) và <b>r</b> (đọc tiếp theo). Không có gì thật sự "xoay" trong bộ nhớ — khi một chỉ số vượt quá ô cuối cùng <code>N-1</code>, phép toán <code>(i + 1) % N</code> đơn giản đưa nó quay lại ô 0. Xem mảng phẳng ngay bên dưới trước để thấy rõ w, r đang ở đâu, rồi cùng dữ liệu ấy được vẽ lại thành vòng tròn để thấy trực quan việc "quay vòng".
             </p>
+            <p style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);text-align:center;margin:0 0 6px;">count = <span id="countTech">0</span> / <span id="nTech">6</span> <span style="font-weight:400;color:var(--muted);">phần tử đang giữ</span></p>
             <svg id="svgArrayLine" viewBox="0 0 480 100" preserveAspectRatio="xMidYMid meet" style="height:100px;background:transparent;"></svg>
             <svg id="svgTech" viewBox="0 0 480 380" preserveAspectRatio="xMidYMid meet"></svg>
             <div class="legend"><b>w</b> = con trỏ GHI · <b>r</b> = con trỏ ĐỌC · <b>count</b> = số phần tử đang giữ</div>
@@ -310,6 +311,8 @@ function setBadge(kind){
 /* ---- flat array strip: same buf/w/r, drawn as a plain array first (bridges into the ring above) ---- */
 function drawArrayLine(){
   const el=$('svgArrayLine'); if(!el) return; el.innerHTML='';
+  const ct=$('countTech'); if(ct) ct.textContent=count;
+  const nt=$('nTech'); if(nt) nt.textContent=N;
   const SVG=CL.svg;
   const cellW=50, gap=8, cellH=40;
   const totalW=N*cellW+(N-1)*gap, startX=(480-totalW)/2, y=32;
