@@ -15,13 +15,12 @@
   .scard h3{margin:0;font-size:16px;color:var(--ink);}
   .scard .hook{font-size:13px;color:var(--muted);line-height:1.5;min-height:38px;}
   .scard .go{font-size:12.5px;font-weight:800;color:var(--green);}
-  .scard .done-badge{margin-left:auto;font-size:12px;font-weight:800;color:var(--green);}
 </style>
 </head>
 <body>
   <div class="hero">
     <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-    <p>Mỗi trạm là 1 trang tương tác — code JS <b>chạy thật</b>, không phải slide chết. Xem cây mọc, xem con trỏ quay vòng, xem va chạm xảy ra trước mắt bạn, rồi trả lời 1 câu hỏi để "tốt nghiệp" trạm đó.</p>
+    <p>Mỗi trạm là 1 câu chuyện tương tác — bấm <b>▶ Play</b> và xem tự chạy, không cần đọc hay giải thích gì cả.</p>
   </div>
   <div class="grid" id="grid"></div>
 
@@ -41,9 +40,8 @@
     const a = document.createElement('a');
     a.className = 'card scard';
     a.href = s.href;
-    const done = CL.isDone(s.key);
     a.innerHTML =
-      '<div class="top"><span class="icon">'+s.icon+'</span><span class="num">Trạm '+(i+1)+'</span>'+(done?'<span class="done-badge">✅ Xong</span>':'')+'</div>'+
+      '<div class="top"><span class="icon">'+s.icon+'</span><span class="num">Trạm '+(i+1)+'</span></div>'+
       '<h3>'+s.label+'</h3>'+
       '<div class="hook">'+HOOKS[s.key]+'</div>'+
       '<div class="go">Bắt đầu →</div>';

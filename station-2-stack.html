@@ -4,65 +4,78 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Code Lab · Stack</title>
 <link rel="stylesheet" href="style.css">
+<style>:root{--accent:#B9770E;}</style>
 </head>
 <body>
   <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
   <div class="toolbox" id="toolbox"></div>
 
-  <div class="station-h">Trạm 2 · Stack <span style="color:var(--muted);font-weight:600">(ngăn xếp, LIFO)</span></div>
-  <p class="station-s">Chỉ thêm/bớt ở <b>một đầu</b> — top. <b>push</b> = O(1) · <b>pop</b> = O(1). Lời gọi hàm chính là push/pop khung lên ngăn xếp thật.</p>
+  <div class="station-h">🍽️ Trạm 2 · Chồng khay Căng-tin <span style="color:var(--muted);font-weight:600">(stack, LIFO)</span></div>
+  <p class="station-s">Chỉ thêm/bớt ở <b>trên cùng</b> — khay chồng ai lên sau lấy trước.</p>
 
   <div class="why">
     <div><span class="wt">🎯 Vấn đề:</span> Gọi hàm lồng nhau (đệ quy) — máy phải nhớ "đang làm dở ở đâu" của MỌI lời gọi chưa xong, đúng thứ tự để quay lại.</div>
-    <div><span class="wt">❌ Không có cơ chế nhớ thứ tự:</span> quay lại nhầm chỗ, hoặc phải tự quản lý bằng tay — dễ sai, khó bảo trì.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> mỗi lần gọi hàm → đẩy 1 <b>KHUNG</b> lên đỉnh ngăn xếp; hàm xong → gỡ khung đó (LIFO) — khớp hoàn hảo thứ tự return của đệ quy.</div>
+    <div><span class="wt">❌ Không có cơ chế nhớ thứ tự:</span> quay lại nhầm chỗ, hoặc phải tự quản lý bằng tay — dễ sai.</div>
+    <div><span class="wt">💡 Ý tưởng:</span> mỗi lần gọi hàm → chồng thêm 1 <b>khay</b> lên đỉnh; hàm xong → lấy khay đó ra (LIFO) — khớp hoàn hảo thứ tự return của đệ quy.</div>
   </div>
 
-  <div class="wrap">
-    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-      <div class="code-title">// mỗi lời gọi = 1 khung PUSH · return = POP</div>
-      <div class="code" id="code"></div></div></div>
+  <div class="viewtoggle" id="viewtoggle">
+    <button class="vt-btn active" data-view="theme">🍽️ Xem theo chủ đề</button>
+    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+  </div>
 
-    <div class="col-viz">
-      <div class="card"><h3>Call Stack <span id="statebadge"></span></h3>
-        <svg id="svg" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="legend">Khung dưới cùng = lời gọi ĐẦU tiên · khung trên cùng (viền xanh dương) = đang chạy · mỗi return → POP khung trên cùng</div>
-      </div>
-      <div class="narr" id="narr">Bấm <b>▶ factorial(3)</b> để xem khung chồng lên rồi pop dồn kết quả về.</div>
-      <div class="card"><h3>Điều khiển</h3>
-        <div class="row">
-          <button id="bRun">▶ factorial(3)</button>
-          <button id="bOverflow" class="ghost">💥 Demo Stack Overflow</button>
-          <button id="bReset" class="ghost">↺ Reset</button>
+  <div id="themeView">
+    <div class="stage">
+      <svg id="svgTheme" viewBox="0 0 380 340" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem đầu bếp chồng khay tính giai thừa(3) — rồi xem chuyện gì xảy ra nếu QUÊN dừng lại.</div>
+      <div class="row" style="margin-top:14px;justify-content:space-between">
+        <button class="play-btn" id="bPlay">▶ Play</button>
+        <div class="side-controls">
+          <button id="bReset2">↺ Reset</button>
         </div>
       </div>
-      <div class="card"><h3>2 cách dựng Stack (tham khảo)</h3>
-        <div class="row" style="align-items:flex-start;gap:16px">
-          <div style="flex:1;min-width:170px">
-            <span class="tag">A · Mảng + top</span>
-            <div class="code" style="margin-top:8px;padding:8px 4px">
-              <div class="cl">int s[N]; int top = -1;</div>
-              <div class="cl">push: s[++top] = x;</div>
-              <div class="cl">pop:  return s[top--];</div>
-            </div>
-          </div>
-          <div style="flex:1;min-width:170px">
-            <span class="tag">B · Linked List</span>
-            <div class="code" style="margin-top:8px;padding:8px 4px">
-              <div class="cl">Node* head = NULL;</div>
-              <div class="cl">push: n-&gt;next=head; head=n;</div>
-              <div class="cl">pop:  head = head-&gt;next;</div>
-            </div>
+    </div>
+  </div>
+
+  <div id="techView" style="display:none">
+    <div class="wrap">
+      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+        <div class="code-title">// mỗi lời gọi = 1 khung PUSH · return = POP</div>
+        <div class="code" id="code"></div></div></div>
+      <div class="col-viz">
+        <div class="card"><h3>Call Stack <span id="statebadge"></span></h3>
+          <svg id="svg" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="legend">Khung dưới cùng = lời gọi ĐẦU tiên · khung trên cùng (viền xanh dương) = đang chạy · mỗi return → POP khung trên cùng</div>
+        </div>
+        <div class="card"><h3>Điều khiển thủ công</h3>
+          <div class="row">
+            <button id="bRun">▶ factorial(3)</button>
+            <button id="bOverflow" class="ghost">💥 Demo Stack Overflow</button>
+            <button id="bReset" class="ghost">↺ Reset</button>
           </div>
         </div>
-        <div class="legend" style="margin-top:8px">Cả hai LIFO · O(1). Mảng: resize khó khi đầy. List: tốn con trỏ hơn nhưng không giới hạn kích thước.</div>
-      </div>
-      <div class="quiz" id="quiz"><div class="q">❓ Nếu hàm đệ quy KHÔNG có ca gốc (base case) thì điều gì xảy ra?</div>
-        <button data-a="safe">Chương trình tự dừng an toàn</button>
-        <button data-a="slow">Chạy chậm nhưng vẫn ra kết quả đúng</button>
-        <button data-a="overflow">Ngăn xếp phình to mãi → STACK OVERFLOW</button>
-        <div class="fb" id="quizFb"></div>
+        <div class="card"><h3>2 cách dựng Stack (tham khảo)</h3>
+          <div class="row" style="align-items:flex-start;gap:16px">
+            <div style="flex:1;min-width:170px">
+              <span class="tag">A · Mảng + top</span>
+              <div class="code" style="margin-top:8px;padding:8px 4px">
+                <div class="cl">int s[N]; int top = -1;</div>
+                <div class="cl">push: s[++top] = x;</div>
+                <div class="cl">pop:  return s[top--];</div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:170px">
+              <span class="tag">B · Linked List</span>
+              <div class="code" style="margin-top:8px;padding:8px 4px">
+                <div class="cl">Node* head = NULL;</div>
+                <div class="cl">push: n-&gt;next=head; head=n;</div>
+                <div class="cl">pop:  head = head-&gt;next;</div>
+              </div>
+            </div>
+          </div>
+          <div class="legend" style="margin-top:8px">Cả hai LIFO · O(1). Mảng: resize khó khi đầy. List: tốn con trỏ hơn nhưng không giới hạn kích thước.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -70,8 +83,9 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
 renderToolbox('stack');
+initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
 const CODE=[
  ['<span class="kw">async function</span> <span class="fn">factorial</span>(n) {'],
@@ -95,8 +109,8 @@ const L={sig:0, push:1, baseChk:3, baseSet:4, elseRecurse:6, setRes:8, pop:9, re
 
 let callStack=[], busy=false;
 
-function draw(){
-  const el=$('svg'); el.innerHTML='';
+function drawTech(){
+  const el=$('svg'); if(!el) return; el.innerHTML='';
   const W=380, BASEY=300, FW=280, X=(W-FW)/2;
   const n=callStack.length;
   const FH = n>0 ? Math.min(54, (BASEY-20)/n) : 54;
@@ -114,10 +128,31 @@ function draw(){
     el.appendChild(g);
   });
 }
-function lock(b){ busy=b; CL.lock(['bRun','bOverflow','bReset'], b); }
+function drawPlates(){
+  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
+  const CX=190, BASEY=310;
+  const n=callStack.length;
+  const GAP = n>0 ? Math.min(30, (BASEY-60)/n) : 30;
+  callStack.forEach((f,i)=>{
+    const y = BASEY - (i+1)*GAP;
+    const isTop=(i===n-1), topple=f.overflow;
+    const jx = topple ? Math.sin(i*13.37)*70 : 0;
+    const jr = topple ? Math.sin(i*7.77)*40 : 0;
+    const g=SVG('g',{transform:'translate('+(CX+jx)+','+y+') rotate('+jr+')'});
+    g.appendChild(SVG('ellipse',{rx:88,ry:16,fill: topple?'#F7D9D9':'#FFF6E9', stroke: topple?'var(--red)':(isTop?'#5AA0FF':'#D9A441'), 'stroke-width':isTop?3:2}));
+    const t=SVG('text',{x:0,y:5,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#7A5312'}); t.textContent = f.label ? f.label.replace(/^f\(n=/,'').replace(')','') : f.n;
+    g.appendChild(t);
+    el.appendChild(g);
+  });
+  if(callStack.some(f=>f.overflow)){
+    el.appendChild((()=>{ const t=SVG('text',{x:CX,y:38,'text-anchor':'middle','font-size':30}); t.textContent='💥'; return t; })());
+  }
+}
+function draw(){ drawPlates(); drawTech(); }
+function lock(b){ busy=b; CL.lock(['bPlay','bReset2','bRun','bOverflow','bReset'], b); }
 
 async function factorial(n){
-  hl(L.sig); narrate('Gọi <b>factorial('+n+')</b> — đẩy khung mới lên ĐỈNH.'); await nap(500);
+  hl(L.sig); narrate('Gọi <b>factorial('+n+')</b> — chồng khay mới lên ĐỈNH.'); await nap(500);
   hl(L.push); callStack.push({n,result:null}); draw(); await nap(650);
   hl(L.baseChk); narrate('Kiểm tra ca gốc: <b>n &lt;= 1</b>? ('+n+' &lt;= 1 là <b>'+(n<=1)+'</b>)'); await nap(700);
   let result;
@@ -131,10 +166,36 @@ async function factorial(n){
   }
   hl(L.setRes); callStack[callStack.length-1].result=result; draw(); await nap(650);
   hl(L.pop); callStack.pop(); draw();
-  narrate('<b>factorial('+n+')</b> trả về '+result+' — gỡ khung khỏi đỉnh (POP).'); await nap(750);
+  narrate('<b>factorial('+n+')</b> trả về '+result+' — lấy khay khỏi đỉnh (POP).'); await nap(750);
   hl(L.ret);
   return result;
 }
+
+async function runOverflow(){
+  hl(L.overflowSig);
+  narrate('😱 Giờ tưởng tượng đầu bếp <b>QUÊN</b> dừng lại: <code>f(n){ return f(n+1); }</code> — KHÔNG có ca gốc…'); await nap(1000);
+  const MAX_FRAMES=16;
+  for(let i=1;i<=MAX_FRAMES;i++){
+    callStack.push({n:i, result:null, label:'f(n='+i+')'});
+    draw();
+    narrate('Chồng thêm khay <b>f('+i+')</b> — không bao giờ dừng để lấy khay ra…');
+    await nap(160);
+  }
+  callStack.forEach(f=>f.overflow=true); draw();
+  narrate('<b style="color:var(--red)">STACK OVERFLOW 💥 sập cả chồng!</b> — không có ca gốc để dừng lại, chồng khay đổ.');
+  await nap(1700);
+}
+
+$('bPlay').onclick=async()=>{
+  if(busy)return; lock(true); callStack=[]; draw();
+  narrate('👨‍🍳 Đầu bếp tính giai thừa(3) — mỗi bước tính lại chồng thêm 1 khay…'); await nap(700);
+  const r = await factorial(3);
+  narrate('✅ Xong! factorial(3) = <b>'+r+'</b>. Chồng khay rỗng trở lại.'); await nap(1300);
+  callStack=[]; draw();
+  await runOverflow();
+  lock(false);
+};
+$('bReset2').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset. Bấm ▶ Play để chạy lại.'); };
 
 $('bRun').onclick=async()=>{
   if(busy)return; lock(true); callStack=[]; draw();
@@ -142,30 +203,8 @@ $('bRun').onclick=async()=>{
   narrate('Xong! <b>factorial(3) = '+r+'</b>. Ngăn xếp rỗng trở lại.');
   lock(false);
 };
-$('bReset').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset. Bấm ▶ factorial(3) để chạy lại.'); };
-
-$('bOverflow').onclick=async()=>{
-  if(busy)return; lock(true); callStack=[]; draw();
-  hl(L.overflowSig);
-  narrate('💥 <code>f(n){ return f(n+1); }</code> — <b>KHÔNG có ca gốc</b>. Xem điều gì xảy ra…'); await nap(900);
-  const MAX_FRAMES=16;
-  for(let i=1;i<=MAX_FRAMES;i++){
-    callStack.push({n:i, result:null, label:'f(n='+i+')'});
-    draw();
-    narrate('Gọi <b>f('+i+')</b> → PUSH khung — không bao giờ return, n cứ tăng mãi…');
-    await nap(160);
-  }
-  callStack.forEach(f=>f.overflow=true); draw();
-  narrate('<b style="color:var(--red)">STACK OVERFLOW 💥 sập!</b> — ngăn xếp phình to mãi vì không có ca gốc để POP về.');
-  await nap(1700);
-  lock(false);
-};
-
-initQuiz('quiz','stack',{
-  safe:{ok:false,msg:'Sai — không có cơ chế nào tự dừng nếu bạn không viết ca gốc.'},
-  slow:{ok:false,msg:'Sai — nó không chỉ chậm, nó sẽ PHÌNH TO tới khi hết bộ nhớ/giới hạn.'},
-  overflow:{ok:true,msg:'Đúng! Mỗi lời gọi PUSH thêm 1 khung, không bao giờ pop → STACK OVERFLOW.'}
-});
+$('bReset').onclick=()=>{ if(busy)return; callStack=[]; draw(); hl(); narrate('Đã reset.'); };
+$('bOverflow').onclick=async()=>{ if(busy)return; lock(true); callStack=[]; draw(); await runOverflow(); lock(false); };
 
 draw();
 })();

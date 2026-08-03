@@ -4,54 +4,67 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Code Lab · Quadtree</title>
 <link rel="stylesheet" href="style.css">
+<style>:root{--accent:#1565C0;}</style>
 </head>
 <body>
   <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
   <div class="toolbox" id="toolbox"></div>
 
-  <div class="station-h">Trạm 6 · Quadtree <span style="color:var(--muted);font-weight:600">(cây tứ phân)</span></div>
-  <p class="station-s">Mỗi ô ≤ <b>CAP</b> điểm; đầy → <b style="color:var(--amber)">chẻ 4</b> (đệ quy). Đông → ô nhỏ · vắng → ô to — cây <b>TỰ UỐN</b> theo mật độ dữ liệu.</p>
+  <div class="station-h">🗺️ Trạm 6 · Bản đồ Ghim vị trí <span style="color:var(--muted);font-weight:600">(quadtree)</span></div>
+  <p class="station-s">Vùng đông ghim tự chia nhỏ để tra cứu nhanh; vùng thưa vẫn giữ nguyên 1 ô lớn.</p>
 
   <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> 1 triệu điểm trên bản đồ, phải trả lời "điểm nào trong khung nhìn?" MỖI khung hình (60 lần/giây).</div>
-    <div><span class="wt">❌ Mảng quét thẳng:</span> kiểm tra từng điểm có trong khung không → O(n) mỗi lần hỏi = hàng chục triệu phép so/giây.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> chia không gian thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</div>
+    <div><span class="wt">🎯 Vấn đề:</span> 1 triệu ghim trên bản đồ, phải trả lời "ghim nào trong khung nhìn?" MỖI khung hình (60 lần/giây).</div>
+    <div><span class="wt">❌ Quét thẳng:</span> kiểm tra từng ghim có trong khung không → hàng chục triệu phép so/giây.</div>
+    <div><span class="wt">💡 Ý tưởng:</span> chia bản đồ thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</div>
   </div>
 
-  <div class="wrap">
-    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-      <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
-      <div class="code" id="code"></div></div></div>
+  <div class="viewtoggle" id="viewtoggle">
+    <button class="vt-btn active" data-view="theme">🗺️ Xem theo chủ đề</button>
+    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+  </div>
 
-    <div class="col-viz">
-      <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
-        <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:#5FE0A0">chấm xanh</span> = điểm vừa thêm · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
-      </div>
-      <div class="narr" id="narr">Bấm <b>✏️ Thêm 1 điểm</b> để xem insert() từng bước, hoặc <b>▶ Rải 30 điểm</b> để xem cây tự uốn.</div>
-      <div class="card"><h3>Điều khiển</h3>
-        <div class="row">
-          <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
-          <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
-          <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
-          <button id="bReset" class="ghost">↺ Reset</button>
+  <div id="themeView">
+    <div class="stage">
+      <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để xem người dùng thả ghim khắp thành phố — và chuyện gì xảy ra khi nhiều đơn trùng một địa chỉ.</div>
+      <div class="row" style="margin-top:14px;justify-content:space-between">
+        <button class="play-btn" id="bPlay">▶ Play</button>
+        <div class="side-controls">
+          <button id="bReset2">↺ Reset</button>
         </div>
       </div>
-      <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
-        <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm. Không bao giờ quét hết mọi điểm.</div>
-        <table class="summary" style="margin-top:9px">
-          <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
-          <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
-          <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
-        </table>
-        <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí — không có nó, subdivide() sẽ không bao giờ dừng.</div>
-      </div>
-      <div class="quiz" id="quiz"><div class="q">❓ Nếu ô đã đủ CAP nhưng đã đạt MAX_DEPTH, chèn thêm điểm rơi vào đó thì sao?</div>
-        <button data-a="split">Chẻ tiếp thành 4 ô nhỏ hơn</button>
-        <button data-a="error">Báo lỗi, từ chối chèn</button>
-        <button data-a="keep">Ô giữ điểm dư, KHÔNG chẻ tiếp</button>
-        <div class="fb" id="quizFb"></div>
+    </div>
+  </div>
+
+  <div id="techView" style="display:none">
+    <div class="wrap">
+      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+        <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
+        <div class="code" id="code"></div></div></div>
+      <div class="col-viz">
+        <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
+          <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
+        </div>
+        <div class="card"><h3>Điều khiển thủ công</h3>
+          <div class="row">
+            <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
+            <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
+            <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
+            <button id="bReset" class="ghost">↺ Reset</button>
+          </div>
+        </div>
+        <div class="card"><h3>Tham khảo · Tìm gần nhất & tuning</h3>
+          <div class="legend"><b>Tìm điểm gần nhất:</b> mỗi ô tự hỏi "có CHẠM vòng tìm kiếm không?" — không chạm → CẮT CẢ NHÁNH, chỉ đo điểm ở ô còn chạm.</div>
+          <table class="summary" style="margin-top:9px">
+            <tr><th></th><th>CAP nhỏ (vd 4)</th><th>CAP lớn (vd 12)</th></tr>
+            <tr><td><b>Mỗi ô</b></td><td>ít điểm → quét nhanh</td><td>nhiều điểm → quét chậm</td></tr>
+            <tr><td><b>Số node</b></td><td>nhiều hơn (tốn bộ nhớ)</td><td>ít hơn</td></tr>
+          </table>
+          <div class="legend" style="margin-top:9px"><b>MAX_DEPTH</b> chặn chẻ vô hạn khi nhiều điểm trùng/gần trùng vị trí.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -59,8 +72,9 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, svg:SVG} = CL;
 renderToolbox('quadtree');
+initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
 const CODE=[
  ['<span class="kw">function</span> <span class="fn">contains</span>(node, p) {'],
@@ -106,7 +120,7 @@ function randPoint(){
   return {x:Math.random()*370+15, y:Math.random()*370+15};
 }
 
-function drawNode(node, el){
+function drawTechNode(node, el){
   const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
   const isCur=(node===curNode);
   const atMax=(node.depth>=MAX_DEPTH && node.points.length>CAP);
@@ -117,15 +131,36 @@ function drawNode(node, el){
   node.points.forEach(p=>{
     el.appendChild(SVG('circle',{cx:p.x,cy:p.y,r:4.5, fill: (p===flashPoint)?'#5FE0A0':'#2E7D46'}));
   });
-  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawNode(c,el)); }
+  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawTechNode(c,el)); }
 }
-function draw(){ const el=$('svg'); el.innerHTML=''; drawNode(root, el); }
-function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset'], b); }
+function drawTech(){ const el=$('svg'); if(!el) return; el.innerHTML=''; drawTechNode(root, el); }
+
+function drawMapNode(node, el){
+  const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
+  const isCur=(node===curNode);
+  const atMax=(node.depth>=MAX_DEPTH && node.points.length>CAP);
+  el.appendChild(SVG('rect',{x,y,width:s,height:s,fill:'none',
+    stroke: atMax?'var(--red)':(isCur?'#1565C0':'#B7CFE8'),
+    'stroke-width': (isCur||atMax)?2.5:1,
+    'stroke-dasharray': atMax?'5 4':'0'}));
+  node.points.forEach(p=>{
+    const isFlash=(p===flashPoint);
+    el.appendChild(SVG('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-size':isFlash?17:12}, [])).textContent='📍';
+  });
+  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawMapNode(c,el)); }
+}
+function drawMap(){
+  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
+  el.appendChild(SVG('rect',{x:0,y:0,width:400,height:400,fill:'#EAF2FB'}));
+  drawMapNode(root, el);
+}
+function draw(){ drawMap(); drawTech(); }
+function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset','bPlay','bReset2'], b); }
 function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; draw(); hl(); }
 
 async function insertRec(node,p,verbose){
   curNode=node;
-  if(verbose){ draw(); hl(L.containsChk); narrate('Kiểm tra: điểm có nằm trong ô tâm ('+Math.round(node.cx)+','+Math.round(node.cy)+'), nửa cạnh '+Math.round(node.half)+'?'); await nap(240); }
+  if(verbose){ draw(); hl(L.containsChk); narrate('Kiểm tra: ghim có nằm trong ô tâm ('+Math.round(node.cx)+','+Math.round(node.cy)+'), nửa cạnh '+Math.round(node.half)+'?'); await nap(240); }
   if(!contains(node,p)){ if(verbose){ narrate('Ngoài ô → return false.'); await nap(240); } return false; }
   if(verbose){ hl(L.roomChk); await nap(200); }
   if(node.points.length<CAP || node.depth>=MAX_DEPTH){
@@ -133,21 +168,40 @@ async function insertRec(node,p,verbose){
     node.points.push(p); flashPoint=p; draw();
     if(verbose){
       if(node.depth>=MAX_DEPTH && node.points.length>CAP){
-        narrate('Ô đã đủ CAP ('+CAP+'/'+CAP+') <b>NHƯNG</b> đã chạm <b style="color:var(--red)">MAX_DEPTH='+MAX_DEPTH+'</b> → <b style="color:var(--red)">KHÔNG chẻ tiếp</b>, cứ giữ điểm dư ở đây.');
+        narrate('Ô đã đủ CAP ('+CAP+'/'+CAP+') <b>NHƯNG</b> đã chạm <b style="color:var(--red)">MAX_DEPTH='+MAX_DEPTH+'</b> → <b style="color:var(--red)">KHÔNG chẻ tiếp</b>, cứ giữ ghim dư ở đây.');
       } else {
-        narrate('Ô còn chỗ ('+node.points.length+'/'+CAP+') → thêm điểm trực tiếp, không cần chẻ.');
+        narrate('Ô còn chỗ ('+node.points.length+'/'+CAP+') → thả ghim trực tiếp, không cần chia.');
       }
       await nap(420);
     }
     return true;
   }
-  if(verbose){ narrate('Ô ĐẦY ('+CAP+'/'+CAP+') và chưa chạm MAX_DEPTH → phải <b style="color:var(--amber)">CHẺ 4</b>.'); await nap(340); hl(L.subdivideCall); }
-  if(!node.nw){ subdivide(node); draw(); if(verbose){ narrate('subdivide(): chẻ ô thành 4 ô con NW · NE · SW · SE.'); await nap(450); } }
+  if(verbose){ narrate('Ô ĐẦY ('+CAP+'/'+CAP+') và chưa chạm MAX_DEPTH → phải <b style="color:var(--amber)">CHIA 4</b>.'); await nap(340); hl(L.subdivideCall); }
+  if(!node.nw){ subdivide(node); draw(); if(verbose){ narrate('subdivide(): chia ô thành 4 ô con NW · NE · SW · SE.'); await nap(450); } }
   if(verbose){ hl(L.recurseCall); await nap(200); }
   const child = pickChild(node,p);
-  if(verbose){ narrate('Điểm rơi vào góc <b>'+child.name+'</b> → đệ quy insert() xuống đó.'); await nap(280); }
+  if(verbose){ narrate('Ghim rơi vào góc <b>'+child.name+'</b> → đệ quy insert() xuống đó.'); await nap(280); }
   return await insertRec(child.node,p,verbose);
 }
+
+$('bPlay').onclick=async()=>{
+  if(busy)return; lock(true); resetTree();
+  narrate('🗺️ Ứng dụng bản đồ: người dùng thả ghim khắp thành phố…'); await nap(500);
+  for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); draw(); await nap(70); }
+  curNode=null; flashPoint=null; draw();
+  narrate('📍 Vùng ĐÔNG tự động chia nhỏ để tra cứu nhanh, vùng THƯA vẫn giữ nguyên 1 ô lớn.'); await nap(1700);
+
+  narrate('🏢 Giờ thử: rất nhiều đơn hàng cùng MỘT toà nhà (trùng địa chỉ)…'); await nap(900);
+  resetTree();
+  const p={x:137.3,y:84.6};
+  for(let i=0;i<24;i++){ await insertRec(root,p,false); draw(); await nap(35); }
+  narrate('Bản đồ đã chia nhỏ liên tục xuống tới độ sâu tối đa. Thả thêm 1 ghim nữa…'); await nap(900);
+  await insertRec(root,p,true);
+  curNode=null; flashPoint=null; draw(); hl();
+  narrate('Xong! Ô đó GIỮ NGUYÊN các ghim dư, không chia mãi — nhờ giới hạn MAX_DEPTH.');
+  lock(false);
+};
+$('bReset2').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); };
 
 $('bOne').onclick=async()=>{
   if(busy)return; lock(true);
@@ -176,12 +230,6 @@ $('bMax').onclick=async()=>{
   lock(false);
 };
 $('bReset').onclick=()=>{ if(busy)return; resetTree(); narrate('Đã reset. Bấm ✏️ Thêm 1 điểm hoặc ▶ Rải 30 điểm.'); };
-
-initQuiz('quiz','quadtree',{
-  split:{ok:false,msg:'Sai — MAX_DEPTH có nghĩa là KHÔNG chẻ tiếp nữa, dù ô vẫn đầy.'},
-  error:{ok:false,msg:'Sai — không có lỗi gì cả, điểm vẫn được chèn, chỉ là ô giữ dư ra thôi.'},
-  keep:{ok:true,msg:'Đúng! MAX_DEPTH chặn đệ quy subdivide() vô hạn — ô đã chạm đáy thì cứ giữ điểm dư, không chẻ thêm.'}
-});
 
 draw();
 })();

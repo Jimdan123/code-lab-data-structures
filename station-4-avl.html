@@ -4,45 +4,58 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Code Lab · AVL Tree</title>
 <link rel="stylesheet" href="style.css">
+<style>:root{--accent:#8E7CC3;}</style>
 </head>
 <body>
   <h1>🧪 Code Lab — cấu trúc dữ liệu <span style="color:var(--green)">chạy thật</span></h1>
-  <p class="sub">Bấm chạy code, xem cây mọc và tự cân bằng ngay trước mắt.</p>
+  <p class="sub">Bấm ▶ Play và xem câu chuyện tự chạy — không cần đọc gì cả.</p>
   <div class="toolbox" id="toolbox"></div>
 
-  <div class="station-h">Trạm 4 · AVL Tree <span style="color:var(--muted);font-weight:600">(cây tìm kiếm tự cân bằng)</span></div>
-  <p class="station-s">Cây tìm kiếm: <b>nhỏ → trái, lớn → phải</b> (tìm = đoán số, loại nửa). Nếu chèn làm cây lệch &gt; 1 tầng → tự <b style="color:var(--amber)">XOAY</b> cho cân, không bao giờ nghiêng thành đường thẳng.</p>
+  <div class="station-h">🎐 Trạm 4 · Mobile Cân Bằng <span style="color:var(--muted);font-weight:600">(AVL Tree)</span></div>
+  <p class="station-s">Mỗi lần treo thêm quả cân, mobile có thể LỆCH — nó tự xoay lại cho THẲNG, không bao giờ nghiêng hẳn sang một bên.</p>
 
   <div class="why">
-    <div><span class="wt">🎯 Vấn đề:</span> Giữ dữ liệu <b>luôn sắp xếp</b> mà vừa tìm nhanh (đoán số, loại nửa) vừa thêm nhanh.</div>
+    <div><span class="wt">🎯 Vấn đề:</span> Giữ dữ liệu <b>luôn sắp xếp</b> mà vừa tìm nhanh vừa thêm nhanh.</div>
     <div><span class="wt">❌ Mảng / cây thường:</span> mảng sắp xếp thì <b>chèn chậm</b>; cây thường dễ <b>nghiêng thành đường thẳng</b> → tìm chậm lại.</div>
-    <div><span class="wt">💡 Ý tưởng:</span> mỗi khi lệch quá 1 tầng, cây <b>tự XOAY</b> cho cân → luôn thấp → tìm luôn nhanh.</div>
+    <div><span class="wt">💡 Ý tưởng:</span> mỗi khi lệch quá 1 tầng, tự <b>XOAY</b> cho cân → luôn thấp → tìm luôn nhanh.</div>
   </div>
 
-  <div class="wrap">
-    <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-      <div class="code-title">// chèn BST → cập nhật chiều cao → tính độ lệch → xoay đúng ca</div>
-      <div class="code" id="code"></div></div></div>
+  <div class="viewtoggle" id="viewtoggle">
+    <button class="vt-btn active" data-view="theme">🎐 Xem theo chủ đề</button>
+    <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
+  </div>
 
-    <div class="col-viz">
-      <div class="card"><h3>Cây <span id="rotbadge"></span></h3>
-        <svg id="svg" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="legend"><b>h</b> = chiều cao · <b>bf</b> = độ lệch (cao trái − cao phải) · <span style="color:#5AA0FF">◯ vòng xanh dương</span> = node đang xét · <span style="color:var(--green)">● xanh lá</span> = node vừa chèn</div>
-      </div>
-      <div class="narr" id="narr">Nhập số rồi <b>Chèn</b> — hoặc bấm <b>Chèn 1→7</b> để xem cây KHÔNG nghiêng nhờ tự xoay.</div>
-      <div class="card"><h3>Điều khiển</h3>
-        <div class="row">
-          <input type="number" id="val" value="50">
-          <button id="bIns">Chèn</button>
-          <button id="bDemo" class="ghost">▶ Chèn 1→7 (xem tự cân)</button>
-          <button id="bReset" class="ghost">↺ Reset</button>
+  <div id="themeView">
+    <div class="stage">
+      <svg id="svgTheme" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="narr" id="narr" style="margin-top:12px">Bấm ▶ Play để treo lần lượt 1→7 quả cân — xem mobile tự lắc rồi thẳng lại.</div>
+      <div class="row" style="margin-top:14px;justify-content:space-between">
+        <button class="play-btn" id="bPlay">▶ Play</button>
+        <div class="side-controls">
+          <button id="bReset2">↺ Reset</button>
         </div>
-        <div class="row" style="margin-top:8px;font-size:12px;color:var(--muted)">Mẹo: chèn 10, 20, 30 (tăng dần) → thấy cú XOAY giữ cây thấp.</div>
       </div>
-      <div class="quiz" id="quiz"><div class="q">❓ Chèn 1,2,3,4,5 theo thứ tự vào cây tìm kiếm THƯỜNG (không cân) → cây thành gì?</div>
-        <button data-a="line">Đường thẳng (nghiêng)</button>
-        <button data-a="bal">Vẫn cân đẹp</button>
-        <div class="fb" id="quizFb"></div>
+    </div>
+  </div>
+
+  <div id="techView" style="display:none">
+    <div class="wrap">
+      <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
+        <div class="code-title">// chèn BST → cập nhật chiều cao → tính độ lệch → xoay đúng ca</div>
+        <div class="code" id="code"></div></div></div>
+      <div class="col-viz">
+        <div class="card"><h3>Cây <span id="rotbadge"></span></h3>
+          <svg id="svg" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="legend"><b>h</b> = chiều cao · <b>bf</b> = độ lệch (cao trái − cao phải) · <span style="color:#5AA0FF">◯ vòng xanh dương</span> = node đang xét · <span style="color:var(--green)">● xanh lá</span> = node vừa chèn</div>
+        </div>
+        <div class="card"><h3>Điều khiển thủ công</h3>
+          <div class="row">
+            <input type="number" id="val" value="50">
+            <button id="bIns">Chèn</button>
+            <button id="bDemo" class="ghost">▶ Chèn 1→7 (nhanh)</button>
+            <button id="bReset" class="ghost">↺ Reset</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -50,9 +63,9 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl:HL, renderCode, renderToolbox, initQuiz, narrate:NARR} = CL;
+const {$, nap, hl:HL, renderCode, renderToolbox, initViewToggle, narrate:NARR, svg:SVG} = CL;
 renderToolbox('avl');
-const SVGNS='http://www.w3.org/2000/svg';
+initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 const CODE=[
  ['<span class="kw">function</span> <span class="fn">height</span>(n){ <span class="kw">return</span> n ? n.h : 0; }'],
  ['<span class="kw">function</span> <span class="fn">balance</span>(n){ <span class="kw">return</span> height(n.left) - height(n.right); }'],
@@ -88,39 +101,61 @@ function insertSync(n,x){ if(!n)return Node(x); if(x<n.v)n.l=insertSync(n.l,x); 
   if(b>1&&x>n.l.v){n.l=rotL(n.l);return rotR(n);} if(b<-1&&x<n.r.v){n.r=rotR(n.r);return rotL(n);} return n; }
 
 let root=null, busy=false, curV=null, bfV=null, flashV=null, rotHappened=false;
+let tiltV=null, tiltDeg=0;
 
-/* layout + vẽ (kèm nhãn h & bf) */
 function layout(n,depth,ctx){ if(!n)return; layout(n.l,depth+1,ctx); n._x=ctx.i++; n._d=depth; layout(n.r,depth+1,ctx); }
-function draw(){
-  const svg=$('svg'); svg.innerHTML='';
-  if(!root){ return; }
+function computeLayout(){
+  if(!root) return null;
   const ctx={i:0}; layout(root,0,ctx);
   const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(root);
   const W=660,Hh=340, padX=40, padY=48;
   const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
-  const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
-  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ const ln=document.createElementNS(SVGNS,'line');
-    ln.setAttribute('class','edge'); ln.setAttribute('x1',px(n));ln.setAttribute('y1',py(n));ln.setAttribute('x2',px(c));ln.setAttribute('y2',py(c)); svg.appendChild(ln); ed(c);} })(root);
+  return { px:n=>padX+n._x*dx, py:n=>padY+n._d*dy };
+}
+function drawTech(pos){
+  const svg=$('svg'); if(!svg) return; svg.innerHTML='';
+  if(!root || !pos) return;
+  const {px,py}=pos;
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ const ln=SVG('line',{class:'edge',x1:px(n),y1:py(n),x2:px(c),y2:py(c)}); svg.appendChild(ln); ed(c);} })(root);
   (function nd(n){ if(!n)return; nd(n.l);
     let cls='node'; if(n.v===flashV)cls+=' flash'; if(n.v===curV)cls+=' cur';
-    const g=document.createElementNS(SVGNS,'g'); g.setAttribute('class',cls);
-    g.setAttribute('transform','translate('+px(n)+','+py(n)+')');
-    const c=document.createElementNS(SVGNS,'circle'); c.setAttribute('r',20);
-    const t=document.createElementNS(SVGNS,'text'); t.textContent=n.v;
-    g.appendChild(c); g.appendChild(t);
-    const th=document.createElementNS(SVGNS,'text'); th.setAttribute('class','h'); th.setAttribute('x',0); th.setAttribute('y',-27); th.textContent='h='+n.h; g.appendChild(th);
-    if(n.v===bfV){ const bf=BF(n); const tb=document.createElementNS(SVGNS,'text'); tb.setAttribute('class','bf'); tb.setAttribute('x',26); tb.setAttribute('y',3);
-      tb.setAttribute('fill',Math.abs(bf)>1?'#E05555':'#5FE0A0'); tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb); }
+    const g=SVG('g',{class:cls, transform:'translate('+px(n)+','+py(n)+')'});
+    g.appendChild(SVG('circle',{r:20}));
+    const t=SVG('text',{}); t.textContent=n.v; g.appendChild(t);
+    const th=SVG('text',{class:'h',x:0,y:-27}); th.textContent='h='+n.h; g.appendChild(th);
+    if(n.v===bfV){ const bf=BF(n); const tb=SVG('text',{class:'bf',x:26,y:3,fill:Math.abs(bf)>1?'#E05555':'#5FE0A0'}); tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb); }
     svg.appendChild(g); nd(n.r);
   })(root);
 }
+function drawMobile(pos){
+  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
+  if(!root || !pos) return;
+  const {px,py}=pos;
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ el.appendChild(SVG('line',{x1:px(n),y1:py(n),x2:px(c),y2:py(c),stroke:'#B9AED0','stroke-width':1.5})); ed(c);} })(root);
+  (function nd(n){ if(!n)return; nd(n.l);
+    const angle = (n.v===tiltV) ? tiltDeg : Math.max(-10,Math.min(10,BF(n)*4));
+    const g=SVG('g',{transform:'translate('+px(n)+','+py(n)+')'});
+    if(n.l||n.r){ g.appendChild(SVG('line',{x1:-14,y1:0,x2:14,y2:0,stroke:'#8E7CC3','stroke-width':2})); }
+    g.appendChild(SVG('circle',{r:2.5,fill:'#8E7CC3'}));
+    const pend=SVG('g',{transform:'rotate('+angle+')'});
+    pend.appendChild(SVG('line',{x1:0,y1:0,x2:0,y2:24,stroke:'#B9AED0','stroke-width':1.5}));
+    const isFlash=(n.v===flashV), isCur=(n.v===curV);
+    pend.appendChild(SVG('circle',{cx:0,cy:24,r:19,fill:isFlash?'#FDEBF3':'#EDE6F7',stroke:isCur?'#5AA0FF':'#8E7CC3','stroke-width':isCur?3:2}));
+    const t=SVG('text',{x:0,y:29,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'#5C4B8A'}); t.textContent=n.v;
+    pend.appendChild(t);
+    g.appendChild(pend);
+    el.appendChild(g);
+    nd(n.r);
+  })(root);
+}
+function draw(){ const pos=computeLayout(); drawTech(pos); drawMobile(pos); }
 function narrate(h){ NARR(h); }
-function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset'],b);}
-function setRot(kind){ $('rotbadge').innerHTML = kind? '<span class="badge rot">⟳ XOAY '+kind+'</span>':''; }
+function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset','bPlay','bReset2'],b);}
+function setRot(kind){ const b=$('rotbadge'); if(b) b.innerHTML = kind? '<span class="badge rot">⟳ XOAY '+kind+'</span>':''; }
 
 /* Chèn TỪNG BƯỚC (đệ quy async) */
 async function ins(node,x){
-  if(!node){ hl(L.base); narrate('Tới chỗ trống → tạo <b>lá mới ['+x+']</b> (chiều cao 1).'); await nap(700); return Node(x); }
+  if(!node){ hl(L.base); narrate('Tới chỗ trống → treo <b>quả cân mới ['+x+']</b>.'); await nap(700); return Node(x); }
   curV=node.v; bfV=null; draw();
   if(x<node.v){ hl(L.goL); narrate('Ở node <b>'+node.v+'</b>: so sánh <b>'+x+' &lt; '+node.v+'</b> → đi <b>TRÁI</b>.'); await nap(850); node.l=await ins(node.l,x); }
   else if(x>node.v){ hl(L.goR); narrate('Ở node <b>'+node.v+'</b>: so sánh <b>'+x+' &gt; '+node.v+'</b> → đi <b>PHẢI</b>.'); await nap(850); node.r=await ins(node.r,x); }
@@ -129,39 +164,68 @@ async function ins(node,x){
   const hL=H(node.l), hR=H(node.r);
   upd(node); curV=node.v; bfV=null; draw();
   hl(L.updH); narrate('Quay lên node <b>'+node.v+'</b>: chiều cao = 1 + max(trái '+hL+', phải '+hR+') = <b>'+node.h+'</b>.'); await nap(1150);
-  const bf=BF(node); bfV=node.v; draw();
-  hl(L.bf); narrate('Độ lệch <b>bf</b> = cao(trái) − cao(phải) = '+hL+' − '+hR+' = <b style="color:'+(Math.abs(bf)>1?'var(--red)':'var(--green)')+'">'+(bf>0?'+':'')+bf+'</b>'+(Math.abs(bf)>1?' → <b style="color:var(--red)">MẤT CÂN!</b>':' → ổn (|bf| ≤ 1).')); await nap(1250);
+  const bf=BF(node); bfV=node.v;
+  if(Math.abs(bf)>1){ tiltV=node.v; tiltDeg = bf>0?-26:26; }
+  draw();
+  hl(L.bf); narrate('Độ lệch <b>bf</b> = cao(trái) − cao(phải) = '+hL+' − '+hR+' = <b style="color:'+(Math.abs(bf)>1?'var(--red)':'var(--green)')+'">'+(bf>0?'+':'')+bf+'</b>'+(Math.abs(bf)>1?' → <b style="color:var(--red)">MẤT CÂN — mobile LỆCH!</b>':' → ổn (|bf| ≤ 1).')); await nap(1250);
 
   hl(L.cases);
-  if(bf>1 && x<node.l.v){ hl(L.LL); rotHappened=true; setRot('LL (phải)'); narrate('Ca <b>LL</b>: bf='+bf+' &gt; 1 <b>và</b> '+x+' &lt; con trái '+node.l.v+' → lệch trái-trái → <b>xoay PHẢI</b> 1 lần.'); await nap(1300); const r=rotR(node); curV=r.v; bfV=null; draw(); await nap(950); return r; }
-  if(bf<-1 && x>node.r.v){ hl(L.RR); rotHappened=true; setRot('RR (trái)'); narrate('Ca <b>RR</b>: bf='+bf+' &lt; −1 <b>và</b> '+x+' &gt; con phải '+node.r.v+' → lệch phải-phải → <b>xoay TRÁI</b> 1 lần.'); await nap(1300); const r=rotL(node); curV=r.v; bfV=null; draw(); await nap(950); return r; }
-  if(bf>1 && x>node.l.v){ hl(L.LR); rotHappened=true; setRot('LR (2 lần)'); narrate('Ca <b>LR</b>: lệch trái (bf='+bf+') nhưng '+x+' &gt; con trái '+node.l.v+' → gấp khúc → <b>xoay TRÁI con trái</b> trước…'); await nap(1300); node.l=rotL(node.l); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay PHẢI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotR(node); curV=r.v; draw(); await nap(950); return r; }
-  if(bf<-1 && x<node.r.v){ hl(L.RL); rotHappened=true; setRot('RL (2 lần)'); narrate('Ca <b>RL</b>: lệch phải (bf='+bf+') nhưng '+x+' &lt; con phải '+node.r.v+' → gấp khúc → <b>xoay PHẢI con phải</b> trước…'); await nap(1300); node.r=rotR(node.r); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay TRÁI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotL(node); curV=r.v; draw(); await nap(950); return r; }
+  if(bf>1 && x<node.l.v){ hl(L.LL); rotHappened=true; setRot('LL (phải)'); narrate('Ca <b>LL</b> → <b>xoay PHẢI</b> 1 lần cho thẳng lại.'); await nap(1300); const r=rotR(node); curV=r.v; bfV=null; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
+  if(bf<-1 && x>node.r.v){ hl(L.RR); rotHappened=true; setRot('RR (trái)'); narrate('Ca <b>RR</b> → <b>xoay TRÁI</b> 1 lần cho thẳng lại.'); await nap(1300); const r=rotL(node); curV=r.v; bfV=null; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
+  if(bf>1 && x>node.l.v){ hl(L.LR); rotHappened=true; setRot('LR (2 lần)'); narrate('Ca <b>LR</b>: gấp khúc → <b>xoay TRÁI con trái</b> trước…'); await nap(1300); node.l=rotL(node.l); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay PHẢI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotR(node); curV=r.v; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
+  if(bf<-1 && x<node.r.v){ hl(L.RL); rotHappened=true; setRot('RL (2 lần)'); narrate('Ca <b>RL</b>: gấp khúc → <b>xoay PHẢI con phải</b> trước…'); await nap(1300); node.r=rotR(node.r); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay TRÁI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotL(node); curV=r.v; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
   hl(L.ok); narrate('|bf| ≤ 1 → node <b>'+node.v+'</b> vẫn CÂN, không xoay, đi tiếp lên trên.'); await nap(900);
   return node;
 }
 
 async function doInsert(x){
   setRot(''); rotHappened=false; flashV=x; curV=null; bfV=null;
-  hl(L.sig); narrate('Chèn <b>'+x+'</b>: đi từ gốc theo luật <b>nhỏ → trái, lớn → phải</b>.'); await nap(750);
+  hl(L.sig); narrate('Treo thêm quả cân <b>'+x+'</b>: đi từ gốc theo luật <b>nhỏ → trái, lớn → phải</b>.'); await nap(750);
   root=await ins(root,x);
-  curV=null; bfV=null; draw(); hl();
-  if(rotHappened) narrate('Chèn <b>'+x+'</b> xong — đã <b style="color:var(--amber)">xoay</b> cho cân, cây vẫn thấp. (Xem badge ⟳ ở tiêu đề.)');
-  else narrate('Chèn <b>'+x+'</b> xong — mọi node đều |bf| ≤ 1, cây vẫn cân, khỏi xoay.');
+  curV=null; bfV=null; tiltV=null; tiltDeg=0; draw(); hl();
+  if(rotHappened) narrate('Treo <b>'+x+'</b> xong — mobile đã <b style="color:var(--amber)">tự xoay</b> cho thẳng lại.');
+  else narrate('Treo <b>'+x+'</b> xong — mobile vẫn cân, khỏi xoay.');
   await nap(800); flashV=null; draw();
 }
-$('bIns').onclick=async ()=>{ if(busy)return; lock(true); await doInsert(+$('val').value); $('val').value=+$('val').value+10; lock(false); };
-$('bReset').onclick=()=>{ if(busy)return; root=null; setRot(''); flashV=null;curV=null;bfV=null; draw(); narrate('Đã xoá cây. Chèn số để xem từng bước.'); hl(); };
-$('bDemo').onclick=async ()=>{ if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null; draw();
-  for(let k=1;k<=7;k++){ root=insertSync(root,k); flashV=k; draw(); narrate('Chèn nhanh <b>'+k+'</b> (đã tự cân) — bấm <b>Chèn</b> để xem chi tiết từng bước.'); await nap(430); }
-  flashV=null; draw();
-  narrate('Chèn 1→7 tăng dần mà cây vẫn <b>THẤP &amp; CÂN</b> (chỉ 3 tầng) — nhờ tự xoay. Cây thường sẽ thành đường thẳng 7 tầng!');
+
+async function showComparisonFlourish(){
+  narrate('🤔 Nếu KHÔNG tự cân bằng, treo 1→7 tăng dần sẽ cho một chuỗi lệch hẳn sang một bên như thế này…');
+  const el=$('svgTheme');
+  const ghost=SVG('g',{opacity:'0'});
+  for(let i=0;i<7;i++){
+    const gx=520+i*3, gy=40+i*34;
+    if(i>0) ghost.appendChild(SVG('line',{x1:520+(i-1)*3,y1:40+(i-1)*34,x2:gx,y2:gy,stroke:'#C7C7C7','stroke-width':1.5}));
+    ghost.appendChild(SVG('circle',{cx:gx,cy:gy,r:9,fill:'#E9E9E9',stroke:'#B0B0B0'}));
+  }
+  el.appendChild(ghost);
+  await nap(80); ghost.setAttribute('opacity','1');
+  await nap(1700);
+  narrate('😵 7 tầng, tìm chậm như dò từng phần tử — KHÔNG có gì tự cân bằng cả.');
+  await nap(1700);
+  narrate('✅ Còn mobile của chúng ta (bên trên) nhờ <b style="color:var(--amber)">tự XOAY</b> nên vẫn THẤP &amp; CÂN — chỉ 3 tầng!');
+  await nap(1800);
+  ghost.remove();
+}
+
+$('bPlay').onclick=async()=>{
+  if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw();
+  narrate('🎐 Treo lần lượt các quả cân 1, 2, 3, 4, 5, 6, 7…'); await nap(700);
+  for(let k=1;k<=7;k++){ await doInsert(k); }
+  await showComparisonFlourish();
+  narrate('Hết! Mobile vẫn thấp & cân sau khi treo đủ 7 quả — nhờ tự xoay mỗi khi lệch quá 1 tầng.');
   lock(false);
 };
-initQuiz('quiz','avl',{
-  line:{ok:true, msg:'Đúng! Cây THƯỜNG không tự cân → thành đường thẳng, tìm chậm như list. AVL tự XOAY nên luôn thấp. (Bấm "Chèn 1→7" để thấy AVL giữ cân.)'},
-  bal:{ok:false, msg:'Cây THƯỜNG (không cân) sẽ nghiêng thành đường thẳng. Chỉ AVL mới giữ cân.'}
-});
+$('bReset2').onclick=()=>{ if(busy)return; root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); narrate('Đã reset. Bấm ▶ Play để xem lại.'); hl(); };
+
+$('bIns').onclick=async ()=>{ if(busy)return; lock(true); await doInsert(+$('val').value); $('val').value=+$('val').value+10; lock(false); };
+$('bReset').onclick=()=>{ if(busy)return; root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); narrate('Đã xoá cây.'); hl(); };
+$('bDemo').onclick=async ()=>{ if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null; draw();
+  for(let k=1;k<=7;k++){ root=insertSync(root,k); flashV=k; draw(); narrate('Chèn nhanh <b>'+k+'</b> (đã tự cân).'); await nap(430); }
+  flashV=null; draw();
+  narrate('Chèn 1→7 tăng dần mà cây vẫn THẤP & CÂN (chỉ 3 tầng) — nhờ tự xoay.');
+  lock(false);
+};
+
 draw();
 if(location.hash==='#seed'){ [50,30,70,20,40,60,80,10,25,90].forEach(v=>{root=insertSync(root,v);}); draw(); }
 })();
