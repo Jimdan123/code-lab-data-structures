@@ -134,7 +134,10 @@
       </div>
     </div>
 
-    <p class="lead-p" style="margin-top:16px;"><code>subdivide()</code> chia đúng như cắt bánh làm 4 phần bằng nhau — hoàn toàn là chuyện hình học, chưa liên quan gì tới điểm đang có trong ô:</p>
+    <p class="lead-p" style="margin-top:16px;">Trước hết: <b>một node lưu gì?</b> Mỗi node chỉ là một object nhỏ — không phải một cấu trúc phức tạp:</p>
+    <div class="formula">node = { cx, cy, half, depth, &nbsp;points: [ ], &nbsp;nw, ne, sw, se }</div>
+    <p class="lead-p"><code>cx, cy, half, depth</code> tả <b>hình vuông</b> mà node này đại diện — cố định, không đổi sau khi tạo. <code>points</code> là danh sách ghim <b>thật sự đang nằm trong ô này</b> (tối đa CAP cái, trừ khi đã chạm MAX_DEPTH). <code>nw/ne/sw/se</code> là 4 ô con — còn <code>null</code> nghĩa là node này <b>chưa chẻ</b>, vẫn còn là lá; code kiểm tra "đã chẻ chưa" chỉ bằng <code>if (!node.nw)</code>.</p>
+    <p class="lead-p"><code>subdivide()</code> chia đúng như cắt bánh làm 4 phần bằng nhau — hoàn toàn là chuyện hình học, chưa liên quan gì tới điểm đang có trong ô:</p>
     <div class="formula">1 ô [tâm, nửa cạnh h] &nbsp;→&nbsp; 4 ô con NW/NE/SW/SE, mỗi ô nửa cạnh = h/2, tâm lệch ±h/2 sang 4 hướng</div>
     <p class="lead-p">Một điểm rơi vào góc nào chỉ cần <b>2 phép so sánh</b>: so <code>x</code> với tâm ô (trái/phải), so <code>y</code> với tâm ô (trên/dưới) → ra đúng 1 trong 4 góc.</p>
     <div class="callout">✂️ <b>Điểm dễ hiểu lầm:</b> khi 1 ô đầy và phải chẻ ra 4 ô con, các điểm <b>đang có sẵn trong ô đó không hề chuyển vào 4 ô con</b> — chúng nằm nguyên tại ô cha. Chỉ có điểm <b>MỚI</b> vừa khiến ô bị đầy (và mọi điểm chèn sau đó) mới thật sự bị đẩy xuống 1 trong 4 ô con. Một ô đã "chẻ" vẫn giữ nguyên các điểm gốc của nó.</div>
@@ -268,6 +271,10 @@ renderToolbox('quadtree');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
 const CODE=[
+ ['<span class="kw">function</span> <span class="fn">QuadNode</span>(cx, cy, half, depth) {'],
+ ['  <span class="kw">return</span> { cx, cy, half, depth, points: [], nw: <span class="kw">null</span>, ne: <span class="kw">null</span>, sw: <span class="kw">null</span>, se: <span class="kw">null</span> };'],
+ ['}'],
+ [''],
  ['<span class="kw">function</span> <span class="fn">contains</span>(node, p) {'],
  ['  <span class="kw">return</span> p.x &gt;= node.cx-node.half &amp;&amp; p.x &lt; node.cx+node.half &amp;&amp;'],
  ['         p.y &gt;= node.cy-node.half &amp;&amp; p.y &lt; node.cy+node.half;'],
@@ -291,7 +298,7 @@ const CODE=[
  ['}'],
 ];
 renderCode('code', CODE);
-const L={containsChk:14, roomChk:15, pushDirect:16, subdivideCall:18, recurseCall:19};
+const L={containsChk:18, roomChk:19, pushDirect:20, subdivideCall:22, recurseCall:23};
 
 let CAP=4; const MAX_DEPTH=5;
 function QN(cx,cy,half,depth){ return {cx,cy,half,depth,points:[],nw:null,ne:null,sw:null,se:null}; }
