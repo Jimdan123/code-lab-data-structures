@@ -154,7 +154,9 @@
 
   <section class="k-section">
     <h2 class="k-h2"><span class="tag">03</span> AVL Tree — cân bằng dựa vào đâu?</h2>
-    <p class="lead-p"><b>AVL Tree</b> (đặt theo tên hai nhà phát minh Adelson-Velsky và Landis, 1962) là một BST có thêm đúng <b>một ràng buộc</b>: tại <b>mọi</b> node, chiều cao của hai cây con trái và phải chỉ được lệch nhau <b>tối đa 1</b>. Đại lượng đo độ lệch đó gọi là <b>hệ số cân bằng (balance factor)</b>:</p>
+    <p class="lead-p"><b>AVL Tree</b> (đặt theo tên hai nhà phát minh Adelson-Velsky và Landis, 1962) là một BST có thêm đúng <b>một ràng buộc</b>: tại <b>mọi</b> node, chiều cao của hai cây con trái và phải chỉ được lệch nhau <b>tối đa 1</b>. Chiều cao (height) của một node được tính từ dưới lên, mỗi node dựa vào chiều cao 2 con của chính nó:</p>
+    <div class="formula">height(rỗng) = 0 &nbsp;→&nbsp; height(node) = 1 + max(height(trái), height(phải))</div>
+    <p class="lead-p">Đại lượng đo độ lệch giữa 2 nhánh gọi là <b>hệ số cân bằng (balance factor)</b>:</p>
     <div class="formula">bf(node) = height(trái) − height(phải) &nbsp;→&nbsp; hợp lệ khi bf ∈ {−1, 0, 1}</div>
     <p class="lead-p">Sau mỗi lần chèn/xoá, AVL tính lại <code>bf</code> tại từng node trên đường đi ngược lên gốc. Ngay khi gặp node có <code>|bf| &gt; 1</code>, cây thực hiện <b>xoay (rotation)</b> tại node đó để đưa mọi thứ về lại cân bằng. Có đúng <b>4 kiểu xoay</b>, tuỳ vào hướng lệch:</p>
     <div class="k-menu4">
