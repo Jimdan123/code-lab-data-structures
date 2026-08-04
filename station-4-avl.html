@@ -43,6 +43,11 @@
 
   .k-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   @media(max-width:900px){.k-menu{grid-template-columns:1fr;}}
+  .k-menu2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:700px){.k-menu2{grid-template-columns:1fr;}}
+  .k-menu4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media(max-width:980px){.k-menu4{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.k-menu4{grid-template-columns:1fr;}}
   .dish{background:#fff;border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);border-top:5px solid var(--card-c,var(--indigo));}
   .dish .ic{font-size:24px;}
   .dish h3{font-family:'Baloo 2',cursive;font-size:16px;margin:6px 0 4px;color:var(--card-c,var(--indigo));}
@@ -56,6 +61,13 @@
   .dish li{margin-bottom:4px;}
   .dish li:last-child{margin-bottom:0;}
   .dish li b{color:var(--card-c);}
+  .dish.rot{padding:16px 16px 14px;}
+  .dish.rot .ic{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:800;background:var(--card-c,var(--indigo));color:#fff;display:inline-block;border-radius:6px;padding:2px 9px;}
+  .lead-p{font-size:14px;line-height:1.65;color:var(--soy);max-width:900px;margin-bottom:14px;}
+  .lead-p b{color:var(--indigo);}
+  .callout{background:var(--tatami);border-left:5px solid var(--lacquer);border-radius:10px;padding:13px 16px;font-size:13.5px;line-height:1.6;margin-top:12px;}
+  .callout b{color:var(--indigo);}
+  .formula{font-family:'JetBrains Mono',monospace;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:12px 16px;font-size:13.5px;margin:10px 0;display:inline-block;}
 
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
@@ -109,28 +121,68 @@
   <div id="toolbox"></div>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">01</span> Vì sao cần cây tự cân bằng?</h2>
-    <div class="k-menu">
-      <div class="dish problem">
-        <div class="ic">🎯</div>
-        <h3>Bài toán</h3>
-        <p>Giữ dữ liệu <b>luôn sắp xếp</b> mà vừa tìm nhanh vừa thêm nhanh.</p>
-      </div>
-      <div class="dish bad">
-        <div class="ic">❌</div>
-        <h3>Mảng / cây thường thì sao?</h3>
-        <p>Mảng sắp xếp thì <b>chèn chậm</b>; cây thường dễ <b>nghiêng thành đường thẳng</b> → tìm chậm lại.</p>
-      </div>
+    <h2 class="k-h2"><span class="tag">01</span> Binary Search Tree (BST) — nền tảng</h2>
+    <p class="lead-p">Cây nhị phân tìm kiếm (BST) là một cây nhị phân mà tại <b>mọi node</b>: mọi giá trị ở cây con <b>trái</b> nhỏ hơn node, mọi giá trị ở cây con <b>phải</b> lớn hơn node. Nhờ tính chất này, mỗi bước tìm/chèn/xoá chỉ cần đi theo <b>một nhánh duy nhất</b> — trái hoặc phải — giống cách tìm kiếm nhị phân trên mảng đã sắp xếp.</p>
+    <div class="k-menu2">
       <div class="dish idea">
-        <div class="ic">💡</div>
-        <h3>Ý tưởng</h3>
-        <p>Mỗi khi lệch quá 1 tầng, tự <b>XOAY</b> cho cân → luôn thấp → tìm luôn nhanh.</p>
+        <div class="ic">✅</div>
+        <h3>Ưu điểm</h3>
+        <ul>
+          <li>Nếu cây cân đối: tìm/chèn/xoá chỉ mất <b>O(log n)</b>.</li>
+          <li>Duyệt in-order (trái → gốc → phải) cho ra dãy <b>đã sắp xếp</b>.</li>
+          <li>Cài đặt <b>đơn giản</b> — chỉ so sánh nhỏ hơn/lớn hơn rồi rẽ nhánh.</li>
+        </ul>
+      </div>
+      <div class="dish problem">
+        <div class="ic">❌</div>
+        <h3>Nhược điểm</h3>
+        <ul>
+          <li>Không có gì đảm bảo cây sẽ cân đối — hình dạng phụ thuộc hoàn toàn vào <b>thứ tự chèn</b>.</li>
+          <li>Cây <b>không tự sửa</b> hình dạng sau khi chèn/xoá.</li>
+          <li>Ở ca xấu nhất, mọi lợi thế "tìm nhanh" biến mất (xem mục 02).</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">02</span> Từ điển mobile treo ↔ khoa học máy tính</h2>
+    <h2 class="k-h2"><span class="tag">02</span> Vấn đề: cây mất cân bằng (chênh lệch)</h2>
+    <p class="lead-p">Chèn lần lượt <b>1, 2, 3, 4, 5, 6, 7</b> vào một BST thường: số nào cũng lớn hơn số trước, nên luôn bị đẩy tiếp sang <b>nhánh phải</b>. Kết quả là cây suy biến thành một <b>chuỗi thẳng 7 tầng</b> — giống hệt một danh sách liên kết, không còn là "cây" theo đúng nghĩa nữa.</p>
+    <div class="formula">chiều cao ca xấu nhất = n &nbsp;(thay vì ~log₂ n nếu cân đối)</div>
+    <div class="callout">📉 Tìm số <b>7</b> trong cây suy biến này phải đi qua đủ cả 7 node → <b>O(n)</b>, mất trắng lợi thế của cây nhị phân tìm kiếm. Đây chính là lý do AVL Tree ra đời: sau <b>mỗi</b> lần chèn/xoá, tự kiểm tra và <b>XOAY</b> lại ngay để cây không bao giờ lệch quá 1 tầng.</div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">03</span> AVL Tree — cân bằng dựa vào đâu?</h2>
+    <p class="lead-p"><b>AVL Tree</b> (đặt theo tên hai nhà phát minh Adelson-Velsky và Landis, 1962) là một BST có thêm đúng <b>một ràng buộc</b>: tại <b>mọi</b> node, chiều cao của hai cây con trái và phải chỉ được lệch nhau <b>tối đa 1</b>. Đại lượng đo độ lệch đó gọi là <b>hệ số cân bằng (balance factor)</b>:</p>
+    <div class="formula">bf(node) = height(trái) − height(phải) &nbsp;→&nbsp; hợp lệ khi bf ∈ {−1, 0, 1}</div>
+    <p class="lead-p">Sau mỗi lần chèn/xoá, AVL tính lại <code>bf</code> tại từng node trên đường đi ngược lên gốc. Ngay khi gặp node có <code>|bf| &gt; 1</code>, cây thực hiện <b>xoay (rotation)</b> tại node đó để đưa mọi thứ về lại cân bằng. Có đúng <b>4 kiểu xoay</b>, tuỳ vào hướng lệch:</p>
+    <div class="k-menu4">
+      <div class="dish rot idea">
+        <div class="ic">LL</div>
+        <h3>Xoay phải</h3>
+        <p>Lệch <b>trái-trái</b> (chèn vào con trái của con trái) → xoay phải tại node mất cân bằng.</p>
+      </div>
+      <div class="dish rot usecase">
+        <div class="ic">RR</div>
+        <h3>Xoay trái</h3>
+        <p>Lệch <b>phải-phải</b> (chèn vào con phải của con phải) → xoay trái tại node mất cân bằng.</p>
+      </div>
+      <div class="dish rot bad">
+        <div class="ic">LR</div>
+        <h3>Xoay trái-phải</h3>
+        <p>Lệch <b>trái-phải</b> → xoay trái tại con trái trước, rồi xoay phải tại gốc (2 bước).</p>
+      </div>
+      <div class="dish rot problem">
+        <div class="ic">RL</div>
+        <h3>Xoay phải-trái</h3>
+        <p>Lệch <b>phải-trái</b> → xoay phải tại con phải trước, rồi xoay trái tại gốc (2 bước).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">04</span> Từ điển mobile treo ↔ khoa học máy tính</h2>
     <div class="k-map">
       <div class="k-chip"><span class="em">🎐</span><div class="t"><b>Mobile treo quả cân</b>cây nhị phân tìm kiếm</div></div>
       <div class="k-chip"><span class="em">⚖️</span><div class="t"><b>Quả cân</b>node mang giá trị</div></div>
@@ -141,7 +193,7 @@
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">03</span> Treo thử quả cân ngay</h2>
+    <h2 class="k-h2"><span class="tag">05</span> Treo thử quả cân ngay</h2>
 
     <div class="viewtoggle" id="viewtoggle">
       <button class="vt-btn active" data-view="theme">🎐 Xem theo chủ đề</button>
@@ -205,7 +257,7 @@
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">04</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
+    <h2 class="k-h2"><span class="tag">06</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
     <div class="k-menu">
       <div class="dish idea">
         <div class="ic">✅</div>
