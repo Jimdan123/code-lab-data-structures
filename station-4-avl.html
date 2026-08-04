@@ -179,6 +179,21 @@
         <p>Lệch <b>phải-trái</b> → xoay phải tại con phải trước, rồi xoay trái tại gốc (2 bước).</p>
       </div>
     </div>
+
+    <p class="lead-p" style="margin-top:16px;">Chọn đúng 1 ca bên dưới để xem <b>chiều cao</b> được tính lại và <b>con trỏ</b> đổi hướng thế nào thật sự — không chỉ đọc tên gọi.</p>
+    <div class="card">
+      <h3>Xem 1 ca xoay thật</h3>
+      <div class="row" style="margin-bottom:10px;">
+        <button class="ghost rotcase-btn" data-case="LL">LL</button>
+        <button class="ghost rotcase-btn" data-case="RR">RR</button>
+        <button class="ghost rotcase-btn" data-case="LR">LR</button>
+        <button class="ghost rotcase-btn" data-case="RL">RL</button>
+        <button id="bRotStep">⏭ Xoay</button>
+        <button id="bRotReset" class="ghost">↺ Reset</button>
+      </div>
+      <svg id="svgRotDemo" viewBox="0 0 300 170" preserveAspectRatio="xMidYMid meet" style="max-width:320px;display:block;margin:0 auto;"></svg>
+      <div class="legend" id="rotDemoNarr" style="margin-top:8px;min-height:36px;"></div>
+    </div>
   </section>
 
   <section class="k-section">
@@ -399,6 +414,77 @@ function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset','bPlay'],b);}
 function lockStep(b){ CL.lock(['bStep'], b); }
 function setRot(kind){ const b=$('rotbadge'); if(b) b.innerHTML = kind? '<span class="badge rot">⟳ XOAY '+kind+'</span>':''; }
 function resetState(){ root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); hl(); }
+
+/* ── Demo mục 03: 1 ca xoay thật — chiều cao & con trỏ ── */
+function plainInsert(n,x){ if(!n) return {v:x,l:null,r:null,h:1}; if(x<n.v) n.l=plainInsert(n.l,x); else if(x>n.v) n.r=plainInsert(n.r,x); return n; }
+function setHeights(n){ if(!n) return; setHeights(n.l); setHeights(n.r); upd(n); }
+const ROT_SEQ={LL:[30,20,10],RR:[10,20,30],LR:[30,10,20],RL:[10,30,20]};
+const ROT_KIND={LL:'trái-trái',RR:'phải-phải',LR:'trái-phải',RL:'phải-trái'};
+let rotCase='LL', rotTree=null, rotStepIdx=0, rotDone=false;
+
+function drawRotDemo(){
+  const svg=$('svgRotDemo'); if(!svg || !rotTree) return; svg.innerHTML='';
+  const ctx={i:0}; layout(rotTree,0,ctx);
+  const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(rotTree);
+  const W=300,Hh=170,padX=54,padY=40;
+  const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
+  const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ svg.appendChild(SVG('line',{class:'edge',x1:px(n),y1:py(n),x2:px(c),y2:py(c)})); ed(c);} })(rotTree);
+  (function nd(n){ if(!n)return; nd(n.l);
+    const isRoot = (n===rotTree);
+    let cls='node'; if(isRoot && !rotDone) cls+=' rot'; if(isRoot && rotDone) cls+=' cur';
+    const g=SVG('g',{class:cls, transform:'translate('+px(n)+','+py(n)+')'});
+    g.appendChild(SVG('circle',{r:18}));
+    const t=SVG('text',{}); t.textContent=n.v; g.appendChild(t);
+    const th=SVG('text',{class:'h',x:0,y:-24}); th.textContent='h='+n.h; g.appendChild(th);
+    if(isRoot){ const bf=BF(n); const tb=SVG('text',{class:'bf',x:22,y:3,fill:Math.abs(bf)>1?'#E05555':'#5FE0A0'}); tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb); }
+    svg.appendChild(g); nd(n.r);
+  })(rotTree);
+}
+function rotBtnLabel(){
+  const total=(rotCase==='LR'||rotCase==='RL')?2:1;
+  if(rotDone) return '✓ Đã xoay xong';
+  if(total===2) return rotStepIdx===0 ? '⏭ Bước 1/2: xoay con trước' : '⏭ Bước 2/2: xoay gốc';
+  return '⏭ Xoay';
+}
+function buildRotCase(name){
+  rotCase=name; rotStepIdx=0; rotDone=false; rotTree=null;
+  for(const v of ROT_SEQ[name]) rotTree=plainInsert(rotTree,v);
+  setHeights(rotTree);
+  document.querySelectorAll('.rotcase-btn').forEach(b=>b.classList.toggle('ghost', b.dataset.case!==name));
+  drawRotDemo();
+  const bf=BF(rotTree);
+  $('bRotStep').textContent=rotBtnLabel(); $('bRotStep').disabled=false;
+  $('rotDemoNarr').innerHTML='Lệch kiểu <b>'+ROT_KIND[name]+'</b>: mỗi node vừa được tính <code>h = 1 + max(h trái, h phải)</code>, và ở gốc thì <b style="color:#C0442F">bf = '+(bf>0?'+':'')+bf+'</b> → mất cân bằng.';
+}
+function rotStep(){
+  if(rotDone) return;
+  const name=rotCase;
+  if(name==='LL'){ rotTree=rotR(rotTree); rotDone=true; }
+  else if(name==='RR'){ rotTree=rotL(rotTree); rotDone=true; }
+  else if(name==='LR'){
+    if(rotStepIdx===0){
+      const kv=rotTree.l.v; rotTree.l=rotL(rotTree.l); rotStepIdx=1; drawRotDemo();
+      $('bRotStep').textContent=rotBtnLabel();
+      $('rotDemoNarr').innerHTML='Bước 1: xoay <b>TRÁI</b> ở con trái ('+kv+') → đưa về đúng dạng trái-trái, chiều cao 2 node đó được tính lại.';
+      return;
+    } else { rotTree=rotR(rotTree); rotDone=true; }
+  }
+  else if(name==='RL'){
+    if(rotStepIdx===0){
+      const kv=rotTree.r.v; rotTree.r=rotR(rotTree.r); rotStepIdx=1; drawRotDemo();
+      $('bRotStep').textContent=rotBtnLabel();
+      $('rotDemoNarr').innerHTML='Bước 1: xoay <b>PHẢI</b> ở con phải ('+kv+') → đưa về đúng dạng phải-phải, chiều cao 2 node đó được tính lại.';
+      return;
+    } else { rotTree=rotL(rotTree); rotDone=true; }
+  }
+  drawRotDemo();
+  const bf=BF(rotTree);
+  $('bRotStep').textContent=rotBtnLabel();
+  $('rotDemoNarr').innerHTML='Xong! <b>'+rotTree.v+'</b> trở thành gốc mới, node lệch cũ tụt xuống làm con — chiều cao mọi node liên quan được tính lại theo <code>h = 1 + max(h trái, h phải)</code>, và giờ <b style="color:#4F7A3C">bf = '+(bf>0?'+':'')+bf+'</b> → cân bằng.';
+}
+document.querySelectorAll('.rotcase-btn').forEach(b=>{ b.onclick=()=>buildRotCase(b.dataset.case); });
+if($('bRotStep')){ $('bRotStep').onclick=rotStep; $('bRotReset').onclick=()=>buildRotCase(rotCase); buildRotCase('LL'); }
 
 /* Chèn TỪNG BƯỚC (đệ quy async) */
 async function ins(node,x){
