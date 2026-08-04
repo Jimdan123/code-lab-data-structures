@@ -138,14 +138,6 @@
   }
   .asmline .lbl{color:#9FB8A8;font-size:11px;letter-spacing:.1em;flex:none}
 
-  .regs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-  @media(max-width:700px){.regs{grid-template-columns:repeat(3,1fr)}}
-  .reg{background:#fff;border-radius:10px;padding:8px 10px;text-align:center;box-shadow:var(--shadow)}
-  .reg .rn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--soy-light);letter-spacing:.08em}
-  .reg .rv{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--indigo);transition:color .2s}
-  .reg.chg .rv{color:var(--lacquer)}
-  .reg.ptrreg .rv{font-size:11.5px}
-
   .note{
     background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;
     padding:12px 16px;font-size:14.5px;min-height:66px;
@@ -183,8 +175,6 @@
   .ram-legend span{display:inline-flex;align-items:center;gap:5px}
   .ram-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
   .growcap{text-align:center;font-size:11.5px;color:var(--soy-light);font-family:'Be Vietnam Pro',sans-serif;margin:6px 0}
-  .outbox{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:9px 12px;min-height:38px}
-  .outbox::before{content:"stdout / exit ▸ ";color:#7E9488;font-size:11px}
 
   /* ── 05: overflow ── */
   .ovf{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
@@ -341,8 +331,6 @@
 
         <div class="asmline"><span class="lbl">CPU ĐANG CHẠY ▸</span><span id="asm">—</span></div>
 
-        <div class="regs" id="regs"></div>
-
         <div class="note" id="simnote">Bấm <b>▶ Tiến</b> để chạy từng bước, hoặc <b>▶▶ Tự động</b> để xem cả vở kịch.</div>
 
         <div class="sim-controls">
@@ -367,10 +355,9 @@
           <span><i style="background:var(--f-sq)"></i>square</span>
           <span><i style="background:#B9AE99"></i>rác (đã pop)</span>
         </div>
-        <div class="outbox" id="simout"></div>
       </div>
     </div>
-    <p class="foot-disc">⚠️ Đã đơn giản hoá để dễ theo dõi: mỗi giá trị chiếm trọn một ô 8 byte (thực tế <code>int</code> chiếm 4 byte và được xếp sát nhau), một vài offset/thanh ghi tạm được làm tròn. Cấu trúc frame, thứ tự push/pop và vai trò các thanh ghi đúng theo System V AMD64 ABI.</p>
+    <p class="foot-disc">⚠️ Đã đơn giản hoá để dễ theo dõi: mỗi giá trị chiếm trọn một ô 8 byte (thực tế <code>int</code> chiếm 4 byte và được xếp sát nhau), một vài offset tạm được làm tròn. Thứ tự tạo/dỡ frame theo đúng cách CPU thật làm.</p>
 
     <!-- Quiz 1 -->
     <div class="quiz">
@@ -662,22 +649,11 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
     csrcEl.appendChild(d);
   });
 
-  const REGNAMES=['rdi','rsi','rax','rbx','rsp','rbp'];
-  const regsEl=document.getElementById('regs');
-  REGNAMES.forEach(rn=>{
-    const d=document.createElement('div');
-    d.className='reg'+((rn==='rsp'||rn==='rbp')?' ptrreg':'');
-    d.id='reg-'+rn;
-    d.innerHTML='<div class="rn">'+rn+'</div><div class="rv">—</div>';
-    regsEl.appendChild(d);
-  });
-
   const ramEl=document.getElementById('ram');
   const asmEl=document.getElementById('asm');
   const noteEl=document.getElementById('simnote');
-  const outEl=document.getElementById('simout');
   const cntEl=document.getElementById('stepcnt');
-  let cur=0, prevRegs={}, prevSp=0, autoT=null;
+  let cur=0, prevSp=0, autoT=null;
 
   const FR={libc:'f-libc',main:'f-main',sum:'f-sum',sq:'f-sq'};
 
@@ -689,19 +665,7 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
     csrcEl.querySelectorAll('.cl').forEach(d=>d.classList.toggle('on',+d.dataset.i===s.cLine));
     asmEl.textContent=s.asm;
     noteEl.innerHTML=s.note;
-    outEl.textContent=s.out;
     cntEl.textContent='bước '+(cur+1)+' / '+steps.length;
-
-    // regs
-    const rspv = s.sp>0 ? addr(s.sp-1) : '—';
-    const rbpv = s.bp>=0 ? addr(s.bp) : '—';
-    const vals={...s.regs, rsp:rspv, rbp:rbpv};
-    REGNAMES.forEach(rn=>{
-      const el=document.getElementById('reg-'+rn);
-      el.querySelector('.rv').textContent=vals[rn];
-      el.classList.toggle('chg', prevRegs[rn]!==undefined && prevRegs[rn]!==vals[rn]);
-    });
-    prevRegs=vals;
 
     // RAM
     ramEl.innerHTML='';
@@ -710,8 +674,8 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
       const d=document.createElement('div');
       d.className='slotrow '+(FR[slot.frame]||'')+(live?'':' junk')+((live && idx===s.sp-1 && s.sp>prevSp)?' fresh':'');
       let pt='';
-      if(live && idx===s.sp-1) pt+='<span class="sp">◀ rsp</span> ';
-      if(live && idx===s.bp)  pt+='<span class="bp">◀ rbp</span>';
+      if(live && idx===s.sp-1) pt+='<span class="sp">◀ đỉnh</span> ';
+      if(live && idx===s.bp)  pt+='<span class="bp">◀ mốc</span>';
       d.innerHTML='<span class="a">'+addr(idx)+'</span><span class="lb">'+slot.label+'</span><span class="pt">'+pt+'</span>';
       ramEl.appendChild(d);
     });
