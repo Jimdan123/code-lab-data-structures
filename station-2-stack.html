@@ -150,31 +150,10 @@
   /* cột stack RAM */
   .ramcol{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
   .ramcol h3{font-family:'Baloo 2',cursive;color:var(--indigo);font-size:17px;margin-bottom:2px}
-  .ramcol .capline{font-size:12px;color:var(--soy-light);margin-bottom:10px}
-  .ram{font-family:'JetBrains Mono',monospace;font-size:12px}
-  .slotrow{
-    display:grid;grid-template-columns:64px 1fr 74px;gap:8px;align-items:center;
-    border-radius:8px;padding:7px 10px;margin-bottom:4px;border-left:6px solid transparent;
-    background:var(--tatami);transition:background .25s,opacity .25s;position:relative;
-  }
-  .slotrow .a{color:var(--soy-light);font-size:11px}
-  .slotrow .lb{font-weight:500}
-  .slotrow .pt{text-align:right;font-weight:700;font-size:11px}
-  .slotrow .pt .sp{color:var(--lacquer)}
-  .slotrow .pt .bp{color:var(--indigo)}
-  .slotrow.f-libc{border-left-color:var(--f-libc)}
-  .slotrow.f-main{border-left-color:var(--f-main)}
-  .slotrow.f-sum{border-left-color:var(--f-sum)}
-  .slotrow.f-sq{border-left-color:var(--f-sq)}
-  .slotrow.junk{opacity:.42;background:#EDE7DA}
-  .slotrow.junk .lb{text-decoration:line-through;text-decoration-thickness:1px}
-  .slotrow.junk::after{content:"rác";position:absolute;right:8px;top:-7px;font-size:10px;background:#B9AE99;color:#fff;border-radius:6px;padding:0 6px}
-  .slotrow.fresh{animation:pushIn .3s ease}
+  .ramcol .capline{font-size:12px;color:var(--soy-light);margin-bottom:14px}
+  .fbox.f-sq{background:var(--f-sq);}
+  .fbox.fresh{animation:pushIn .3s ease}
   @keyframes pushIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
-  .ram-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;font-family:'Be Vietnam Pro',sans-serif}
-  .ram-legend span{display:inline-flex;align-items:center;gap:5px}
-  .ram-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
-  .growcap{text-align:center;font-size:11.5px;color:var(--soy-light);font-family:'Be Vietnam Pro',sans-serif;margin:6px 0}
 
   /* ── 05: overflow ── */
   .ovf{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
@@ -223,19 +202,6 @@
   .chip .t{font-size:13.5px}
   .chip .t b{display:block;color:var(--indigo);font-size:14px}
 
-  /* ── quiz ── */
-  .quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-top:22px}
-  .quiz h3{font-family:'Baloo 2',cursive;font-size:19px;color:var(--soy);margin-bottom:10px}
-  .quiz .q{font-size:15.5px;margin-bottom:14px}
-  .opts{display:flex;flex-wrap:wrap;gap:10px}
-  .opts .opt{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-size:14px}
-  .opt.correct{background:var(--wasabi);border-color:var(--wasabi);color:#fff}
-  .opt.wrong{background:var(--lacquer);border-color:var(--lacquer);color:#fff}
-  .reveal{display:none;margin-top:16px;background:#fff;border-radius:12px;padding:16px 18px;font-size:14.5px;border-left:5px solid var(--wasabi)}
-  .reveal.show{display:block;animation:pop .3s ease}
-  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-  .foot-disc{font-size:12.5px;color:var(--soy-light);margin-top:14px}
   footer{margin-top:70px;text-align:center;font-size:13px;color:var(--soy-light)}
   footer .lantern{font-size:22px}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -344,46 +310,9 @@
       </div>
 
       <div class="ramcol">
-        <h3>RAM · vùng stack</h3>
-        <div class="capline">mỗi hàng = 1 ô 8 byte (đã đơn giản hoá) · địa chỉ cao ở trên</div>
-        <div class="growcap">⬇ stack mọc xuống ⬇</div>
-        <div class="ram" id="ram"></div>
-        <div class="ram-legend">
-          <span><i style="background:var(--f-libc)"></i>libc</span>
-          <span><i style="background:var(--f-main)"></i>main</span>
-          <span><i style="background:var(--f-sum)"></i>sum_sq</span>
-          <span><i style="background:var(--f-sq)"></i>square</span>
-          <span><i style="background:#B9AE99"></i>rác (đã pop)</span>
-        </div>
-      </div>
-    </div>
-    <p class="foot-disc">⚠️ Đã đơn giản hoá để dễ theo dõi: mỗi giá trị chiếm trọn một ô 8 byte (thực tế <code>int</code> chiếm 4 byte và được xếp sát nhau), một vài offset tạm được làm tròn. Thứ tự tạo/dỡ frame theo đúng cách CPU thật làm.</p>
-
-    <!-- Quiz 1 -->
-    <div class="quiz">
-      <h3>🤔 Kiểm tra nhanh #1</h3>
-      <p class="q">Bản thân lệnh <code>call</code> đẩy thứ gì lên stack?</p>
-      <div class="opts" data-quiz>
-        <button class="opt" data-a="0">Các đối số của hàm</button>
-        <button class="opt" data-a="1">Địa chỉ trả về (địa chỉ lệnh kế tiếp)</button>
-        <button class="opt" data-a="0">Thanh ghi rbp của caller</button>
-      </div>
-      <div class="reveal">
-        <b>Đúng — chỉ địa chỉ trả về!</b> <code>call f</code> = <code>push rip_kế_tiếp</code> + <code>jmp f</code>. Đối số (6 cái đầu) đã nằm sẵn trong thanh ghi <code>rdi, rsi, rdx, rcx, r8, r9</code> từ trước; còn <code>rbp</code> là do <b>prologue của hàm được gọi</b> tự push ở bước đầu tiên (<code>push rbp</code>). Ba "thủ phạm" khác nhau, ba thời điểm khác nhau — xem lại bước 6→7 trong mô phỏng.
-      </div>
-    </div>
-
-    <!-- Quiz 2 -->
-    <div class="quiz">
-      <h3>🤔 Kiểm tra nhanh #2</h3>
-      <p class="q">Khi một hàm <code>return</code>, dữ liệu trong frame của nó sẽ ra sao?</p>
-      <div class="opts" data-quiz>
-        <button class="opt" data-a="0">Bị ghi đè ngay lập tức bằng 0</button>
-        <button class="opt" data-a="0">Được chuyển sang heap để giữ lại</button>
-        <button class="opt" data-a="1">Vẫn nằm nguyên trong RAM — chỉ có rsp dịch lên, vùng đó thành "rác"</button>
-      </div>
-      <div class="reveal">
-        <b>Chuẩn!</b> <code>leave/ret</code> chỉ dịch chuyển <code>rsp</code> — không ai đi xoá bộ nhớ cả (xoá thì tốn thời gian vô ích). Vùng cũ trở thành "rác" và sẽ bị <b>frame kế tiếp ghi đè</b> — trong mô phỏng, frame của <code>square(4)</code> đè lên đúng địa chỉ của <code>square(3)</code>. Đây cũng là lý do bug kinh điển trong C: <code>return &amp;bien_cuc_bo;</code> — con trỏ trỏ vào vùng rác, đọc ra giá trị "ma" (<b>dangling pointer</b> / use-after-return).
+        <h3>Stack lúc này</h3>
+        <div class="capline">Mỗi khung = một lời gọi hàm — khung mới luôn xếp lên trên, đang chạy thì viền vàng.</div>
+        <div class="fstack" id="ram"></div>
       </div>
     </div>
   </section>
@@ -531,8 +460,6 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
   ];
 
   // ── dựng danh sách bước ──
-  const HI = 0x7ffd2000;
-  const addr = i => '…' + (HI - 8*(i+1)).toString(16).slice(-4);
   const steps = [];
   let mem = [], sp = 0, bp = -1;
   let regs = {rdi:'—', rsi:'—', rax:'—', rbx:'—'};
@@ -653,9 +580,10 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
   const asmEl=document.getElementById('asm');
   const noteEl=document.getElementById('simnote');
   const cntEl=document.getElementById('stepcnt');
-  let cur=0, prevSp=0, autoT=null;
+  let cur=0, prevTopFrame=null, autoT=null, reachedEnd=false;
 
   const FR={libc:'f-libc',main:'f-main',sum:'f-sum',sq:'f-sq'};
+  const FNAME={libc:'libc', main:'main()', sum:'sum_sq()', sq:'square()'};
 
   function show(i){
     cur=Math.max(0,Math.min(steps.length-1,i));
@@ -667,19 +595,25 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
     noteEl.innerHTML=s.note;
     cntEl.textContent='bước '+(cur+1)+' / '+steps.length;
 
-    // RAM
+    // stack — một khung hộp cho mỗi lời gọi hàm đang còn sống
     ramEl.innerHTML='';
-    s.mem.forEach((slot,idx)=>{
-      const live = idx < s.sp;
+    const groups=[];
+    for(let idx=0; idx<s.sp; idx++){
+      const slot=s.mem[idx];
+      let g=groups.length? groups[groups.length-1]: null;
+      if(!g || g.frame!==slot.frame){ g={frame:slot.frame, locals:[]}; groups.push(g); }
+      if(slot.cls==='local') g.locals.push(slot.label);
+    }
+    groups.forEach((g,gi)=>{
+      const isTop = gi===groups.length-1;
       const d=document.createElement('div');
-      d.className='slotrow '+(FR[slot.frame]||'')+(live?'':' junk')+((live && idx===s.sp-1 && s.sp>prevSp)?' fresh':'');
-      let pt='';
-      if(live && idx===s.sp-1) pt+='<span class="sp">◀ đỉnh</span> ';
-      if(live && idx===s.bp)  pt+='<span class="bp">◀ mốc</span>';
-      d.innerHTML='<span class="a">'+addr(idx)+'</span><span class="lb">'+slot.label+'</span><span class="pt">'+pt+'</span>';
+      d.className='fbox '+(FR[g.frame]||'')+(isTop?' top':'')+((isTop && g.frame!==prevTopFrame)?' fresh':'');
+      d.innerHTML='<b>'+(FNAME[g.frame]||g.frame)+'</b> <span>'+(isTop?'— đang chạy':'— đang chờ')+(g.locals.length? ' · '+g.locals.join(' · '):'')+'</span>';
       ramEl.appendChild(d);
     });
-    prevSp=s.sp;
+    prevTopFrame = groups.length? groups[groups.length-1].frame : null;
+
+    if(cur>=steps.length-1 && !reachedEnd){ reachedEnd=true; CL.markDone('stack'); }
   }
   function stopAuto(){ if(autoT){clearInterval(autoT);autoT=null;document.getElementById('sAuto').textContent='▶▶ Tự động';} }
   document.getElementById('sNext').onclick=()=>{stopAuto();show(cur+1);};
@@ -717,22 +651,6 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
   };
   document.getElementById('ovfReset').onclick=()=>{ ovfStop(); depth=0; ovfRender(); errEl.classList.remove('show'); };
   ovfRender();
-
-  /* ═══ quiz ═══ */
-  document.querySelectorAll('[data-quiz]').forEach(box=>{
-    const reveal=box.parentElement.querySelector('.reveal');
-    box.querySelectorAll('.opt').forEach(b=>{
-      b.onclick=()=>{
-        box.querySelectorAll('.opt').forEach(o=>{
-          o.classList.remove('correct','wrong');
-          if(o.dataset.a==='1') o.classList.add('correct');
-        });
-        if(b.dataset.a!=='1') b.classList.add('wrong');
-        reveal.classList.add('show');
-        if(b.dataset.a==='1') CL.markDone('stack');
-      };
-    });
-  });
 })();
 </script>
 </body>
