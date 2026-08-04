@@ -57,6 +57,12 @@
   .dish li:last-child{margin-bottom:0;}
   .dish li b{color:var(--card-c);}
 
+  .lead-p{font-size:14px;line-height:1.65;color:var(--soy);max-width:900px;margin-bottom:14px;}
+  .lead-p b{color:var(--indigo);}
+  .callout{background:var(--tatami);border-left:5px solid var(--lacquer);border-radius:10px;padding:13px 16px;font-size:13.5px;line-height:1.6;margin-top:12px;}
+  .callout b{color:var(--indigo);}
+  .formula{font-family:'JetBrains Mono',monospace;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:12px 16px;font-size:13.5px;margin:10px 0;display:inline-block;}
+
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
   .k-chip .em{font-size:22px;}
@@ -127,6 +133,11 @@
         <p>Chia bản đồ thành ô; hỏi khung chỉ cần hỏi "ô có chạm khung không" — không chạm thì <b>CẮT CẢ NHÁNH</b>, khỏi xét bên trong.</p>
       </div>
     </div>
+
+    <p class="lead-p" style="margin-top:16px;"><code>subdivide()</code> chia đúng như cắt bánh làm 4 phần bằng nhau — hoàn toàn là chuyện hình học, chưa liên quan gì tới điểm đang có trong ô:</p>
+    <div class="formula">1 ô [tâm, nửa cạnh h] &nbsp;→&nbsp; 4 ô con NW/NE/SW/SE, mỗi ô nửa cạnh = h/2, tâm lệch ±h/2 sang 4 hướng</div>
+    <p class="lead-p">Một điểm rơi vào góc nào chỉ cần <b>2 phép so sánh</b>: so <code>x</code> với tâm ô (trái/phải), so <code>y</code> với tâm ô (trên/dưới) → ra đúng 1 trong 4 góc.</p>
+    <div class="callout">✂️ <b>Điểm dễ hiểu lầm:</b> khi 1 ô đầy và phải chẻ ra 4 ô con, các điểm <b>đang có sẵn trong ô đó không hề chuyển vào 4 ô con</b> — chúng nằm nguyên tại ô cha. Chỉ có điểm <b>MỚI</b> vừa khiến ô bị đầy (và mọi điểm chèn sau đó) mới thật sự bị đẩy xuống 1 trong 4 ô con. Một ô đã "chẻ" vẫn giữ nguyên các điểm gốc của nó.</div>
   </section>
 
   <section class="k-section">
@@ -373,7 +384,7 @@ async function insertRec(node,p,verbose){
     return true;
   }
   if(verbose){ narrate('Ô ĐẦY ('+CAP+'/'+CAP+') và chưa chạm MAX_DEPTH → phải <b style="color:var(--amber)">CHIA 4</b>.'); await nap(340); hl(L.subdivideCall); }
-  if(!node.nw){ subdivide(node); draw(); if(verbose){ narrate('subdivide(): chia ô thành 4 ô con NW · NE · SW · SE.'); await nap(450); } }
+  if(!node.nw){ subdivide(node); draw(); if(verbose){ narrate('subdivide(): chia ô thành 4 ô con NW · NE · SW · SE — các ghim cũ ở ô này vẫn giữ nguyên, không bị chuyển đi.'); await nap(500); } }
   if(verbose){ hl(L.recurseCall); await nap(200); }
   const child = pickChild(node,p);
   if(verbose){ narrate('Ghim rơi vào góc <b>'+child.name+'</b> → đệ quy insert() xuống đó.'); await nap(280); }
