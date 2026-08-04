@@ -105,37 +105,14 @@
   .b-ghost:hover{background:var(--indigo);color:#fff}
   .b-dark{background:var(--nori);color:#F6F1E4}
 
-  /* ── 02: bản đồ bộ nhớ ── */
-  .memmap{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
-  @media(max-width:900px){.memmap{grid-template-columns:1fr}}
-  .memcol{font-family:'JetBrains Mono',monospace;font-size:13px}
-  .memrow{border:2px solid var(--soy);border-bottom:none;padding:10px 14px;position:relative;background:#fff}
-  .memrow:last-child{border-bottom:2px solid var(--soy);border-radius:0 0 12px 12px}
-  .memrow:first-child{border-radius:12px 12px 0 0}
-  .memrow .nm{font-weight:700}
-  .memrow .d{font-family:'Be Vietnam Pro',sans-serif;font-size:12.5px;color:var(--soy-light)}
-  .memrow.stackz{background:var(--salmon-soft)}
-  .memrow.heapz{background:var(--wasabi-soft)}
-  .memrow.gap{background:repeating-linear-gradient(45deg,#fff,#fff 8px,var(--tatami) 8px,var(--tatami) 16px);text-align:center;color:var(--soy-light)}
-  .memrow .addr{position:absolute;right:10px;top:8px;font-size:11px;color:var(--soy-light)}
-  .memside li{margin-bottom:10px;font-size:14.5px}
-  .memside ul{margin-left:18px}
-
-  /* ── 03: giải phẫu frame ── */
-  .anatomy{display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start}
-  @media(max-width:980px){.anatomy{grid-template-columns:1fr}}
-  .frame-diagram{font-family:'JetBrains Mono',monospace;font-size:12.5px}
-  .fr-row{border:2px solid var(--indigo);border-bottom:none;background:#fff;padding:9px 12px;position:relative}
-  .fr-row:first-child{border-radius:12px 12px 0 0}
-  .fr-row:last-child{border-bottom:2px solid var(--indigo);border-radius:0 0 12px 12px}
-  .fr-row .who{font-family:'Be Vietnam Pro',sans-serif;font-size:11.5px;color:var(--soy-light)}
-  .fr-row .ptr{position:absolute;right:-86px;top:50%;transform:translateY(-50%);font-weight:700;font-size:12px}
-  .fr-row .ptr.pw{color:var(--salmon)}
-  .fr-row .ptr.pr{color:var(--wasabi)}
-  @media(max-width:980px){.fr-row .ptr{position:static;transform:none;display:inline-block;margin-left:8px}}
-  .fr-row.hi{background:var(--salmon-soft)}
-  .fr-row.lo{background:var(--wasabi-soft)}
-  .dircap{font-family:'Be Vietnam Pro',sans-serif;font-size:12px;color:var(--soy-light);margin:4px 2px}
+  /* ── 02: một lời gọi hàm tạo ra gì ── */
+  .fstack{display:flex;flex-direction:column-reverse;gap:6px;max-width:420px;margin:0 auto;}
+  .fbox{border-radius:10px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700;color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .fbox span{font-family:'Be Vietnam Pro',sans-serif;font-weight:400;font-size:12.5px;opacity:.85;}
+  .fbox.f-libc{background:var(--f-libc);}
+  .fbox.f-main{background:var(--f-main);}
+  .fbox.f-sum{background:var(--f-sum);}
+  .fbox.top{outline:3px solid var(--gold);outline-offset:2px;}
 
   .prolog{background:var(--nori);border-radius:14px;overflow:hidden}
   .prolog .hd{background:#121a17;color:#9FB8A8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 16px;letter-spacing:.08em}
@@ -279,7 +256,7 @@
 <header>
   <div class="eyebrow">TRẠM 2 · CẤU TRÚC DỮ LIỆU</div>
   <h1>Stack &amp; Call Stack<br><span class="accent">CPU gọi hàm như thế nào? 🍡</span></h1>
-  <p class="sub">Từ chồng đĩa LIFO đến <b>giải phẫu một stack frame thật</b>: <code>call</code> đẩy địa chỉ trả về, prologue cất <code>rbp</code>, biến cục bộ nằm ở đâu, <code>leave / ret</code> thu dọn ra sao — và vì sao đệ quy vô hạn làm chương trình… nổ.</p>
+  <p class="sub">Từ chồng đĩa LIFO đến <b>mỗi lời gọi hàm tạo ra một stack frame riêng</b> như thế nào, biến cục bộ với biến global khác nhau ra sao — và vì sao đệ quy vô hạn làm chương trình… nổ.</p>
 </header>
 
 <div class="stwrap">
@@ -310,70 +287,44 @@
     </div>
   </section>
 
-  <!-- ══ 02 · Bản đồ bộ nhớ ══ -->
+  <!-- ══ 02 · Một lời gọi hàm tạo ra gì ══ -->
   <section>
-    <h2><span class="tag">02</span> Stack nằm ở đâu trong bộ nhớ tiến trình?</h2>
-    <div class="memmap">
-      <div class="memcol">
-        <div class="dircap">địa chỉ cao (vd. 0x7ffd… trên Linux x86-64)</div>
-        <div class="memrow stackz"><span class="nm">STACK ⬇</span> <span class="addr">↓ mọc xuống</span><div class="d">frame của các hàm đang chạy · cấp phát tự động · giới hạn ~8 MB (ulimit -s)</div></div>
-        <div class="memrow gap">… khoảng trống (mmap, thư viện .so) …</div>
-        <div class="memrow heapz"><span class="nm">HEAP ⬆</span> <span class="addr">↑ mọc lên</span><div class="d">malloc / new / đối tượng JS · sống tới khi free hoặc GC dọn</div></div>
-        <div class="memrow"><span class="nm">.bss / .data</span><div class="d">biến toàn cục (chưa/đã khởi tạo)</div></div>
-        <div class="memrow"><span class="nm">.text</span><div class="d">mã máy của chương trình — chính là nơi <b>địa chỉ trả về</b> trỏ tới!</div></div>
-        <div class="dircap">địa chỉ thấp</div>
+    <h2><span class="tag">02</span> Một lời gọi hàm tạo ra gì trong bộ nhớ?</h2>
+    <p class="lead">Mỗi khi một hàm được gọi, chương trình dựng lên một vùng nhớ nhỏ <b>riêng cho đúng lần gọi đó</b> — gọi là <b>stack frame</b>. Frame này giữ hai thứ: các <b>biến cục bộ</b> của hàm, và một <b>ghi chú đường về</b> để quay lại đúng chỗ đang gọi khi hàm chạy xong.</p>
+    <div class="stcard">
+      <div class="fstack" id="fstackDemo">
+        <div class="fbox f-libc">main() <span>— đang chờ</span></div>
+        <div class="fbox f-main">tinhTong() <span>— đang chờ</span></div>
+        <div class="fbox f-sum top">binhPhuong() <span>— ĐANG CHẠY</span></div>
       </div>
-      <div class="stcard memside">
-        <ul>
-          <li><b>Stack mọc từ địa chỉ cao xuống thấp.</b> "Push" thực chất là <code>rsp = rsp − 8</code> rồi ghi giá trị vào <code>[rsp]</code> — vì vậy push/pop nhanh khủng khiếp: <b>chỉ là một phép trừ/cộng con trỏ</b>, không đi tìm chỗ trống như heap.</li>
-          <li>Thanh ghi <b><code>rsp</code></b> (stack pointer) luôn trỏ đúng <b>đỉnh stack</b> — ô có địa chỉ thấp nhất đang dùng.</li>
-          <li>Thanh ghi <b><code>rbp</code></b> (base/frame pointer) trỏ <b>mốc cố định của frame hiện tại</b>: biến cục bộ nằm ở <code>rbp − k</code>, tham số tràn nằm ở <code>rbp + k</code>.</li>
-          <li>Mỗi <b>thread có stack riêng</b>; heap thì các thread dùng chung — một lý do stack "tự nhiên" an toàn hơn với đa luồng.</li>
-          <li>Stack và heap mọc <b>ngược chiều nhau</b> vào vùng trống ở giữa — tận dụng không gian, hai bên không cần biết trước bên kia to cỡ nào.</li>
+      <p style="margin-top:16px;font-size:14.5px;">Gọi hàm khác bên trong hàm đang chạy → thêm một frame <b>MỚI chồng lên trên</b>. Hàm nào chạy xong trước thì frame đó <b>biến mất trước</b> — đúng thứ tự LIFO đã nói ở mục 01.</p>
+    </div>
+
+    <p class="lead" style="margin-top:24px;">Vậy <b>biến global</b> thì sao — chẳng lẽ nó cũng nằm trong một frame nào đó? <b>Không.</b> Biến global/tĩnh không thuộc về frame của bất kỳ hàm nào cả — nó sống trong một vùng nhớ riêng, tồn tại suốt từ lúc chương trình bắt đầu chạy tới lúc kết thúc, không phụ thuộc hàm nào đang được gọi. Vì vậy hàm nào cũng đọc/ghi được nó trực tiếp, không cần "mang theo" trong frame của mình.</p>
+
+    <div class="duo" style="grid-template-columns:1fr 1fr;">
+      <div class="stcard">
+        <h3 style="font-family:'Baloo 2',cursive;color:var(--wasabi);font-size:16px;margin-bottom:8px;">📦 Biến cục bộ</h3>
+        <ul style="margin-left:18px;font-size:13.5px;line-height:1.7;">
+          <li>Sinh ra <b>khi hàm được gọi</b>, nằm trong frame của đúng hàm đó.</li>
+          <li>Chỉ hàm chứa nó nhìn thấy được.</li>
+          <li><b>Biến mất</b> ngay khi hàm chạy xong (frame bị dỡ).</li>
         </ul>
       </div>
-    </div>
-  </section>
-
-  <!-- ══ 03 · Giải phẫu frame ══ -->
-  <section>
-    <h2><span class="tag">03</span> Giải phẫu một stack frame (x86-64 · System V ABI)</h2>
-    <p class="lead">Mỗi lời gọi hàm tạo ra một <b>frame</b> — "khay đồ nghề" riêng của hàm đó trên stack. Frame được dựng bởi 3 lệnh <b>prologue</b> và dỡ bởi 2 lệnh <b>epilogue</b>:</p>
-    <div class="anatomy">
-      <div>
-        <div class="dircap">địa chỉ cao — phần của hàm gọi (caller)</div>
-        <div class="frame-diagram">
-          <div class="fr-row"><b>đối số thứ 7, 8, …</b><div class="who">6 đối số đầu đi bằng thanh ghi: rdi, rsi, rdx, rcx, r8, r9 — chỉ số 7 trở đi mới nằm trên stack</div></div>
-          <div class="fr-row hi"><b>địa chỉ trả về</b><div class="who">lệnh <code>call</code> tự push — trỏ về lệnh kế tiếp trong caller (.text)</div></div>
-          <div class="fr-row"><b>saved rbp</b><span class="ptr pw">← rbp</span><div class="who">prologue cất rbp của caller để lát nữa khôi phục</div></div>
-          <div class="fr-row"><b>biến cục bộ</b><div class="who">int x, mảng, struct… — truy cập qua <code>rbp − k</code></div></div>
-          <div class="fr-row lo"><b>vùng tạm / căn lề</b><span class="ptr pr">← rsp</span><div class="who">rsp phải chia hết cho 16 trước mỗi <code>call</code> (ABI bắt buộc)</div></div>
-        </div>
-        <div class="dircap">địa chỉ thấp — đỉnh stack, nơi frame kế tiếp sẽ mọc</div>
-      </div>
-      <div class="prolog">
-        <div class="hd">prologue &amp; epilogue · "nghi thức vào – ra" của mọi hàm</div>
-<pre><span class="c">; ── caller ──────────────────────────────</span>
-<span class="f">call</span>  ham_kia        <span class="c">; = push rip_kế_tiếp + jmp ham_kia</span>
-
-<span class="c">; ── PROLOGUE (dựng frame) ───────────────</span>
-<span class="f">push</span>  <span class="n">rbp</span>            <span class="c">; 1. cất mốc frame của caller</span>
-<span class="f">mov</span>   <span class="n">rbp</span>, <span class="n">rsp</span>       <span class="c">; 2. đặt mốc frame MỚI</span>
-<span class="f">sub</span>   <span class="n">rsp</span>, <span class="n">N</span>         <span class="c">; 3. "xin" N byte cho biến cục bộ</span>
-
-<span class="c">; … thân hàm: đọc/ghi [rbp − k] …</span>
-<span class="c">; … kết quả trả về đặt vào rax/eax …</span>
-
-<span class="c">; ── EPILOGUE (dỡ frame) ─────────────────</span>
-<span class="f">leave</span>                <span class="c">; = mov rsp,rbp + pop rbp</span>
-<span class="f">ret</span>                  <span class="c">; pop địa chỉ trả về → nạp vào rip</span></pre>
+      <div class="stcard">
+        <h3 style="font-family:'Baloo 2',cursive;color:var(--lacquer);font-size:16px;margin-bottom:8px;">🌍 Biến global</h3>
+        <ul style="margin-left:18px;font-size:13.5px;line-height:1.7;">
+          <li>Sinh ra <b>khi chương trình bắt đầu chạy</b>, nằm ngoài mọi frame.</li>
+          <li><b>Mọi hàm</b> đều đọc/ghi trực tiếp được.</li>
+          <li>Sống tới tận khi <b>chương trình kết thúc</b>.</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <!-- ══ 04 · SIMULATOR ══ -->
   <section>
-    <h2><span class="tag">04</span> Mô phỏng call stack — từng lệnh một 🔬</h2>
+    <h2><span class="tag">03</span> Mô phỏng call stack — từng lệnh một 🔬</h2>
     <p class="lead">Ta chạy chương trình C bên dưới đúng theo cách CPU chạy (tinh thần <code>gcc -O0</code>, x86-64). Quan sát: <code>call</code> push địa chỉ trả về, đối số đi qua <b>rdi/rsi</b> rồi bị "spill" xuống frame, kết quả trả về nằm trong <b>rax</b>, và frame cũ trở thành <b>rác</b> chứ không hề bị xoá.</p>
 
     <div class="sim">
@@ -452,7 +403,7 @@
 
   <!-- ══ 05 · Stack overflow ══ -->
   <section>
-    <h2><span class="tag">05</span> Khi chồng đĩa chạm trần: Stack Overflow 💥</h2>
+    <h2><span class="tag">04</span> Khi chồng đĩa chạm trần: Stack Overflow 💥</h2>
     <div class="ovf">
       <div class="stcard ovf-note">
         <p>Stack có <b>giới hạn cứng</b> (Linux mặc định ~8 MB/thread; V8 của Chrome/Node giới hạn theo số frame, cỡ ~10.000). Mỗi lời gọi hàm "ăn" một frame — đệ quy không có điểm dừng sẽ ăn sạch:</p>
@@ -498,7 +449,7 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
 
   <!-- ══ 06 · Stack vs Heap + security + ứng dụng ══ -->
   <section>
-    <h2><span class="tag">06</span> Stack vs Heap — và vì sao hacker mê stack</h2>
+    <h2><span class="tag">05</span> Stack vs Heap — và vì sao hacker mê stack</h2>
 
     <div class="stcard" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
       <div>
