@@ -353,8 +353,8 @@ function drawHotel(){
     const t=SVG('text',{x:280,y:30,'text-anchor':'middle','font-size':26}); t.textContent='🧑'; el.appendChild(t);
     const nm=SVG('text',{x:280,y:46,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'var(--accent)'}); nm.textContent=lobbyName; el.appendChild(nm);
     if(hashBoardText){
-      el.appendChild(SVG('rect',{x:200,y:54,width:160,height:28,rx:7,fill:'#FFF8E7',stroke:'var(--accent)','stroke-width':1.5}));
-      const bt=SVG('text',{x:280,y:72,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'#7A5312'});
+      el.appendChild(SVG('rect',{x:210,y:52,width:140,height:26,rx:13,fill:'#FFF8E7',stroke:'var(--accent)','stroke-width':1.5}));
+      const bt=SVG('text',{x:280,y:69,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#7A5312'});
       bt.textContent = hashBoardText;
       el.appendChild(bt);
     }
@@ -366,25 +366,11 @@ function lockStep(b){ CL.lock(['bStep'], b); }
 function resetState(){ table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; hashBoardText=null; draw(); hl(); }
 
 async function doInsert(key){
-  lobbyName=key; hashBoardText=null; draw();
-  narrate('🧑 Khách <b>"'+key+'"</b> bước vào sảnh, tới quầy lễ tân…'); await nap(650);
-  hl(L.hashSig); await nap(250);
-  hl(L.hashLoop);
-  narrate('🛎️ Lễ tân nhẩm tính: cộng dồn từng chữ cái trong tên…');
-  let h=0;
-  for(const ch of String(key)){
-    h = (h*31 + ch.charCodeAt(0)) >>> 0;
-    hashBoardText = '"'+ch+'" → '+h;
-    draw();
-    await nap(320);
-  }
-  const idx = h % M;
-  hl(L.hashMod);
-  hashBoardText = h+' % '+M+' = '+idx;
-  draw();
-  await nap(550);
-  narrate('🛎️ Lễ tân tính ngay: <b>phòng '+idx+'</b> — không cần tra sổ.'); await nap(750);
-  hashBoardText=null;
+  const idx = hashFn(key);
+  lobbyName=key; hashBoardText='🔑 Phòng '+idx; draw();
+  narrate('🧑 Khách <b>"'+key+'"</b> bước vào, tay đã cầm sẵn <b>chìa khoá phòng '+idx+'</b> — tên nào cũng ra đúng 1 chìa, đi thẳng tới đó, khỏi cần hỏi lễ tân.'); await nap(950);
+  hl(L.hashSig); await nap(200);
+  hl(L.hashMod); await nap(200);
   hl(L.putSig); await nap(300);
   hl(L.putScan);
   const bucket = table[idx];
@@ -394,7 +380,7 @@ async function doInsert(key){
     narrate('🚪 "'+key+'" đi <b>THẲNG</b> tới phòng '+idx+' — không dò qua phòng nào khác, O(1).'); await nap(900);
   }
   hl(L.putPush);
-  lobbyName=null;
+  lobbyName=null; hashBoardText=null;
   bucket.push({key}); flashBucket=idx; draw();
   narrate('✅ "'+key+'" đã nhận phòng '+idx+'.'); await nap(850);
   flashBucket=null; draw(); hl();
