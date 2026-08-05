@@ -68,6 +68,11 @@
   .callout{background:var(--tatami);border-left:5px solid var(--lacquer);border-radius:10px;padding:13px 16px;font-size:13.5px;line-height:1.6;margin-top:12px;}
   .callout b{color:var(--indigo);}
   .formula{font-family:'JetBrains Mono',monospace;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:12px 16px;font-size:13.5px;margin:10px 0;display:inline-block;}
+  .rule-list{font-size:14px;line-height:1.65;color:var(--soy);max-width:900px;margin:0 0 14px 22px;padding:0 0 0 4px;}
+  .rule-list li{margin-bottom:6px;}
+  .rule-list b{color:var(--indigo);}
+  .callout ul{margin:8px 0 0 20px;padding:0;}
+  .callout ul li{margin-bottom:5px;}
 
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
@@ -76,9 +81,6 @@
   .k-chip .t b{display:block;color:var(--indigo);font-size:13px;}
   .k-chip .t code{font-family:'JetBrains Mono',monospace;background:#fff;border-radius:5px;padding:1px 6px;font-size:11.5px;color:var(--lacquer);}
 
-  .viewtoggle{margin-top:6px;}
-  .k-main{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start;}
-  @media(max-width:980px){.k-main{grid-template-columns:1fr;}}
 
   .tray{background:var(--nori);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
   .tray .bar{display:flex;align-items:center;gap:8px;background:#121a17;padding:11px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#9FB8A8;letter-spacing:.06em;}
@@ -100,6 +102,16 @@
   .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
   .k-side button:hover{background:var(--indigo);color:#fff;}
 
+  .log-layout{display:grid;grid-template-columns:1fr 250px;gap:14px;align-items:start;max-width:1080px;margin:0 auto 10px;}
+  @media(max-width:900px){.log-layout{grid-template-columns:1fr;}}
+  .log-panel{background:var(--nori);border-radius:14px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;color:#B9CBC0;max-height:300px;overflow-y:auto;}
+  .log-panel .ln{padding:3px 2px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .log-panel .ln:last-child{border-bottom:none;}
+  .log-panel .ln b{color:#EADFC8;}
+  .log-panel .ln.rot{color:var(--gold);font-weight:700;}
+  .log-panel .ln.bad b{color:#F19C8C;}
+  .log-panel .ln.empty{opacity:.55;font-style:italic;}
+
   .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
   .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
   .k-quiz button{background:#fff;color:var(--soy);border:2px solid #E4D6B4;font-family:'Be Vietnam Pro',sans-serif;font-weight:700;border-radius:10px;padding:8px 14px;}
@@ -114,51 +126,79 @@
 
   <div class="k-noren">
     <div class="k-eyebrow">Trạm 4 · Cấu trúc dữ liệu</div>
-    <h1>AVL Tree<br><span class="accent">= Mobile cân bằng 🎐</span></h1>
-    <p class="sub2">Mỗi lần treo thêm quả cân, mobile có thể <b>LỆCH</b> — nó tự xoay lại cho <b>THẲNG</b>, không bao giờ nghiêng hẳn sang một bên. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
+    <h1>AVL Tree<br><span class="accent">= Cây tự cân bằng 🌳</span></h1>
+    <p class="sub2">Cây nhị phân tìm kiếm (BST) bình thường có thể mọc <b>LỆCH</b> hẳn về một bên sau vài lần chèn — chậm dần thành O(n). AVL là BST được thêm luật: lệch quá 1 tầng thì <b>tự XOAY lại</b> ngay, không bao giờ để cây nghiêng. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
   </div>
 
   <div id="toolbox"></div>
 
   <section class="k-section">
     <h2 class="k-h2"><span class="tag">01</span> Binary Search Tree (BST) — nền tảng</h2>
-    <p class="lead-p">Cây nhị phân tìm kiếm (BST) là một cây nhị phân mà tại <b>mọi node</b>: mọi giá trị ở cây con <b>trái</b> nhỏ hơn node, mọi giá trị ở cây con <b>phải</b> lớn hơn node. Nhờ tính chất này, mỗi bước tìm/chèn/xoá chỉ cần đi theo <b>một nhánh duy nhất</b> — trái hoặc phải — giống cách tìm kiếm nhị phân trên mảng đã sắp xếp.</p>
-    <div class="k-menu2">
-      <div class="dish idea">
-        <div class="ic">✅</div>
-        <h3>Ưu điểm</h3>
-        <ul>
-          <li>Nếu cây cân đối: tìm/chèn/xoá chỉ mất <b>O(log n)</b>.</li>
-          <li>Duyệt in-order (trái → gốc → phải) cho ra dãy <b>đã sắp xếp</b>.</li>
-          <li>Cài đặt <b>đơn giản</b> — chỉ so sánh nhỏ hơn/lớn hơn rồi rẽ nhánh.</li>
-        </ul>
+    <p class="lead-p">Cây nhị phân tìm kiếm (BST) là một cây nhị phân tuân theo đúng <b>một luật</b>, áp dụng tại <b>mọi node</b> chứ không chỉ ở gốc:</p>
+    <ul class="rule-list">
+      <li>Mọi giá trị nằm ở cây con <b>trái</b> của một node → <b>nhỏ hơn</b> node đó.</li>
+      <li>Mọi giá trị nằm ở cây con <b>phải</b> của một node → <b>lớn hơn</b> node đó.</li>
+      <li>Luật này đúng <b>đệ quy</b> ở mọi tầng — con, cháu, chắt... node nào cũng phải tuân theo y hệt (bấm thử node bất kỳ trong cây bên dưới để thấy rõ).</li>
+    </ul>
+    <p class="lead-p">Nhờ tính chất này, mỗi bước tìm/chèn/xoá chỉ cần đi theo <b>một nhánh duy nhất</b> — trái hoặc phải — giống cách tìm kiếm nhị phân trên mảng đã sắp xếp.</p>
+
+    <div class="k-scene" style="max-width:820px;margin:0 auto 16px;">
+      <svg id="svgBstIntro" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="legend" style="text-align:center;">
+        <span style="color:var(--wasabi);font-weight:800;">●</span> nhỏ hơn node đã chọn &nbsp;·&nbsp;
+        <span style="color:var(--salmon);font-weight:800;">●</span> lớn hơn node đã chọn &nbsp;·&nbsp;
+        <span style="color:var(--gold);font-weight:800;">●</span> đường tìm kiếm
       </div>
-      <div class="dish problem">
-        <div class="ic">❌</div>
-        <h3>Nhược điểm</h3>
-        <ul>
-          <li>Không có gì đảm bảo cây sẽ cân đối — hình dạng phụ thuộc hoàn toàn vào <b>thứ tự chèn</b>.</li>
-          <li>Cây <b>không tự sửa</b> hình dạng sau khi chèn/xoá.</li>
-          <li>Ở ca xấu nhất, mọi lợi thế "tìm nhanh" biến mất (xem mục 02).</li>
-        </ul>
+      <div class="ticker" id="bstIntroNarr" style="max-width:none;">Bấm vào <b>bất kỳ node nào</b> để xem luật BST đúng tại đúng node đó — không chỉ đúng ở gốc.</div>
+      <div class="k-controls">
+        <div class="row" style="gap:8px">
+          <input type="number" id="bstIntroVal" placeholder="vd: 47" style="width:90px;">
+          <button id="bBstIntroSearch">🔍 Tìm giá trị này</button>
+        </div>
+        <div class="k-side"><button id="bBstIntroReset">↺ Bỏ chọn</button></div>
       </div>
+    </div>
+
+    <div class="callout" style="max-width:820px;margin:0 auto 16px;">
+      💡 <b>BST giải quyết vấn đề gì?</b> — so với các cách lưu "phẳng":
+      <ul>
+        <li><b>Mảng/danh sách chưa sắp xếp:</b> tìm phải quét lần lượt từng phần tử — <b>O(n)</b>.</li>
+        <li><b>Mảng đã sắp xếp:</b> tìm nhanh O(log n), nhưng chèn/xoá phải dịch chuyển cả dãy để giữ thứ tự — <b>O(n)</b>.</li>
+        <li><b>BST:</b> giữ được cả hai cùng lúc — tìm theo đúng <b>một đường</b> từ gốc xuống (O(log n)), <b>và</b> chèn/xoá chỉ cần nối lại vài con trỏ, không dịch chuyển gì cả.</li>
+      </ul>
+      <span style="display:block;margin-top:8px;">⚠️ Điều kiện: cây phải còn <b>cân đối</b> — xem mục 02 khi nó <b>không</b> cân đối.</span>
     </div>
   </section>
 
   <section class="k-section">
     <h2 class="k-h2"><span class="tag">02</span> Vấn đề: cây mất cân bằng (chênh lệch)</h2>
     <p class="lead-p">Chèn lần lượt <b>1, 2, 3, 4, 5, 6, 7</b> vào một BST thường: số nào cũng lớn hơn số trước, nên luôn bị đẩy tiếp sang <b>nhánh phải</b>. Kết quả là cây suy biến thành một <b>chuỗi thẳng 7 tầng</b> — giống hệt một danh sách liên kết, không còn là "cây" theo đúng nghĩa nữa.</p>
+
+    <div class="k-scene" style="max-width:820px;margin:0 auto 16px;">
+      <svg id="svgSkew" viewBox="0 0 760 320" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="ticker" id="skewNarr" style="max-width:none;"></div>
+      <div class="k-controls">
+        <div class="row" style="gap:8px">
+          <button class="play-btn" id="bSkewPlay">▶ Chèn 1→7 tự động</button>
+          <button id="bSkewStep" style="background:var(--indigo)">⏭ Từng bước</button>
+        </div>
+        <div class="k-side"><button id="bSkewReset">↺ Reset</button></div>
+      </div>
+    </div>
+
     <div class="formula">chiều cao ca xấu nhất = n &nbsp;(thay vì ~log₂ n nếu cân đối)</div>
     <div class="callout">📉 Tìm số <b>7</b> trong cây suy biến này phải đi qua đủ cả 7 node → <b>O(n)</b>, mất trắng lợi thế của cây nhị phân tìm kiếm. Đây chính là lý do AVL Tree ra đời: sau <b>mỗi</b> lần chèn/xoá, tự kiểm tra và <b>XOAY</b> lại ngay để cây không bao giờ lệch quá 1 tầng.</div>
   </section>
 
   <section class="k-section">
     <h2 class="k-h2"><span class="tag">03</span> AVL Tree — cân bằng dựa vào đâu?</h2>
-    <p class="lead-p"><b>AVL Tree</b> (đặt theo tên hai nhà phát minh Adelson-Velsky và Landis, 1962) là một BST có thêm đúng <b>một ràng buộc</b>: tại <b>mọi</b> node, chiều cao của hai cây con trái và phải chỉ được lệch nhau <b>tối đa 1</b>. Chiều cao (height) của một node được tính từ dưới lên, mỗi node dựa vào chiều cao 2 con của chính nó:</p>
-    <div class="formula">height(rỗng) = 0 &nbsp;→&nbsp; height(node) = 1 + max(height(trái), height(phải))</div>
-    <p class="lead-p">Đại lượng đo độ lệch giữa 2 nhánh gọi là <b>hệ số cân bằng (balance factor)</b>:</p>
-    <div class="formula">bf(node) = height(trái) − height(phải) &nbsp;→&nbsp; hợp lệ khi bf ∈ {−1, 0, 1}</div>
-    <p class="lead-p">Sau mỗi lần chèn/xoá, AVL tính lại <code>bf</code> tại từng node trên đường đi ngược lên gốc. Ngay khi gặp node có <code>|bf| &gt; 1</code>, cây thực hiện <b>xoay (rotation)</b> tại node đó để đưa mọi thứ về lại cân bằng. Có đúng <b>4 kiểu xoay</b>, tuỳ vào hướng lệch:</p>
+    <p class="lead-p"><b>AVL Tree</b> (đặt theo tên hai nhà phát minh Adelson-Velsky và Landis, 1962) — vẫn là cây ở mục 01, chỉ thêm đúng <b>một luật mới</b>:</p>
+    <ul class="rule-list">
+      <li>Vẫn là <b>BST</b> — luật "trái nhỏ hơn, phải lớn hơn" ở mục 01 giữ nguyên <b>100%</b>, không đổi gì cả.</li>
+      <li>Thêm đúng 1 luật: tại <b>mọi node</b>, hai nhánh con trái/phải chỉ được lệch chiều cao <b>tối đa 1 tầng</b>.</li>
+      <li>Lệch quá 1 tầng → cây <b>tự XOAY lại ngay</b> — khác hẳn BST thường ở mục 02, cứ lệch mãi chẳng ai sửa.</li>
+    </ul>
+    <p class="lead-p" style="margin-top:16px;">Lệch quá 1 tầng thì xoay thế nào? Có đúng <b>4 kiểu xoay</b>, tuỳ vào hướng lệch:</p>
     <div class="k-menu4">
       <div class="dish rot idea">
         <div class="ic">LL</div>
@@ -182,8 +222,8 @@
       </div>
     </div>
 
-    <p class="lead-p" style="margin-top:16px;">Chọn đúng 1 ca bên dưới để xem <b>chiều cao</b> được tính lại và <b>con trỏ</b> đổi hướng thế nào thật sự — không chỉ đọc tên gọi.</p>
-    <div class="card">
+    <p class="lead-p" style="margin-top:16px;">Chọn đúng 1 ca bên dưới, bấm xoay để xem <b>từng node di chuyển thật</b> — cây lớn hơn hẳn 3 node để thấy rõ: xoay chỉ động vào đúng 3 node liên quan, phần còn lại của cây <b>đứng yên</b>.</p>
+    <div class="card" style="max-width:820px;margin:0 auto;">
       <h3>Xem 1 ca xoay thật</h3>
       <div class="row" style="margin-bottom:10px;">
         <button class="ghost rotcase-btn" data-case="LL">LL</button>
@@ -193,88 +233,19 @@
         <button id="bRotStep">⏭ Xoay</button>
         <button id="bRotReset" class="ghost">↺ Reset</button>
       </div>
-      <svg id="svgRotDemo" viewBox="0 0 300 170" preserveAspectRatio="xMidYMid meet" style="max-width:320px;display:block;margin:0 auto;"></svg>
+      <svg id="svgRotDemo" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet" style="max-width:640px;display:block;margin:0 auto;"></svg>
       <div class="legend" id="rotDemoNarr" style="margin-top:8px;min-height:36px;"></div>
     </div>
+
+    <p class="lead-p" style="margin-top:24px;">Làm sao AVL <b>biết</b> khi nào bị lệch để xoay? Bằng cách tính <b>chiều cao</b> mỗi node — từ dưới lên, mỗi node dựa vào chiều cao 2 con của chính nó:</p>
+    <div class="formula">height(rỗng) = 0 &nbsp;→&nbsp; height(node) = 1 + max(height(trái), height(phải))</div>
+    <p class="lead-p">Đại lượng đo độ lệch giữa 2 nhánh gọi là <b>hệ số cân bằng (balance factor)</b>:</p>
+    <div class="formula">bf(node) = height(trái) − height(phải) &nbsp;→&nbsp; hợp lệ khi bf ∈ {−1, 0, 1}</div>
+    <p class="lead-p">Sau mỗi lần chèn/xoá, AVL tính lại <code>bf</code> tại từng node trên đường đi ngược lên gốc — ngay khi gặp <code>|bf| &gt; 1</code> ở đâu, xoay ở đó (đúng như demo bên trên).</p>
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">04</span> Từ điển mobile treo ↔ khoa học máy tính</h2>
-    <div class="k-map">
-      <div class="k-chip"><span class="em">🎐</span><div class="t"><b>Mobile treo quả cân</b>cây nhị phân tìm kiếm</div></div>
-      <div class="k-chip"><span class="em">⚖️</span><div class="t"><b>Quả cân</b>node mang giá trị</div></div>
-      <div class="k-chip"><span class="em">📐</span><div class="t"><b>Lệch cân</b>độ lệch <code>bf = h(trái)−h(phải)</code></div></div>
-      <div class="k-chip"><span class="em">🔄</span><div class="t"><b>Tự xoay lại</b>rotation (LL/RR/LR/RL)</div></div>
-      <div class="k-chip"><span class="em">📏</span><div class="t"><b>Số tầng dây treo</b>chiều cao cây (height)</div></div>
-    </div>
-  </section>
-
-  <section class="k-section">
-    <h2 class="k-h2"><span class="tag">05</span> Treo thử quả cân ngay</h2>
-
-    <div class="viewtoggle" id="viewtoggle">
-      <button class="vt-btn active" data-view="theme">🎐 Xem theo chủ đề</button>
-      <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-    </div>
-
-    <div id="themeView">
-      <div class="k-scene" style="max-width:700px;margin:0 auto;">
-        <svg id="svgTheme" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để treo lần lượt 1→7 quả cân tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-        <div class="k-controls">
-          <div class="row" style="gap:8px">
-            <button class="play-btn" id="bPlay">▶ Tự động</button>
-            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
-          </div>
-          <div class="k-side"><button id="bReset">↺ Reset</button></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="techView" style="display:none">
-      <div class="wrap">
-        <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-          <div class="code-title">// chèn BST → cập nhật chiều cao → tính độ lệch → xoay đúng ca</div>
-          <div class="code" id="code"></div></div></div>
-        <div class="col-viz">
-          <div class="card"><h3>Cây <span id="rotbadge"></span></h3>
-            <svg id="svg" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet"></svg>
-            <div class="legend"><b>h</b> = chiều cao · <b>bf</b> = độ lệch (cao trái − cao phải) · <span style="color:#5AA0FF">◯ vòng xanh dương</span> = node đang xét · <span style="color:var(--green)">● xanh lá</span> = node vừa chèn</div>
-          </div>
-          <div class="card"><h3>Điều khiển thủ công</h3>
-            <div class="row">
-              <input type="number" id="val" value="50">
-              <button id="bIns">Chèn</button>
-              <button id="bDemo" class="ghost">▶ Chèn 1→7 (nhanh)</button>
-            </div>
-          </div>
-          <div class="card"><h3>Minh hoạ · Cây thường vs AVL</h3>
-            <div class="row" style="margin-bottom:8px">
-              <input type="text" id="bstSeqInput" value="1,2,3,4,5,6,7" style="width:150px;">
-              <button id="bBstStep">⏭ Chèn 1 (1/7)</button>
-              <button id="bBstReset" class="ghost">↺ Reset</button>
-            </div>
-            <div style="display:flex;gap:16px;align-items:flex-end;height:74px;">
-              <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;">
-                <div style="font-size:11px;font-weight:800;color:var(--lacquer);">Cây thường</div>
-                <div id="bstBar" style="background:var(--lacquer);height:2px;border-radius:3px;margin-top:auto;transition:height .3s;"></div>
-                <div id="bstHeightLabel" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:4px;">cao 0</div>
-              </div>
-              <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;">
-                <div style="font-size:11px;font-weight:800;color:var(--wasabi);">AVL (tự cân)</div>
-                <div id="avlBar" style="background:var(--wasabi);height:2px;border-radius:3px;margin-top:auto;transition:height .3s;"></div>
-                <div id="avlHeightLabel" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:4px;">cao 0</div>
-              </div>
-            </div>
-            <div class="legend" id="bstNarr" style="margin-top:8px;min-height:18px;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="k-section">
-    <h2 class="k-h2"><span class="tag">06</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
+    <h2 class="k-h2"><span class="tag">04</span> Ưu điểm, nhược điểm & khi nào dùng</h2>
     <div class="k-menu">
       <div class="dish idea">
         <div class="ic">✅</div>
@@ -307,6 +278,66 @@
   </section>
 
   <section class="k-section">
+    <h2 class="k-h2"><span class="tag">05</span> Thêm &amp; Xoá — tự cân bằng từng bước</h2>
+    <p class="lead-p"><b>Tìm kiếm</b> thì y hệt BST ở mục 01 — không có gì mới ở đó. <b>Thêm</b> và <b>xoá</b> mới là chỗ AVL khác biệt: cả hai đều đi xuống như BST trước, rồi trên đường <b>quay lui về gốc</b>, mỗi node được cập nhật lại <code>height</code>, tính <code>bf</code>, và xoay ngay tại chỗ nếu lệch — đúng cơ chế đã thấy ở mục 03, chỉ khác là giờ chạy thật trên cả cây.</p>
+
+    <h3 style="font-family:'Baloo 2',cursive;font-size:17px;color:var(--indigo);margin:22px 0 8px;">➕ Thêm (Insert)</h3>
+    <p class="lead-p">Chèn xong ở một lá, quay lui lên: <b>quá lắm chỉ 1 lần xoay</b> là đủ cân bằng lại toàn cây — vì chèn chỉ làm 1 nhánh cao thêm đúng 1 tầng, và chỗ xoay <b>không nhất thiết ở gốc</b> — hễ gặp node lệch đầu tiên trên đường quay lui là xoay ngay tại đó rồi dừng.</p>
+    <div class="log-layout">
+      <div class="k-scene">
+        <svg id="svgIns" viewBox="0 0 640 220" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="ticker" id="insNarr" style="max-width:none;"></div>
+        <div class="k-controls">
+          <div class="row" style="gap:8px">
+            <input type="number" id="insVal" placeholder="vd: 28" style="width:90px;">
+            <button id="bInsGo">➕ Chèn</button>
+          </div>
+          <div class="k-side"><button id="bInsReset">↺ Reset</button></div>
+        </div>
+      </div>
+      <div class="log-panel" id="insLog"></div>
+    </div>
+
+    <h3 style="font-family:'Baloo 2',cursive;font-size:17px;color:var(--indigo);margin:22px 0 8px;">➖ Xoá (Delete)</h3>
+    <p class="lead-p">Xoá 1 giá trị có <b>3 ca</b>: node là <b>lá</b> (xoá thẳng), node có <b>1 con</b> (con lên thay chỗ), node có <b>2 con</b> (mượn giá trị nhỏ nhất bên nhánh phải — gọi là <i>successor</i> — rồi xoá successor đó thay). Khác với thêm, quay lui sau khi xoá <b>có thể phải xoay ở nhiều tầng liên tiếp</b>, không dừng lại ở lần đầu.</p>
+    <div class="log-layout">
+      <div class="k-scene">
+        <svg id="svgDel" viewBox="0 0 640 220" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="ticker" id="delNarr" style="max-width:none;"></div>
+        <div class="k-controls">
+          <div class="row" style="gap:8px">
+            <input type="number" id="delVal" placeholder="vd: 75" style="width:90px;">
+            <button id="bDelGo">➖ Xoá</button>
+          </div>
+          <div class="k-side"><button id="bDelReset">↺ Reset</button></div>
+        </div>
+      </div>
+      <div class="log-panel" id="delLog"></div>
+    </div>
+
+    <div class="k-menu2" style="margin-top:20px;">
+      <div class="dish idea">
+        <div class="ic">✅</div>
+        <h3>Thêm — rẻ</h3>
+        <ul>
+          <li>Chèn làm cao thêm <b>đúng 1 nhánh</b>, nên chỉ có <b>1 chỗ</b> có thể lệch.</li>
+          <li><b>Tối đa 1 lần xoay</b> (đơn hoặc kép) là chắc chắn cân bằng lại toàn cây — xoay xong là dừng ngay, không cần đi tiếp.</li>
+          <li>O(log n) cả đường xuống lẫn đường lên — luôn nhanh, dễ đoán.</li>
+        </ul>
+      </div>
+      <div class="dish problem">
+        <div class="ic">❌</div>
+        <h3>Xoá — đắt hơn</h3>
+        <ul>
+          <li>Xoá 1 phần tử có thể làm <b>nhiều nhánh tổ tiên</b> cùng thấp đi 1 tầng → quay lui <b>có thể phải xoay ở nhiều tầng liên tiếp</b>, tới tận gốc (vẫn O(log n) lần xoay, nhưng không dừng ở lần đầu như thêm).</li>
+          <li>Ca "2 con" tốn thêm bước: phải tìm successor, copy giá trị, rồi xoá đệ quy tiếp.</li>
+          <li>Đây là lý do <code>std::map</code>/<code>TreeMap</code> hay chọn <b>Red-Black Tree</b> thay AVL — cân bằng lỏng hơn nên ghi (thêm/xoá) rẻ hơn, đổi lại tra cứu chậm hơn AVL một chút.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
     <div class="k-quiz">
       <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho chiếc mobile</h2>
       <div class="q" id="quiz">Chèn 1,2,3,4,5 theo thứ tự vào cây tìm kiếm THƯỜNG (không cân) → cây thành gì?
@@ -325,319 +356,424 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl:HL, renderCode, renderToolbox, initViewToggle, initQuiz, narrate:NARR, svg:SVG} = CL;
+const {$, nap, renderToolbox, initQuiz, svg:SVG} = CL;
 renderToolbox('avl');
-initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
-const CODE=[
- ['<span class="kw">function</span> <span class="fn">height</span>(n){ <span class="kw">return</span> n ? n.h : 0; }'],
- ['<span class="kw">function</span> <span class="fn">balance</span>(n){ <span class="kw">return</span> height(n.left) - height(n.right); }'],
- [''],
- ['<span class="kw">function</span> <span class="fn">insert</span>(node, x) {'],
- ['  <span class="kw">if</span> (node == null) <span class="kw">return</span> newNode(x);   <span class="cm">// tạo lá mới</span>'],
- ['  <span class="kw">if</span> (x &lt; node.val) node.left  = insert(node.left, x);'],
- ['  <span class="kw">else</span>              node.right = insert(node.right, x);'],
- [''],
- ['  node.h = 1 + max(height(L), height(R));  <span class="cm">// cập nhật chiều cao</span>'],
- ['  <span class="kw">let</span> bf = balance(node);              <span class="cm">// độ lệch = hTrái − hPhải</span>'],
- [''],
- ['  <span class="cm">// 4 ca mất cân → xoay:</span>'],
- ['  <span class="kw">if</span> (bf &gt; 1  &amp;&amp; x &lt; node.left.val)  <span class="kw">return</span> rotateR(node);   <span class="cm">// LL</span>'],
- ['  <span class="kw">if</span> (bf &lt; -1 &amp;&amp; x &gt; node.right.val) <span class="kw">return</span> rotateL(node);   <span class="cm">// RR</span>'],
- ['  <span class="kw">if</span> (bf &gt; 1  &amp;&amp; x &gt; node.left.val)  { node.left=rotateL(node.left);  <span class="kw">return</span> rotateR(node); } <span class="cm">// LR</span>'],
- ['  <span class="kw">if</span> (bf &lt; -1 &amp;&amp; x &lt; node.right.val) { node.right=rotateR(node.right); <span class="kw">return</span> rotateL(node); } <span class="cm">// RL</span>'],
- ['  <span class="kw">return</span> node;   <span class="cm">// |bf| ≤ 1 → đã cân</span>'],
- ['}'],
-];
-const L={height:0,balance:1,sig:3,base:4,goL:5,goR:6,updH:8,bf:9,cases:11,LL:12,RR:13,LR:14,RL:15,ok:16};
-renderCode('code', CODE);
-function hl(...idx){ HL(...idx); }
 
 /* AVL core */
-function Node(v){return{v:v,l:null,r:null,h:1};}
 const H=n=>n?n.h:0, BF=n=>n?H(n.l)-H(n.r):0, upd=n=>{n.h=1+Math.max(H(n.l),H(n.r));};
 function rotR(y){const x=y.l;y.l=x.r;x.r=y;upd(y);upd(x);return x;}
 function rotL(x){const y=x.r;x.r=y.l;y.l=x;upd(x);upd(y);return y;}
-function insertSync(n,x){ if(!n)return Node(x); if(x<n.v)n.l=insertSync(n.l,x); else if(x>n.v)n.r=insertSync(n.r,x); else return n;
-  upd(n); const b=BF(n);
-  if(b>1&&x<n.l.v)return rotR(n); if(b<-1&&x>n.r.v)return rotL(n);
-  if(b>1&&x>n.l.v){n.l=rotL(n.l);return rotR(n);} if(b<-1&&x<n.r.v){n.r=rotR(n.r);return rotL(n);} return n; }
-
-let root=null, busy=false, curV=null, bfV=null, flashV=null, rotHappened=false;
-let tiltV=null, tiltDeg=0;
+/* nhãn bf dạng "badge" có nền riêng — chữ nhạt trên nền svg sáng rất khó đọc, nên tô nền đậm cho nổi */
+function bfBadge(g,bf){
+  /* .node text{fill:#fff} trong style.css là rule stylesheet, luôn thắng attribute fill= gắn qua JS
+     (presentation attribute có độ ưu tiên thấp nhất) — phải set màu qua style= (inline) mới đè được nó. */
+  const col=Math.abs(bf)>1?'var(--lacquer)':'var(--wasabi)';
+  const tb=SVG('text',{class:'bf',x:22,y:3,style:'fill:'+col+';stroke:#fff;stroke-width:2.5;paint-order:stroke;'});
+  tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb);
+}
 
 function layout(n,depth,ctx){ if(!n)return; layout(n.l,depth+1,ctx); n._x=ctx.i++; n._d=depth; layout(n.r,depth+1,ctx); }
-function computeLayout(){
-  if(!root) return null;
-  const ctx={i:0}; layout(root,0,ctx);
-  const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(root);
-  const W=660,Hh=340, padX=40, padY=48;
+/* ── Mục 01: cây BST "phức tạp" tĩnh — bấm node để xem luật, tìm để xem đường đi ── */
+const BST_INTRO_SEQ=[41,20,65,11,29,50,91,5,15,26,32,47,55,76,99];
+let bstIntroRoot=null, bstIntroPickV=null, bstIntroPathSet=null, bstIntroFoundV=null;
+function biInsert(n,x){ if(!n) return {v:x,l:null,r:null}; if(x<n.v) n.l=biInsert(n.l,x); else if(x>n.v) n.r=biInsert(n.r,x); return n; }
+function biFind(n,v){ if(!n) return null; if(v===n.v) return n; return v<n.v?biFind(n.l,v):biFind(n.r,v); }
+function biCollect(n,set){ if(!n) return; set.add(n.v); biCollect(n.l,set); biCollect(n.r,set); }
+function biCollectArr(n,arr){ if(!n) return; arr.push(n.v); biCollectArr(n.l,arr); biCollectArr(n.r,arr); }
+function narrateBstIntro(){
+  if(bstIntroPickV==null){ $('bstIntroNarr').innerHTML='Bấm vào <b>bất kỳ node nào</b> để xem luật BST đúng tại đúng node đó — không chỉ đúng ở gốc.'; return; }
+  const picked=biFind(bstIntroRoot,bstIntroPickV);
+  const ls=[]; biCollectArr(picked.l,ls); const rs=[]; biCollectArr(picked.r,rs);
+  $('bstIntroNarr').innerHTML='Tại node <b>'+bstIntroPickV+'</b>: cây con <b style="color:var(--wasabi)">trái</b> = {'+(ls.length?ls.sort((a,b)=>a-b).join(', '):'—')+'} toàn bộ <b>&lt; '+bstIntroPickV+'</b>; cây con <b style="color:var(--salmon)">phải</b> = {'+(rs.length?rs.sort((a,b)=>a-b).join(', '):'—')+'} toàn bộ <b>&gt; '+bstIntroPickV+'</b>.';
+}
+function drawBstIntro(){
+  const svg=$('svgBstIntro'); if(!svg||!bstIntroRoot) return; svg.innerHTML='';
+  const ctx={i:0}; layout(bstIntroRoot,0,ctx);
+  const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(bstIntroRoot);
+  const W=760,Hh=300,padX=30,padY=34;
   const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
-  return { px:n=>padX+n._x*dx, py:n=>padY+n._d*dy };
-}
-function drawTech(pos){
-  const svg=$('svg'); if(!svg) return; svg.innerHTML='';
-  if(!root || !pos) return;
-  const {px,py}=pos;
-  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ const ln=SVG('line',{class:'edge',x1:px(n),y1:py(n),x2:px(c),y2:py(c)}); svg.appendChild(ln); ed(c);} })(root);
+  const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
+
+  let leftSet=null,rightSet=null;
+  if(bstIntroPickV!=null){
+    const picked=biFind(bstIntroRoot,bstIntroPickV);
+    if(picked){ leftSet=new Set(); rightSet=new Set(); biCollect(picked.l,leftSet); biCollect(picked.r,rightSet); }
+  }
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){
+    const onPath = bstIntroPathSet && bstIntroPathSet.has(n.v) && bstIntroPathSet.has(c.v);
+    svg.appendChild(SVG('line',{x1:px(n),y1:py(n),x2:px(c),y2:py(c),stroke:onPath?'var(--gold)':'#B9AED0','stroke-width':onPath?3:1.5}));
+    ed(c);
+  } })(bstIntroRoot);
   (function nd(n){ if(!n)return; nd(n.l);
-    let cls='node'; if(n.v===flashV)cls+=' flash'; if(n.v===curV)cls+=' cur';
-    const g=SVG('g',{class:cls, transform:'translate('+px(n)+','+py(n)+')'});
-    g.appendChild(SVG('circle',{r:20}));
-    const t=SVG('text',{}); t.textContent=n.v; g.appendChild(t);
-    const th=SVG('text',{class:'h',x:0,y:-27}); th.textContent='h='+n.h; g.appendChild(th);
-    if(n.v===bfV){ const bf=BF(n); const tb=SVG('text',{class:'bf',x:26,y:3,fill:Math.abs(bf)>1?'#E05555':'#5FE0A0'}); tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb); }
+    let fill='#EDE6F7', stroke='#8E7CC3', sw=2;
+    if(leftSet && leftSet.has(n.v)){ fill='#E4EED9'; stroke='var(--wasabi)'; }
+    if(rightSet && rightSet.has(n.v)){ fill='#FBE3DC'; stroke='var(--salmon)'; }
+    if(bstIntroPathSet && bstIntroPathSet.has(n.v)){ stroke='var(--gold)'; sw=3; }
+    if(n.v===bstIntroPickV){ stroke='#5AA0FF'; sw=3; }
+    if(n.v===bstIntroFoundV){ fill='#4F7A3C'; }
+    const g=SVG('g',{transform:'translate('+px(n)+','+py(n)+')',style:'cursor:pointer'});
+    g.appendChild(SVG('circle',{r:16,fill:fill,stroke:stroke,'stroke-width':sw}));
+    const t=SVG('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':12,'font-weight':800,fill:n.v===bstIntroFoundV?'#fff':'#4A3A2A'}); t.textContent=n.v; g.appendChild(t);
+    g.addEventListener('click',()=>{ bstIntroPickV=(bstIntroPickV===n.v)?null:n.v; bstIntroPathSet=null; bstIntroFoundV=null; drawBstIntro(); narrateBstIntro(); });
     svg.appendChild(g); nd(n.r);
-  })(root);
+  })(bstIntroRoot);
 }
-function drawMobile(pos){
-  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
-  if(!root || !pos) return;
-  const {px,py}=pos;
-  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ el.appendChild(SVG('line',{x1:px(n),y1:py(n),x2:px(c),y2:py(c),stroke:'#B9AED0','stroke-width':1.5})); ed(c);} })(root);
+function bstIntroSearch(){
+  const x=+$('bstIntroVal').value; if(isNaN(x)) return;
+  const path=new Set(); let n=bstIntroRoot, steps=0, found=false;
+  while(n){ path.add(n.v); steps++; if(x===n.v){ found=true; break; } n = x<n.v?n.l:n.r; }
+  bstIntroPathSet=path; bstIntroPickV=null; bstIntroFoundV=found?x:null;
+  drawBstIntro();
+  $('bstIntroNarr').innerHTML = found
+    ? 'Tìm <b>'+x+'</b>: chỉ <b>'+steps+' bước</b> đi thẳng từ gốc xuống — khỏi cần chạm '+(BST_INTRO_SEQ.length-steps)+' node còn lại.'
+    : 'Không có <b>'+x+'</b> trong cây — nhưng chỉ mất <b>'+steps+' bước</b> để biết chắc điều đó (đi hết nhánh phù hợp rồi gặp chỗ trống).';
+}
+if($('svgBstIntro')){
+  bstIntroRoot=null; for(const v of BST_INTRO_SEQ) bstIntroRoot=biInsert(bstIntroRoot,v);
+  drawBstIntro();
+  $('bBstIntroSearch').onclick=bstIntroSearch;
+  $('bBstIntroReset').onclick=()=>{ bstIntroPickV=null; bstIntroPathSet=null; bstIntroFoundV=null; drawBstIntro(); narrateBstIntro(); };
+}
+
+/* ── Mục 02: chèn 1..7 vào BST thường → suy biến thành đường thẳng ── */
+const SKEW_SEQ=[1,2,3,4,5,6,7];
+let skewRoot=null, skewIdx=0, skewBusy=false;
+function drawSkew(){
+  const svg=$('svgSkew'); if(!svg) return; svg.innerHTML='';
+  if(!skewRoot) return;
+  const ctx={i:0}; layout(skewRoot,0,ctx);
+  const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(skewRoot);
+  const W=760,Hh=320,padX=30,padY=26;
+  const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
+  const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ svg.appendChild(SVG('line',{x1:px(n),y1:py(n),x2:px(c),y2:py(c),stroke:'#E0A48A','stroke-width':2})); ed(c);} })(skewRoot);
   (function nd(n){ if(!n)return; nd(n.l);
-    const angle = (n.v===tiltV) ? tiltDeg : Math.max(-10,Math.min(10,BF(n)*4));
+    const isLast=(n.v===skewIdx);
     const g=SVG('g',{transform:'translate('+px(n)+','+py(n)+')'});
-    if(n.l||n.r){ g.appendChild(SVG('line',{x1:-14,y1:0,x2:14,y2:0,stroke:'#8E7CC3','stroke-width':2})); }
-    g.appendChild(SVG('circle',{r:2.5,fill:'#8E7CC3'}));
-    const pend=SVG('g',{transform:'rotate('+angle+')'});
-    pend.appendChild(SVG('line',{x1:0,y1:0,x2:0,y2:24,stroke:'#B9AED0','stroke-width':1.5}));
-    const isFlash=(n.v===flashV), isCur=(n.v===curV);
-    pend.appendChild(SVG('circle',{cx:0,cy:24,r:19,fill:isFlash?'#FDEBF3':'#EDE6F7',stroke:isCur?'#5AA0FF':'#8E7CC3','stroke-width':isCur?3:2}));
-    const t=SVG('text',{x:0,y:29,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'#5C4B8A'}); t.textContent=n.v;
-    pend.appendChild(t);
-    g.appendChild(pend);
-    el.appendChild(g);
-    nd(n.r);
-  })(root);
+    g.appendChild(SVG('circle',{r:15,fill:isLast?'#4F7A3C':'#FBE3DC',stroke:'var(--lacquer)','stroke-width':isLast?3:2}));
+    const t=SVG('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':12,'font-weight':800,fill:isLast?'#fff':'#7A3324'}); t.textContent=n.v; g.appendChild(t);
+    svg.appendChild(g); nd(n.r);
+  })(skewRoot);
 }
-function draw(){ const pos=computeLayout(); drawTech(pos); drawMobile(pos); }
-function narrate(h){ NARR(h); }
-function lock(b){busy=b;CL.lock(['bIns','bDemo','bReset','bPlay'],b);}
-function lockStep(b){ CL.lock(['bStep'], b); }
-function setRot(kind){ const b=$('rotbadge'); if(b) b.innerHTML = kind? '<span class="badge rot">⟳ XOAY '+kind+'</span>':''; }
-function resetState(){ root=null; setRot(''); flashV=null;curV=null;bfV=null;tiltV=null;tiltDeg=0; draw(); hl(); }
+function skewNarrate(){
+  if(skewIdx===0){ $('skewNarr').innerHTML='Bấm <b>▶ Chèn 1→7 tự động</b> hoặc <b>⏭ Từng bước</b> để xem cây suy biến thành đường thẳng ngay trước mắt.'; return; }
+  $('skewNarr').innerHTML = 'Đã chèn <b>'+skewIdx+'/7</b> — chiều cao hiện tại = <b style="color:var(--lacquer)">'+skewIdx+'</b> tầng (bằng đúng số phần tử đã chèn) — '+(skewIdx===7?'suy biến <b>hoàn toàn</b> thành danh sách liên kết, không còn là cây nữa!':'toàn bộ node mới đều rẽ <b>PHẢI</b>, chưa từng rẽ trái.');
+}
+function skewStepOnce(){
+  if(skewIdx>=SKEW_SEQ.length) return false;
+  skewRoot=biInsert(skewRoot,SKEW_SEQ[skewIdx]); skewIdx++;
+  drawSkew(); skewNarrate();
+  return true;
+}
+function skewReset(){ skewRoot=null; skewIdx=0; drawSkew(); skewNarrate(); }
+if($('svgSkew')){
+  $('bSkewReset').onclick=()=>{ if(skewBusy) return; skewReset(); };
+  $('bSkewStep').onclick=()=>{ if(skewBusy) return; if(skewIdx>=SKEW_SEQ.length){ skewReset(); return; } skewStepOnce(); };
+  $('bSkewPlay').onclick=async()=>{
+    if(skewBusy) return; skewBusy=true; CL.lock(['bSkewPlay','bSkewStep','bSkewReset'],true);
+    skewReset();
+    for(let i=0;i<SKEW_SEQ.length;i++){ skewStepOnce(); await nap(500); }
+    CL.lock(['bSkewPlay','bSkewStep','bSkewReset'],false); skewBusy=false;
+  };
+  skewReset();
+}
 
 /* ── Demo mục 03: 1 ca xoay thật — chiều cao & con trỏ ── */
 function plainInsert(n,x){ if(!n) return {v:x,l:null,r:null,h:1}; if(x<n.v) n.l=plainInsert(n.l,x); else if(x>n.v) n.r=plainInsert(n.r,x); return n; }
 function setHeights(n){ if(!n) return; setHeights(n.l); setHeights(n.r); upd(n); }
-const ROT_SEQ={LL:[30,20,10],RR:[10,20,30],LR:[30,10,20],RL:[10,30,20]};
+const ROT_SEQ={
+  LL:[50,30,70,20,40,10,25],
+  RR:[30,10,50,40,70,60,90],
+  LR:[50,20,70,10,35,30,40],
+  RL:[30,10,70,45,90,40,50]
+};
 const ROT_KIND={LL:'trái-trái',RR:'phải-phải',LR:'trái-phải',RL:'phải-trái'};
-let rotCase='LL', rotTree=null, rotStepIdx=0, rotDone=false;
+let rotCase='LL', rotTree=null, rotStepIdx=0, rotDone=false, rotPosMap={};
 
-function drawRotDemo(){
+/* vẽ có animation: FLIP — đặt node ở vị trí CŨ rồi transition sang vị trí MỚI.
+   preview (tuỳ chọn) = {v, pos} ép RIÊNG 1 node hiện tới vị trí đích trước,
+   trong khi mọi node khác vẫn đứng nguyên — dùng để tách bước "chuyển nhánh giữa". */
+/* opts: {suppressEdges:[{parent,child}], highlightV} — vẽ tĩnh hoặc animate FLIP vị trí node.
+   Node không bị "đẩy trước" tới vị trí tương lai — muốn thấy 1 CON TRỎ đổi hướng thì
+   dùng animateSwingEdge() vẽ riêng đường nối đang xoay, còn node cứ đứng yên. */
+function drawRotDemo(animate, opts){
+  opts = opts || {};
+  const suppress = opts.suppressEdges || [];
   const svg=$('svgRotDemo'); if(!svg || !rotTree) return; svg.innerHTML='';
   const ctx={i:0}; layout(rotTree,0,ctx);
   const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(rotTree);
-  const W=300,Hh=170,padX=54,padY=40;
+  const W=560,Hh=260,padX=60,padY=36;
   const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
   const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
-  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ svg.appendChild(SVG('line',{class:'edge',x1:px(n),y1:py(n),x2:px(c),y2:py(c)})); ed(c);} })(rotTree);
+
+  const newPos={};
+  (function collect(n){ if(!n)return; collect(n.l); newPos[n.v]={x:px(n),y:py(n)}; collect(n.r); })(rotTree);
+
+  (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){
+    if(suppress.some(s=>s.parent===n.v && s.child===c.v)){ ed(c); continue; }
+    const p1=newPos[n.v], p2=newPos[c.v];
+    svg.appendChild(SVG('line',{class:'edge',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y}));
+    ed(c);
+  } })(rotTree);
+
+  const groups=[];
   (function nd(n){ if(!n)return; nd(n.l);
     const isRoot = (n===rotTree);
-    let cls='node'; if(isRoot && !rotDone) cls+=' rot'; if(isRoot && rotDone) cls+=' cur';
-    const g=SVG('g',{class:cls, transform:'translate('+px(n)+','+py(n)+')'});
+    const isHi = Array.isArray(opts.highlightV) ? opts.highlightV.includes(n.v) : opts.highlightV===n.v;
+    let cls='node'; if((isRoot && !rotDone) || isHi) cls+=' rot'; if(isRoot && rotDone) cls+=' cur';
+    const g=SVG('g',{class:cls});
     g.appendChild(SVG('circle',{r:18}));
     const t=SVG('text',{}); t.textContent=n.v; g.appendChild(t);
     const th=SVG('text',{class:'h',x:0,y:-24}); th.textContent='h='+n.h; g.appendChild(th);
-    if(isRoot){ const bf=BF(n); const tb=SVG('text',{class:'bf',x:22,y:3,fill:Math.abs(bf)>1?'#E05555':'#5FE0A0'}); tb.textContent='bf='+(bf>0?'+':'')+bf; g.appendChild(tb); }
-    svg.appendChild(g); nd(n.r);
+    if(isRoot){ bfBadge(g, BF(n)); }
+    const start=(animate && rotPosMap[n.v])?rotPosMap[n.v]:newPos[n.v];
+    g.style.transform='translate('+start.x+'px,'+start.y+'px)';
+    svg.appendChild(g);
+    groups.push([g,n.v]);
+    nd(n.r);
   })(rotTree);
+
+  if(animate){
+    let applied=false;
+    const apply=()=>{
+      if(applied) return; applied=true;
+      groups.forEach(([g,v])=>{
+        g.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';
+        g.style.transform='translate('+newPos[v].x+'px,'+newPos[v].y+'px)';
+      });
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(apply));
+    setTimeout(apply,300); /* trang bị dự phòng nếu rAF không chạy (vd tab đang ẩn) */
+  }
+  rotPosMap=newPos;
+  return {svg:svg, pos:newPos};
+}
+/* vẽ 1 đường nối XOAY thật — đầu "con" đứng yên tại childPos, đầu "cha" trượt từ fromPos sang toPos.
+   Đây mới là thứ thật sự đổi hướng: con trỏ, không phải node bị đẩy đi đâu cả. */
+function animateSwingEdge(svg, fromPos, toPos, childPos){
+  const ln=SVG('line',{class:'edge',x1:fromPos.x,y1:fromPos.y,x2:childPos.x,y2:childPos.y,stroke:'var(--gold)','stroke-width':3});
+  svg.appendChild(ln);
+  const dur=700, t0=performance.now();
+  function frame(now){
+    const t=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-t,3);
+    ln.setAttribute('x1', fromPos.x+(toPos.x-fromPos.x)*e);
+    ln.setAttribute('y1', fromPos.y+(toPos.y-fromPos.y)*e);
+    if(t<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+/* Cả 4 ca đều phân rã về cùng 1 khối nguyên tố: xoay tại "top" theo hướng "style"
+   ('R' = rotR, pivot=top.l — kiểu LL; 'L' = rotL, pivot=top.r — kiểu RR), tách làm 2 bước nhỏ:
+   (A) đường nối của nhánh giữa XOAY từ pivot sang top — không node nào di chuyển;
+   (B) pivot lên thay chỗ top tại đúng chỗ top đang gắn vào cây.
+   LL/RR chỉ cần 1 khối (2 bước). LR/RL cần 2 khối nối tiếp — xoay xong con rồi mới xoay gốc
+   (4 bước), y hệt lặp lại pattern LL/RR 2 lần. */
+function rotPlan(){
+  const name=rotCase;
+  if(name==='LL') return [{top:()=>rotTree, style:'R', reattach:n=>{rotTree=n;}, phase:'gốc'}];
+  if(name==='RR') return [{top:()=>rotTree, style:'L', reattach:n=>{rotTree=n;}, phase:'gốc'}];
+  if(name==='LR') return [
+    {top:()=>rotTree.l, style:'L', reattach:n=>{rotTree.l=n;}, phase:'con'},
+    {top:()=>rotTree,   style:'R', reattach:n=>{rotTree=n;},   phase:'gốc'}
+  ];
+  return [ /* RL */
+    {top:()=>rotTree.r, style:'R', reattach:n=>{rotTree.r=n;}, phase:'con'},
+    {top:()=>rotTree,   style:'L', reattach:n=>{rotTree=n;},   phase:'gốc'}
+  ];
 }
 function rotBtnLabel(){
-  const total=(rotCase==='LR'||rotCase==='RL')?2:1;
   if(rotDone) return '✓ Đã xoay xong';
-  if(total===2) return rotStepIdx===0 ? '⏭ Bước 1/2: xoay con trước' : '⏭ Bước 2/2: xoay gốc';
-  return '⏭ Xoay';
+  const plan=rotPlan(), total=plan.length*2, stepNum=rotStepIdx+1;
+  const isA=(rotStepIdx%2===0), phase=plan[Math.floor(rotStepIdx/2)].phase;
+  const tag = plan.length>1 ? ' ('+phase+')' : '';
+  return '⏭ Bước '+stepNum+'/'+total+': '+(isA?'chuyển nhánh giữa':'đổi chỗ')+tag;
 }
 function buildRotCase(name){
   rotCase=name; rotStepIdx=0; rotDone=false; rotTree=null;
   for(const v of ROT_SEQ[name]) rotTree=plainInsert(rotTree,v);
   setHeights(rotTree);
   document.querySelectorAll('.rotcase-btn').forEach(b=>b.classList.toggle('ghost', b.dataset.case!==name));
-  drawRotDemo();
+  rotPosMap={};
+  drawRotDemo(false);
   const bf=BF(rotTree);
   $('bRotStep').textContent=rotBtnLabel(); $('bRotStep').disabled=false;
   $('rotDemoNarr').innerHTML='Lệch kiểu <b>'+ROT_KIND[name]+'</b>: mỗi node vừa được tính <code>h = 1 + max(h trái, h phải)</code>, và ở gốc thì <b style="color:#C0442F">bf = '+(bf>0?'+':'')+bf+'</b> → mất cân bằng.';
 }
 function rotStep(){
   if(rotDone) return;
-  const name=rotCase;
-  if(name==='LL'){ rotTree=rotR(rotTree); rotDone=true; }
-  else if(name==='RR'){ rotTree=rotL(rotTree); rotDone=true; }
-  else if(name==='LR'){
-    if(rotStepIdx===0){
-      const kv=rotTree.l.v; rotTree.l=rotL(rotTree.l); rotStepIdx=1; drawRotDemo();
-      $('bRotStep').textContent=rotBtnLabel();
-      $('rotDemoNarr').innerHTML='Bước 1: xoay <b>TRÁI</b> ở con trái ('+kv+') → đưa về đúng dạng trái-trái, chiều cao 2 node đó được tính lại.';
-      return;
-    } else { rotTree=rotR(rotTree); rotDone=true; }
+  const plan=rotPlan(), total=plan.length*2;
+  const block=plan[Math.floor(rotStepIdx/2)], isA=(rotStepIdx%2===0);
+  const top=block.top(), style=block.style;
+  const pivot = style==='R' ? top.l : top.r;
+  const dirWord = style==='R' ? 'TRÁI' : 'PHẢI';
+  const tag = plan.length>1 ? ' — xoay '+block.phase : '';
+
+  if(isA){
+    const mid = style==='R' ? pivot.r : pivot.l;
+    rotStepIdx++;
+    if(mid){
+      const {svg,pos}=drawRotDemo(false, {suppressEdges:[{parent:pivot.v,child:mid.v}], highlightV:[pivot.v,mid.v,top.v]});
+      animateSwingEdge(svg, pos[pivot.v], pos[top.v], pos[mid.v]);
+      $('rotDemoNarr').innerHTML='Bước '+rotStepIdx+'/'+total+tag+': đường nối của <b>'+mid.v+'</b> đang XOAY — con trỏ đổi từ trỏ tới <b>'+pivot.v+'</b> sang trỏ tới <b>'+top.v+'</b> (làm con '+dirWord+'). Node khác đứng yên.';
+    } else {
+      drawRotDemo(false);
+      $('rotDemoNarr').innerHTML='Bước '+rotStepIdx+'/'+total+tag+': <b>'+pivot.v+'</b> không có nhánh giữa để chuyển — bỏ qua.';
+    }
+    $('bRotStep').textContent=rotBtnLabel();
+    return;
   }
-  else if(name==='RL'){
-    if(rotStepIdx===0){
-      const kv=rotTree.r.v; rotTree.r=rotR(rotTree.r); rotStepIdx=1; drawRotDemo();
-      $('bRotStep').textContent=rotBtnLabel();
-      $('rotDemoNarr').innerHTML='Bước 1: xoay <b>PHẢI</b> ở con phải ('+kv+') → đưa về đúng dạng phải-phải, chiều cao 2 node đó được tính lại.';
-      return;
-    } else { rotTree=rotL(rotTree); rotDone=true; }
-  }
-  drawRotDemo();
-  const bf=BF(rotTree);
+
+  const newSub = style==='R' ? rotR(top) : rotL(top);
+  block.reattach(newSub);
+  rotStepIdx++;
+  const finished = rotStepIdx>=total;
+  if(finished) rotDone=true;
+  drawRotDemo(true);
   $('bRotStep').textContent=rotBtnLabel();
-  $('rotDemoNarr').innerHTML='Xong! <b>'+rotTree.v+'</b> trở thành gốc mới, node lệch cũ tụt xuống làm con — chiều cao mọi node liên quan được tính lại theo <code>h = 1 + max(h trái, h phải)</code>, và giờ <b style="color:#4F7A3C">bf = '+(bf>0?'+':'')+bf+'</b> → cân bằng.';
+  if(finished){
+    const bf=BF(rotTree);
+    $('rotDemoNarr').innerHTML='Bước '+rotStepIdx+'/'+total+tag+': <b>'+newSub.v+'</b> lên làm gốc mới, node lệch cũ tụt xuống làm con — chiều cao mọi node liên quan được tính lại, và giờ <b style="color:#4F7A3C">bf = '+(bf>0?'+':'')+bf+'</b> → cân bằng.';
+  } else {
+    $('rotDemoNarr').innerHTML='Bước '+rotStepIdx+'/'+total+tag+': <b>'+newSub.v+'</b> lên thay chỗ <b>'+top.v+'</b> — nhánh này giờ đã đúng dạng, chuyển sang xoay ở gốc.';
+  }
 }
 document.querySelectorAll('.rotcase-btn').forEach(b=>{ b.onclick=()=>buildRotCase(b.dataset.case); });
 if($('bRotStep')){ $('bRotStep').onclick=rotStep; $('bRotReset').onclick=()=>buildRotCase(rotCase); buildRotCase('LL'); }
 
-/* Chèn TỪNG BƯỚC (đệ quy async) */
-async function ins(node,x){
-  if(!node){ hl(L.base); narrate('Tới chỗ trống → treo <b>quả cân mới ['+x+']</b>.'); await nap(700); return Node(x); }
-  curV=node.v; bfV=null; draw();
-  if(x<node.v){ hl(L.goL); narrate('Ở node <b>'+node.v+'</b>: so sánh <b>'+x+' &lt; '+node.v+'</b> → đi <b>TRÁI</b>.'); await nap(850); node.l=await ins(node.l,x); }
-  else if(x>node.v){ hl(L.goR); narrate('Ở node <b>'+node.v+'</b>: so sánh <b>'+x+' &gt; '+node.v+'</b> → đi <b>PHẢI</b>.'); await nap(850); node.r=await ins(node.r,x); }
-  else { narrate('<b>'+x+'</b> đã có trong cây → bỏ qua.'); return node; }
+/* ── Mục 06: Thêm & Xoá chạy thật trên cả cây — quay lui, cập nhật h/bf, xoay nếu lệch ── */
+function avlNode(v){ return {v:v,l:null,r:null,h:1}; }
+function avlInsertSync(n,x){ if(!n) return avlNode(x); if(x<n.v) n.l=avlInsertSync(n.l,x); else if(x>n.v) n.r=avlInsertSync(n.r,x); else return n;
+  upd(n); const b=BF(n);
+  if(b>1&&x<n.l.v) return rotR(n); if(b<-1&&x>n.r.v) return rotL(n);
+  if(b>1&&x>n.l.v){ n.l=rotL(n.l); return rotR(n); } if(b<-1&&x<n.r.v){ n.r=rotR(n.r); return rotL(n); } return n; }
+function bstMinNode(n){ return n.l ? bstMinNode(n.l) : n; }
+function makeTreeDraw(svgId,W,Hh){
+  return function(root,cur,flash,bfV){
+    const svg=$(svgId); if(!svg) return; svg.innerHTML='';
+    if(!root) return;
+    const ctx={i:0}; layout(root,0,ctx);
+    const cnt=ctx.i, maxD=(function md(n){return n?1+Math.max(md(n.l),md(n.r)):0;})(root);
+    const padX=50,padY=32;
+    const dx=cnt>1?(W-2*padX)/(cnt-1):0, dy=maxD>1?(Hh-2*padY)/(maxD-1):0;
+    const px=n=>padX+n._x*dx, py=n=>padY+n._d*dy;
+    (function ed(n){ if(!n)return; for(const c of [n.l,n.r]) if(c){ svg.appendChild(SVG('line',{class:'edge',x1:px(n),y1:py(n),x2:px(c),y2:py(c)})); ed(c);} })(root);
+    (function nd(n){ if(!n)return; nd(n.l);
+      let cls='node'; if(n.v===flash) cls+=' flash'; if(n.v===cur) cls+=' cur';
+      const g=SVG('g',{class:cls, transform:'translate('+px(n)+','+py(n)+')'});
+      g.appendChild(SVG('circle',{r:18}));
+      const t=SVG('text',{}); t.textContent=n.v; g.appendChild(t);
+      const th=SVG('text',{class:'h',x:0,y:-24}); th.textContent='h='+n.h; g.appendChild(th);
+      if(n.v===bfV){ bfBadge(g, BF(n)); }
+      svg.appendChild(g); nd(n.r);
+    })(root);
+  };
+}
+function rebalanceMsg(node,bf){
+  if(bf>1 && BF(node.l)>=0) return {kind:'LL', apply:n=>rotR(n)};
+  if(bf>1 && BF(node.l)<0)  return {kind:'LR', apply:n=>{n.l=rotL(n.l); return rotR(n);}};
+  if(bf<-1 && BF(node.r)<=0) return {kind:'RR', apply:n=>rotL(n)};
+  if(bf<-1 && BF(node.r)>0)  return {kind:'RL', apply:n=>{n.r=rotR(n.r); return rotL(n);}};
+  return null;
+}
+/* ticker = dòng trạng thái hiện tại; log = lưu lại toàn bộ lịch sử tính toán, cuộn xuống dòng mới nhất */
+function appendLog(logId,html,cls){ const p=$(logId); if(!p) return; if(p.querySelector('.ln.empty')) p.innerHTML=''; const ln=document.createElement('div'); ln.className='ln'+(cls?' '+cls:''); ln.innerHTML=html; p.appendChild(ln); p.scrollTop=p.scrollHeight; }
+function clearLog(logId,msg){ const p=$(logId); if(p) p.innerHTML='<div class="ln empty">'+msg+'</div>'; }
+function say(tickerId,logId,html,cls){ $(tickerId).innerHTML=html; appendLog(logId,html,cls); }
 
+/* --- Thêm --- */
+const drawInsUI=makeTreeDraw('svgIns',640,220);
+let insRoot=null, insBusy=false, insCur=null, insBf=null;
+function seedIns(){ insRoot=null; for(const v of [50,25,75,10,30,60,90,5,15,27,65]) insRoot=avlInsertSync(insRoot,v); }
+function drawIns(){ drawInsUI(insRoot, insCur, null, insBf); }
+async function insertStep(node,x){
+  if(!node){ insCur=null; drawIns(); say('insNarr','insLog','Tới chỗ trống → chèn <b>'+x+'</b> làm lá mới.'); await nap(600); return avlNode(x); }
+  insCur=node.v; insBf=null; drawIns();
+  if(x<node.v){ say('insNarr','insLog','Ở <b>'+node.v+'</b>: '+x+' &lt; '+node.v+' → đi <b>TRÁI</b>.'); await nap(650); node.l=await insertStep(node.l,x); }
+  else if(x>node.v){ say('insNarr','insLog','Ở <b>'+node.v+'</b>: '+x+' &gt; '+node.v+' → đi <b>PHẢI</b>.'); await nap(650); node.r=await insertStep(node.r,x); }
+  else { say('insNarr','insLog','<b>'+x+'</b> đã có trong cây — bỏ qua.'); return node; }
   const hL=H(node.l), hR=H(node.r);
-  upd(node); curV=node.v; bfV=null; draw();
-  hl(L.updH); narrate('Quay lên node <b>'+node.v+'</b>: chiều cao = 1 + max(trái '+hL+', phải '+hR+') = <b>'+node.h+'</b>.'); await nap(1150);
-  const bf=BF(node); bfV=node.v;
-  if(Math.abs(bf)>1){ tiltV=node.v; tiltDeg = bf>0?-26:26; }
-  draw();
-  hl(L.bf); narrate('Độ lệch <b>bf</b> = cao(trái) − cao(phải) = '+hL+' − '+hR+' = <b style="color:'+(Math.abs(bf)>1?'var(--red)':'var(--green)')+'">'+(bf>0?'+':'')+bf+'</b>'+(Math.abs(bf)>1?' → <b style="color:var(--red)">MẤT CÂN — mobile LỆCH!</b>':' → ổn (|bf| ≤ 1).')); await nap(1250);
-
-  hl(L.cases);
-  if(bf>1 && x<node.l.v){ hl(L.LL); rotHappened=true; setRot('LL (phải)'); narrate('Ca <b>LL</b> → <b>xoay PHẢI</b> 1 lần cho thẳng lại.'); await nap(1300); const r=rotR(node); curV=r.v; bfV=null; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
-  if(bf<-1 && x>node.r.v){ hl(L.RR); rotHappened=true; setRot('RR (trái)'); narrate('Ca <b>RR</b> → <b>xoay TRÁI</b> 1 lần cho thẳng lại.'); await nap(1300); const r=rotL(node); curV=r.v; bfV=null; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
-  if(bf>1 && x>node.l.v){ hl(L.LR); rotHappened=true; setRot('LR (2 lần)'); narrate('Ca <b>LR</b>: gấp khúc → <b>xoay TRÁI con trái</b> trước…'); await nap(1300); node.l=rotL(node.l); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay PHẢI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotR(node); curV=r.v; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
-  if(bf<-1 && x<node.r.v){ hl(L.RL); rotHappened=true; setRot('RL (2 lần)'); narrate('Ca <b>RL</b>: gấp khúc → <b>xoay PHẢI con phải</b> trước…'); await nap(1300); node.r=rotR(node.r); curV=node.v; bfV=null; draw(); await nap(950); narrate('…rồi <b>xoay TRÁI</b> ở '+node.v+' → thẳng lại.'); await nap(850); const r=rotL(node); curV=r.v; tiltV=null; tiltDeg=0; draw(); await nap(950); return r; }
-  hl(L.ok); narrate('|bf| ≤ 1 → node <b>'+node.v+'</b> vẫn CÂN, không xoay, đi tiếp lên trên.'); await nap(900);
+  upd(node); insCur=node.v; insBf=null; drawIns();
+  say('insNarr','insLog','Quay lui qua <b>'+node.v+'</b>: h = 1+max('+hL+','+hR+') = <b>'+node.h+'</b>.'); await nap(700);
+  const bf=BF(node); insBf=node.v; drawIns();
+  const bad=Math.abs(bf)>1;
+  say('insNarr','insLog','bf('+node.v+') = '+hL+' − '+hR+' = <b style="color:'+(bad?'var(--lacquer)':'var(--wasabi)')+'">'+(bf>0?'+':'')+bf+'</b>'+(bad?' → <b style="color:var(--lacquer)">LỆCH!</b>':' → ổn, đi tiếp lên trên.'), bad?'bad':null); await nap(700);
+  const rb=rebalanceMsg(node,bf);
+  if(rb){ say('insNarr','insLog','Ca <b>'+rb.kind+'</b> → xoay lại tại <b>'+node.v+'</b>.','rot'); await nap(700); const r=rb.apply(node); insCur=r.v; insBf=null; drawIns(); await nap(700); return r; }
   return node;
 }
-
-async function doInsert(x){
-  setRot(''); rotHappened=false; flashV=x; curV=null; bfV=null;
-  hl(L.sig); narrate('Treo thêm quả cân <b>'+x+'</b>: đi từ gốc theo luật <b>nhỏ → trái, lớn → phải</b>.'); await nap(750);
-  root=await ins(root,x);
-  curV=null; bfV=null; tiltV=null; tiltDeg=0; draw(); hl();
-  if(rotHappened) narrate('Treo <b>'+x+'</b> xong — mobile đã <b style="color:var(--amber)">tự xoay</b> cho thẳng lại.');
-  else narrate('Treo <b>'+x+'</b> xong — mobile vẫn cân, khỏi xoay.');
-  await nap(800); flashV=null; draw();
+if($('bInsGo')){
+  $('bInsGo').onclick=async()=>{
+    if(insBusy) return; const x=+$('insVal').value; if(isNaN(x)) return;
+    insBusy=true; CL.lock(['bInsGo','bInsReset'],true);
+    $('insLog').innerHTML='';
+    insRoot=await insertStep(insRoot,x);
+    insCur=null; insBf=null; drawIns();
+    say('insNarr','insLog','✓ Xong! Cây vẫn cân bằng (|bf| ≤ 1 ở mọi node) sau khi chèn <b>'+x+'</b>.');
+    CL.lock(['bInsGo','bInsReset'],false); insBusy=false;
+  };
+  $('bInsReset').onclick=()=>{ if(insBusy) return; seedIns(); drawIns(); clearLog('insLog','Log sẽ hiện ở đây khi bạn chèn.'); $('insNarr').innerHTML='Thử chèn <b>28</b> để xem cây tự xoay lại (không phải ở gốc!) — hoặc <b>1</b> để xem một lần chèn không cần xoay.'; };
+  seedIns(); drawIns();
+  $('insNarr').innerHTML='Thử chèn <b>28</b> để xem cây tự xoay lại (không phải ở gốc!) — hoặc <b>1</b> để xem một lần chèn không cần xoay.';
+  clearLog('insLog','Log sẽ hiện ở đây khi bạn chèn.');
 }
 
-async function showComparisonFlourish(){
-  narrate('🤔 Nếu KHÔNG tự cân bằng, treo 1→7 tăng dần sẽ cho một chuỗi lệch hẳn sang một bên như thế này…');
-  const el=$('svgTheme');
-  const ghost=SVG('g',{opacity:'0'});
-  for(let i=0;i<7;i++){
-    const gx=520+i*3, gy=40+i*34;
-    if(i>0) ghost.appendChild(SVG('line',{x1:520+(i-1)*3,y1:40+(i-1)*34,x2:gx,y2:gy,stroke:'#C7C7C7','stroke-width':1.5}));
-    ghost.appendChild(SVG('circle',{cx:gx,cy:gy,r:9,fill:'#E9E9E9',stroke:'#B0B0B0'}));
+/* --- Xoá --- */
+const drawDelUI=makeTreeDraw('svgDel',640,220);
+let delRoot=null, delBusy=false, delCur=null, delFlash=null, delBf=null;
+function seedDel(){ delRoot=null; for(const v of [50,25,75,10,30,60,90,5,15,27,65]) delRoot=avlInsertSync(delRoot,v); }
+function drawDel(){ drawDelUI(delRoot, delCur, delFlash, delBf); }
+async function deleteStep(node,x){
+  if(!node){ say('delNarr','delLog','Không có <b>'+x+'</b> trong cây.'); return null; }
+  delCur=node.v; drawDel();
+  if(x<node.v){ say('delNarr','delLog','Ở <b>'+node.v+'</b>: '+x+' &lt; '+node.v+' → đi TRÁI.'); await nap(600); node.l=await deleteStep(node.l,x); }
+  else if(x>node.v){ say('delNarr','delLog','Ở <b>'+node.v+'</b>: '+x+' &gt; '+node.v+' → đi PHẢI.'); await nap(600); node.r=await deleteStep(node.r,x); }
+  else {
+    if(!node.l || !node.r){
+      const child=node.l||node.r;
+      delFlash=node.v; drawDel();
+      say('delNarr','delLog','Tìm thấy <b>'+node.v+'</b> — '+(child?('có <b>1 con</b> → con ('+child.v+') lên thay chỗ luôn.'):'là <b>lá</b> → xoá thẳng, chỗ đó trống.'));
+      await nap(1000); delFlash=null;
+      return child;
+    } else {
+      const succ=bstMinNode(node.r);
+      delFlash=succ.v; drawDel();
+      say('delNarr','delLog','<b>'+node.v+'</b> có <b>2 con</b> → mượn giá trị nhỏ nhất bên phải (successor): <b>'+succ.v+'</b>. Copy giá trị đó lên node '+node.v+', rồi xoá <b>node '+succ.v+' gốc</b> (bản gốc, giờ chỉ còn tối đa 1 con) ở nhánh phải.');
+      await nap(1200); delFlash=null;
+      node.v=succ.v;
+      node.r=await deleteStep(node.r,succ.v);
+    }
   }
-  el.appendChild(ghost);
-  await nap(80); ghost.setAttribute('opacity','1');
-  await nap(1700);
-  narrate('😵 7 tầng, tìm chậm như dò từng phần tử — KHÔNG có gì tự cân bằng cả.');
-  await nap(1700);
-  narrate('✅ Còn mobile của chúng ta (bên trên) nhờ <b style="color:var(--amber)">tự XOAY</b> nên vẫn THẤP &amp; CÂN — chỉ 3 tầng!');
-  await nap(1800);
-  ghost.remove();
+  if(!node) return null;
+  const hL=H(node.l), hR=H(node.r);
+  upd(node); delCur=node.v; delBf=null; drawDel();
+  say('delNarr','delLog','Quay lui qua <b>'+node.v+'</b>: h = 1+max('+hL+','+hR+') = <b>'+node.h+'</b>.'); await nap(650);
+  const bf=BF(node); delBf=node.v; drawDel();
+  const bad=Math.abs(bf)>1;
+  say('delNarr','delLog','bf('+node.v+') = '+hL+' − '+hR+' = <b style="color:'+(bad?'var(--lacquer)':'var(--wasabi)')+'">'+(bf>0?'+':'')+bf+'</b>'+(bad?' → <b style="color:var(--lacquer)">LỆCH!</b>':' → ổn, đi tiếp lên trên.'), bad?'bad':null); await nap(650);
+  const rb=rebalanceMsg(node,bf);
+  if(rb){ say('delNarr','delLog','Ca <b>'+rb.kind+'</b> → xoay lại tại <b>'+node.v+'</b> — quay lui vẫn còn tiếp tục lên trên, có thể xoay thêm nữa.','rot'); await nap(750); const r=rb.apply(node); delCur=r.v; delBf=null; drawDel(); await nap(750); return r; }
+  return node;
 }
-
-/* ---- one shared script: automatic play or one-step-at-a-time ---- */
-const SCRIPT=[
-  {narrate:'🎐 Treo lần lượt các quả cân 1, 2, 3, 4, 5, 6, 7…', pause:700},
-  {op:'insert', val:1}, {op:'insert', val:2}, {op:'insert', val:3}, {op:'insert', val:4},
-  {op:'insert', val:5}, {op:'insert', val:6}, {op:'insert', val:7},
-  {op:'flourish'},
-  {narrate:'Hết! Mobile vẫn thấp & cân sau khi treo đủ 7 quả — nhờ tự xoay mỗi khi lệch quá 1 tầng.', pause:0},
-];
-async function runBeat(beat){
-  if(beat.op==='insert') await doInsert(beat.val);
-  else if(beat.op==='flourish') await showComparisonFlourish();
-  else narrate(beat.narrate);
+if($('bDelGo')){
+  $('bDelGo').onclick=async()=>{
+    if(delBusy) return; const x=+$('delVal').value; if(isNaN(x)) return;
+    delBusy=true; CL.lock(['bDelGo','bDelReset'],true);
+    $('delLog').innerHTML='';
+    delRoot=await deleteStep(delRoot,x);
+    delCur=null; delBf=null; drawDel();
+    say('delNarr','delLog','✓ Xong! Cây vẫn cân bằng sau khi xoá <b>'+x+'</b>.');
+    CL.lock(['bDelGo','bDelReset'],false); delBusy=false;
+  };
+  $('bDelReset').onclick=()=>{ if(delBusy) return; seedDel(); drawDel(); clearLog('delLog','Log sẽ hiện ở đây khi bạn xoá.'); $('delNarr').innerHTML='Thử xoá <b>75</b> hoặc <b>90</b> để xem nó tự xoay lại — hoặc xoá <b>50</b> (gốc, 2 con) để xem ca "mượn successor".'; };
+  seedDel(); drawDel();
+  $('delNarr').innerHTML='Thử xoá <b>75</b> hoặc <b>90</b> để xem nó tự xoay lại — hoặc xoá <b>50</b> (gốc, 2 con) để xem ca "mượn successor".';
+  clearLog('delLog','Log sẽ hiện ở đây khi bạn xoá.');
 }
-
-$('bReset').onclick=()=>{
-  if(busy)return;
-  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
-  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
-};
-
-$('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); resetState();
-  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
-  lock(false);
-};
-
-let stepMode=false, stepIdx=0;
-$('bStep').onclick=async()=>{
-  if(busy)return;
-  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
-  if(stepIdx>=SCRIPT.length){
-    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
-    return;
-  }
-  lockStep(true);
-  await runBeat(SCRIPT[stepIdx]);
-  stepIdx++;
-  lockStep(false);
-  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
-};
-
-$('bIns').onclick=async ()=>{ if(busy)return; lock(true); await doInsert(+$('val').value); $('val').value=+$('val').value+10; lock(false); };
-$('bDemo').onclick=async ()=>{ if(busy)return; lock(true); root=null; setRot(''); flashV=null;curV=null;bfV=null; draw();
-  for(let k=1;k<=7;k++){ root=insertSync(root,k); flashV=k; draw(); narrate('Chèn nhanh <b>'+k+'</b> (đã tự cân).'); await nap(430); }
-  flashV=null; draw();
-  narrate('Chèn 1→7 tăng dần mà cây vẫn THẤP & CÂN (chỉ 3 tầng) — nhờ tự xoay.');
-  lock(false);
-};
-
-/* ---- cây thường (không cân) vs AVL, minh hoạ trực tiếp, từng bước ---- */
-function bstInsert(n,x){ if(!n) return {v:x,l:null,r:null}; if(x<n.v) n.l=bstInsert(n.l,x); else if(x>n.v) n.r=bstInsert(n.r,x); return n; }
-function treeHeight(n){ return n ? 1+Math.max(treeHeight(n.l), treeHeight(n.r)) : 0; }
-let bstDemoRoot=null, avlDemoRoot=null, bstSeq=[1,2,3,4,5,6,7], bstStepIdx=0, bstDemoBusy=false;
-function parseBstSeq(){
-  const nums = ($('bstSeqInput').value||'').split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n));
-  return nums.length ? nums : [1,2,3,4,5,6,7];
-}
-function bstBtnLabel(){
-  return bstStepIdx>=bstSeq.length ? '↺ Xong! Bấm để làm lại' : '⏭ Chèn '+bstSeq[bstStepIdx]+' ('+(bstStepIdx+1)+'/'+bstSeq.length+')';
-}
-function renderBstBars(){
-  const bh=treeHeight(bstDemoRoot), ah=treeHeight(avlDemoRoot);
-  $('bstBar').style.height=Math.max(2,Math.min(bh*8,64))+'px';
-  $('avlBar').style.height=Math.max(2,Math.min(ah*8,64))+'px';
-  $('bstHeightLabel').textContent='cao '+bh;
-  $('avlHeightLabel').textContent='cao '+ah;
-}
-function resetBstDemo(){
-  bstDemoRoot=null; avlDemoRoot=null; bstStepIdx=0; bstSeq=parseBstSeq();
-  renderBstBars();
-  $('bstNarr').innerHTML='Bấm nút để chèn từng số vào CẢ 2 cây, so chiều cao.';
-  $('bBstStep').textContent=bstBtnLabel();
-}
-function bstStep(){
-  if(bstDemoBusy) return;
-  if(bstStepIdx>=bstSeq.length){ resetBstDemo(); return; }
-  const x = bstSeq[bstStepIdx];
-  bstDemoRoot = bstInsert(bstDemoRoot, x);
-  avlDemoRoot = insertSync(avlDemoRoot, x);
-  renderBstBars();
-  const bh=treeHeight(bstDemoRoot), ah=treeHeight(avlDemoRoot);
-  $('bstNarr').innerHTML='Chèn <b>'+x+'</b> → cây thường cao <b style="color:var(--lacquer)">'+bh+'</b>, AVL cao <b style="color:var(--wasabi)">'+ah+'</b>'+(bh>ah?' — AVL đã tự xoay để thấp hơn!':'.');
-  bstStepIdx++;
-  $('bBstStep').textContent=bstBtnLabel();
-}
-$('bBstStep').onclick = bstStep;
-$('bBstReset').onclick = ()=>{ if(bstDemoBusy) return; resetBstDemo(); };
 
 initQuiz('quiz','avl',{
   line:{ok:true, msg:'Đúng! Cây THƯỜNG không tự cân → thành đường thẳng, tìm chậm như list. AVL tự XOAY nên luôn thấp.'},
   bal:{ok:false, msg:'Cây THƯỜNG (không cân) sẽ nghiêng thành đường thẳng. Chỉ AVL mới giữ cân.'}
 });
-
-draw();
-resetBstDemo();
-if(location.hash==='#seed'){ [50,30,70,20,40,60,80,10,25,90].forEach(v=>{root=insertSync(root,v);}); draw(); }
 })();
 </script>
 </body>

@@ -63,6 +63,26 @@
   .callout b{color:var(--indigo);}
   .formula{font-family:'JetBrains Mono',monospace;background:var(--nori);color:#A8D5A2;border-radius:10px;padding:12px 16px;font-size:13.5px;margin:10px 0;display:inline-block;}
 
+  .qt-fig{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0 18px;}
+  .qt-fig svg{flex:0 0 auto;background:#fff;border-radius:14px;box-shadow:var(--shadow);width:auto;max-width:100%;height:auto;}
+  .qt-fig .fig-notes{flex:1 1 220px;background:var(--tatami);border-radius:10px;padding:11px 15px;font-size:13px;line-height:1.75;}
+  .qt-fig .fig-notes b{color:var(--indigo);}
+  .qt-fig .badge{font-family:'JetBrains Mono',monospace;}
+
+  .mode-btn{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--soy);border:2px solid #E4D6B4;border-radius:10px;padding:7px 13px;font-size:12.5px;font-weight:700;}
+  .mode-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+
+  .click-note{background:var(--tatami);border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.6;border-left:4px solid var(--wasabi);}
+  .click-note.split{border-left-color:var(--gold);}
+  .click-note.find{border-left-color:var(--accent);}
+  .click-note b{color:var(--indigo);}
+  #techNarr .click-note{cursor:pointer;transition:box-shadow .15s ease;}
+  #techNarr .click-note:hover{box-shadow:0 0 0 2px rgba(44,64,102,.18);}
+  #techNarr .click-note.active{border-left-color:var(--indigo);box-shadow:0 0 0 2px var(--indigo);background:#fff;}
+  #svgTheme{cursor:crosshair;}
+  #svgTree{width:auto;height:auto;max-width:none;display:block;background:#fff;}
+  #svgTreeWrap{padding:10px;}
+
   .k-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px;}
   .k-chip{background:var(--tatami);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
   .k-chip .em{font-size:22px;}
@@ -109,7 +129,7 @@
   <div class="k-noren">
     <div class="k-eyebrow">Trạm 6 · Cấu trúc dữ liệu</div>
     <h1>Quadtree<br><span class="accent">= Bản đồ ghim vị trí 🗺️</span></h1>
-    <p class="sub2">Vùng đông ghim tự chia nhỏ để tra cứu nhanh; vùng thưa vẫn giữ nguyên 1 ô lớn. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
+    <p class="sub2">Vùng đông ghim tự chia nhỏ để tra cứu nhanh; vùng thưa vẫn giữ nguyên 1 ô lớn. Chọn chế độ rồi bấm thẳng vào bản đồ để tự trải nghiệm.</p>
   </div>
 
   <div id="toolbox"></div>
@@ -134,13 +154,7 @@
       </div>
     </div>
 
-    <p class="lead-p" style="margin-top:16px;">Trước hết: <b>một node lưu gì?</b> Mỗi node chỉ là một object nhỏ — không phải một cấu trúc phức tạp:</p>
-    <div class="formula">node = { cx, cy, half, depth, &nbsp;points: [ ], &nbsp;nw, ne, sw, se }</div>
-    <p class="lead-p"><code>cx, cy, half, depth</code> tả <b>hình vuông</b> mà node này đại diện — cố định, không đổi sau khi tạo. <code>points</code> là danh sách ghim <b>thật sự đang nằm trong ô này</b> (tối đa CAP cái, trừ khi đã chạm MAX_DEPTH). <code>nw/ne/sw/se</code> là 4 ô con — còn <code>null</code> nghĩa là node này <b>chưa chẻ</b>, vẫn còn là lá; code kiểm tra "đã chẻ chưa" chỉ bằng <code>if (!node.nw)</code>.</p>
-    <p class="lead-p"><code>subdivide()</code> chia đúng như cắt bánh làm 4 phần bằng nhau — hoàn toàn là chuyện hình học, chưa liên quan gì tới điểm đang có trong ô:</p>
-    <div class="formula">1 ô [tâm, nửa cạnh h] &nbsp;→&nbsp; 4 ô con NW/NE/SW/SE, mỗi ô nửa cạnh = h/2, tâm lệch ±h/2 sang 4 hướng</div>
-    <p class="lead-p">Một điểm rơi vào góc nào chỉ cần <b>2 phép so sánh</b>: so <code>x</code> với tâm ô (trái/phải), so <code>y</code> với tâm ô (trên/dưới) → ra đúng 1 trong 4 góc.</p>
-    <div class="callout">✂️ <b>Điểm dễ hiểu lầm:</b> khi 1 ô đầy và phải chẻ ra 4 ô con, các điểm <b>đang có sẵn trong ô đó không hề chuyển vào 4 ô con</b> — chúng nằm nguyên tại ô cha. Chỉ có điểm <b>MỚI</b> vừa khiến ô bị đầy (và mọi điểm chèn sau đó) mới thật sự bị đẩy xuống 1 trong 4 ô con. Một ô đã "chẻ" vẫn giữ nguyên các điểm gốc của nó.</div>
+    <div class="callout" style="margin-top:16px;">🌍 <b>Chuyện có thật:</b> cuối 2015, Google Maps SDK cho iOS <b>chưa có sẵn</b> tính năng tự gom cụm ghim (marker clustering). Lập trình viên bên ngoài phải tự dựng quadtree để nhóm ghim theo từng ô khi người dùng phóng to/thu nhỏ bản đồ — mãi sau này Google mới đưa clustering vào chính SDK của mình. Quadtree không phải lý thuyết suông — nó từng là thứ "vá" cho một tính năng còn thiếu trên bản đồ thật.</div>
   </section>
 
   <section class="k-section">
@@ -151,7 +165,10 @@
       <div class="k-chip"><span class="em">✂️</span><div class="t"><b>Chia 4 góc</b><code>subdivide()</code> → NW/NE/SW/SE</div></div>
       <div class="k-chip"><span class="em">🧱</span><div class="t"><b>Giới hạn chẻ</b><code>MAX_DEPTH</code></div></div>
       <div class="k-chip"><span class="em">🔍</span><div class="t"><b>Cắt cả nhánh không chạm</b>tăng tốc truy vấn vùng</div></div>
+      <div class="k-chip"><span class="em">🗑️</span><div class="t"><b>Xoá + gộp lại</b><code>remove()</code> rồi <code>tryMerge()</code></div></div>
+      <div class="k-chip"><span class="em">📏</span><div class="t"><b>Bán kính co dần</b>tìm gần nhất, cắt nhánh theo <code>bestSoFar</code></div></div>
     </div>
+    <div class="callout" style="margin-top:14px;">📐 <b>Luật chia, nói gọn:</b> ô <b>chưa chẻ</b> → điểm mới cứ thả thẳng vào ô đó. Khi ô đã có đủ <b>CAP=4</b> điểm mà còn điểm thứ 5 muốn vào → ô mới tự <code>subdivide()</code> ra 4 ô con rồi đẩy điểm xuống đúng góc. Ô con đầy tiếp thì lại chẻ tiếp — nhưng chỉ chẻ tối đa tới tầng <b>MAX_DEPTH=5</b> rồi DỪNG hẳn, dù có đầy cỡ nào cũng giữ nguyên, không chẻ thêm.</div>
   </section>
 
   <section class="k-section">
@@ -163,52 +180,184 @@
     </div>
 
     <div id="themeView">
-      <div class="k-scene" style="max-width:460px;margin:0 auto;">
-        <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ngày thả ghim tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-        <div class="k-controls">
-          <div class="row" style="gap:8px">
-            <button class="play-btn" id="bPlay">▶ Tự động</button>
-            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
+      <div class="k-main">
+        <div class="k-scene" style="max-width:460px;margin:0 auto;">
+          <svg id="svgTheme" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="k-controls">
+            <div class="k-side"><button id="bReset">↺ Reset</button></div>
           </div>
-          <div class="k-side"><button id="bReset">↺ Reset</button></div>
+        </div>
+        <div class="card">
+          <h3>🧪 Tự thí nghiệm: bấm thẳng vào bản đồ</h3>
+          <div class="row" id="themeModeRow" style="gap:6px;margin-bottom:10px;">
+            <button id="themeModeAdd" class="mode-btn active">📍 Thả ghim</button>
+            <button id="themeModeFind" class="mode-btn">🔍 Tìm gần nhất</button>
+          </div>
+          <div class="legend" style="margin-bottom:10px;" id="themeModeHint">Luật chia: mỗi ô tối đa <b>CAP=4</b> ghim, trừ khi đã chạm <b>MAX_DEPTH=5</b> — đầy thì ô tự động chia 4. Chọn chế độ rồi bấm vào bản đồ bên trái, ghi chú sẽ hiện ở đây.</div>
+          <div id="clickLog" style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            <div class="legend">Chưa có ghim nào do bạn thả — bấm thử vào bản đồ xem sao.</div>
+          </div>
         </div>
       </div>
     </div>
 
     <div id="techView" style="display:none">
-      <div class="wrap">
-        <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-          <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
-          <div class="code" id="code"></div></div></div>
-        <div class="col-viz">
-          <div class="card"><h3>Quadtree (CAP=4, MAX_DEPTH=5)</h3>
-            <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
-            <div class="legend">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH</div>
+      <div class="tech-explain" style="margin-bottom:22px;">
+        <h3 style="font-family:'Baloo 2',cursive;color:var(--indigo);font-size:17px;margin:0 0 8px;">Add · Remove · Find nearest — tính bằng gì?</h3>
+        <p class="lead-p">Ba phép toán này không phải "thuật toán bí ẩn" — mỗi phép chỉ lặp lại 1-2 phép so sánh hoặc 1 phép khoảng cách theo đệ quy. Bóc từng cái ra xem nó thực sự làm gì, kèm hình minh hoạ nhỏ:</p>
+
+        <p class="lead-p"><b>① Add (chèn):</b> lặp lại ở <b>MỖI tầng</b> cho tới khi gặp ô còn chỗ.</p>
+        <div class="qt-fig">
+          <svg width="220" height="150" viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="30" y="15" width="120" height="120" fill="#F5F8FC" stroke="var(--indigo)" stroke-width="2"/>
+            <line x1="90" y1="15" x2="90" y2="135" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="30" y1="75" x2="150" y2="75" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="90" cy="75" r="2.5" fill="var(--indigo)"/>
+            <text x="96" y="72" font-size="9" fill="var(--soy-light)">tâm</text>
+            <text x="45" y="35" font-size="10" fill="var(--soy-light)" opacity="0.7">NW</text>
+            <text x="118" y="35" font-size="10" fill="var(--soy-light)" opacity="0.7">NE</text>
+            <text x="45" y="122" font-size="10" fill="var(--soy-light)" opacity="0.7">SW</text>
+            <text x="118" y="122" font-size="10" fill="var(--soy-light)" opacity="0.7">SE</text>
+            <line x1="90" y1="75" x2="62" y2="45" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="62" cy="45" r="5.5" fill="var(--lacquer)" stroke="#fff" stroke-width="1.5"/>
+            <text x="68" y="42" font-size="12" font-weight="700" fill="var(--lacquer)">p</text>
+          </svg>
+          <div class="fig-notes">
+            <b>① Có nằm trong ô?</b> so <code>p.x, p.y</code> với 4 biên hình vuông — ngoài thì dừng.<br>
+            <b>② Chọn góc:</b> lệch trái(W)/phải(E) so tâm, lệch trên(N)/dưới(S) so tâm → ghép thành đúng 1 trong 4 góc.<br>
+            <span class="badge">Ví dụ trên: p ở W + N → góc <b>NW</b>.</span>
           </div>
-          <div class="card"><h3>Điều khiển thủ công</h3>
+        </div>
+        <div class="callout">✂️ Ô đã đủ CAP mà chưa chạm MAX_DEPTH → <code>subdivide()</code> chẻ 4, rồi làm lại bước ② cho đúng ô con vừa chọn.</div>
+
+        <p class="lead-p"><b>② Remove (xoá):</b> đi xuống y hệt Add để tìm điểm, xoá xong thử <b>GỘP LẠI</b>.</p>
+        <div class="qt-fig">
+          <svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="15" width="50" height="50" fill="none" stroke="var(--indigo)" stroke-width="1.5"/>
+            <rect x="60" y="15" width="50" height="50" fill="none" stroke="var(--indigo)" stroke-width="1.5"/>
+            <rect x="10" y="65" width="50" height="50" fill="none" stroke="var(--indigo)" stroke-width="1.5"/>
+            <rect x="60" y="65" width="50" height="50" fill="none" stroke="var(--indigo)" stroke-width="1.5"/>
+            <circle cx="30" cy="35" r="5" fill="none" stroke="var(--lacquer)" stroke-width="2"/>
+            <line x1="25" y1="30" x2="35" y2="40" stroke="var(--lacquer)" stroke-width="2"/>
+            <line x1="35" y1="30" x2="25" y2="40" stroke="var(--lacquer)" stroke-width="2"/>
+            <circle cx="85" cy="35" r="5" fill="var(--wasabi)"/>
+            <circle cx="30" cy="90" r="5" fill="var(--wasabi)"/>
+            <circle cx="85" cy="90" r="5" fill="var(--wasabi)"/>
+            <text x="12" y="130" font-size="9.5" fill="var(--soy-light)">TRƯỚC (đã chẻ, 1 điểm bị xoá)</text>
+            <text x="122" y="72" font-size="18" fill="var(--gold)">→</text>
+            <rect x="150" y="15" width="100" height="100" fill="none" stroke="var(--indigo)" stroke-width="2"/>
+            <circle cx="180" cy="45" r="5" fill="var(--wasabi)"/>
+            <circle cx="222" cy="42" r="5" fill="var(--wasabi)"/>
+            <circle cx="200" cy="88" r="5" fill="var(--wasabi)"/>
+            <text x="158" y="130" font-size="9.5" fill="var(--soy-light)">SAU (gộp lại: count ≤ CAP)</text>
+          </svg>
+          <div class="fig-notes">
+            <b>① Xoá điểm</b> khỏi <code>points[]</code> của ô con chứa nó.<br>
+            <b>② Đếm lại:</b> tổng điểm ô cha + 4 ô con còn lại bao nhiêu.<br>
+            <span class="badge">Tổng ≤ CAP → gộp hết về 1 ô, bỏ 4 ô con (<code>tryMerge</code>).</span>
+          </div>
+        </div>
+        <p class="lead-p" style="margin-top:2px;">Nhờ vậy quadtree không phình to mãi — vùng từng đông ghim rồi thưa dần sẽ tự <b>co cây lại</b>, không giữ mãi những ô con gần như rỗng.</p>
+
+        <p class="lead-p"><b>③ Find nearest:</b> không quét hết điểm — mỗi ô chỉ cần khoảng cách tới <b>điểm gần nhất TRÊN cạnh ô đó</b> (không phải tới tâm ô).</p>
+        <div class="qt-fig">
+          <svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="25" width="70" height="70" fill="#F5F8FC" stroke="var(--accent)" stroke-width="2"/>
+            <line x1="85" y1="40" x2="112" y2="40" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="85" cy="40" r="3" fill="var(--accent)"/>
+            <circle cx="112" cy="40" r="5.5" fill="var(--gold)" stroke="#fff" stroke-width="1.5"/>
+            <text x="90" y="34" font-size="9" fill="var(--accent)">d</text>
+            <text x="90" y="55" font-size="10" fill="var(--soy-light)">Q</text>
+            <text x="6" y="112" font-size="9.5" fill="var(--accent)" font-weight="700">d ≤ bestSoFar → MỞ ra xem</text>
+            <rect x="170" y="25" width="70" height="70" fill="var(--lacquer)" opacity="0.12" stroke="var(--lacquer)" stroke-width="2"/>
+            <line x1="240" y1="95" x2="285" y2="115" stroke="var(--lacquer)" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="240" cy="95" r="3" fill="var(--lacquer)"/>
+            <circle cx="285" cy="115" r="5.5" fill="var(--gold)" stroke="#fff" stroke-width="1.5"/>
+            <text x="248" y="112" font-size="9" fill="var(--lacquer)">d</text>
+            <text x="258" y="128" font-size="10" fill="var(--soy-light)">Q</text>
+            <text x="150" y="140" font-size="9.5" fill="var(--lacquer)" font-weight="700">d &gt; bestSoFar → CẮT nhánh</text>
+          </svg>
+          <div class="fig-notes">
+            <b>① Tìm điểm gần Q nhất trên cạnh ô</b> (kéo Q về mép ô nếu Q đứng ngoài) → khoảng cách <code>d</code>.<br>
+            <b>② So d với bestSoFar</b> — khoảng cách tới ghim gần nhất mình từng thấy.<br>
+            <span class="badge">d ≤ bestSoFar → mở ô ra xem · d &gt; bestSoFar → CẮT, khỏi mở.</span>
+          </div>
+        </div>
+        <div class="callout">📏 <b>Mẹo:</b> "bán kính tìm kiếm" không cố định trước — nó <b>CO LẠI</b> dần mỗi khi tìm được điểm gần hơn, khiến các nhánh xét sau càng dễ bị cắt.</div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>🧪 Ví dụ thực tế (~30 điểm) — bấm để xem từng bước</h3>
+          <div class="legend" style="margin-bottom:8px;">Cùng <b>1 ví dụ</b> cho cả 3 phép toán ở trên. Chọn chế độ, rồi bấm thẳng vào bản đồ bên dưới:</div>
+          <div class="row" id="modeRow" style="gap:6px;margin-bottom:10px;">
+            <button id="modeAdd" class="mode-btn active">➕ Add</button>
+            <button id="modeRemove" class="mode-btn">🗑️ Remove</button>
+            <button id="modeFind" class="mode-btn">🔍 Find nearest</button>
+          </div>
+          <div class="row" style="gap:6px;margin-bottom:10px;">
+            <button id="vizSquare" class="mode-btn active">🗺️ Ô vuông</button>
+            <button id="vizTree" class="mode-btn">🌳 Sơ đồ cây</button>
+          </div>
+          <div class="k-main" style="grid-template-columns:420px 1fr;">
+            <div>
+              <svg id="svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style="cursor:crosshair;width:100%;height:auto;aspect-ratio:1/1;"></svg>
+              <div id="svgTreeWrap" style="display:none;overflow:auto;max-height:460px;background:#fff;border-radius:14px;box-shadow:var(--shadow);">
+                <svg id="svgTree"></svg>
+              </div>
+              <div class="legend" style="margin-top:8px;">Ô vuông = 1 node · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--red)">viền đỏ đứt nét</span> = đã chạm MAX_DEPTH · sơ đồ cây: mỗi vòng tròn = 1 node, số bên dưới = số điểm đang giữ.</div>
+            </div>
+            <div>
+              <div class="legend" style="margin-bottom:8px;">📋 Log — từng bước kiểm tra (mới nhất ở trên). <b>Bấm vào 1 dòng</b> để xem lại đúng ô/dòng code của bước đó.</div>
+              <div id="techNarr" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">
+                <div class="legend" style="text-align:center;">
+                  <svg viewBox="0 0 160 160" width="140" height="140" style="background:#fff;border-radius:10px;box-shadow:var(--shadow);">
+                    <rect x="10" y="10" width="140" height="140" fill="none" stroke="#2C4066" stroke-width="2"/>
+                    <line x1="80" y1="10" x2="80" y2="150" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <line x1="10" y1="80" x2="150" y2="80" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>
+                    <text x="20" y="30" font-size="13" font-weight="700" fill="#2C4066" font-family="'JetBrains Mono',monospace">NW</text>
+                    <text x="112" y="30" font-size="13" font-weight="700" fill="#2C4066" font-family="'JetBrains Mono',monospace">NE</text>
+                    <text x="20" y="140" font-size="13" font-weight="700" fill="#2C4066" font-family="'JetBrains Mono',monospace">SW</text>
+                    <text x="106" y="140" font-size="13" font-weight="700" fill="#2C4066" font-family="'JetBrains Mono',monospace">SE</text>
+                  </svg>
+                  <div style="margin-top:8px;">Ví dụ mặc định: 1 ô đầy sẽ <b>chia thành 4 ô con</b> NW · NE · SW · SE. Bấm vào bản đồ bên trái để xem thật diễn ra trên cây.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;border-top:1px solid #E4D6B4;padding-top:14px;">
+            <div class="legend" style="margin-bottom:10px;">⚙️ <b>Cài đặt thêm cho ví dụ này</b> — thao tác nhanh trên cùng cây, khỏi cần bấm từng điểm:</div>
             <div class="row">
               <button id="bOne">✏️ Thêm 1 điểm (từng bước)</button>
+              <button id="bRemove" class="ghost" style="border-color:var(--lacquer);color:var(--lacquer)">🗑️ Xoá 1 điểm (từng bước)</button>
               <button id="bBulk" class="ghost">▶ Rải 30 điểm (mật độ)</button>
               <button id="bMax" class="ghost" style="border-color:var(--red);color:var(--red)">🎯 Demo MAX_DEPTH</button>
             </div>
-          </div>
-          <div class="card"><h3>Minh hoạ · Ảnh hưởng của CAP</h3>
-            <div class="row" style="margin-bottom:8px">
+            <div class="row" style="margin-top:12px;gap:8px;align-items:center;">
+              <span class="legend" style="margin:0;">Ảnh hưởng của CAP:</span>
               <input type="number" id="capInput" value="4" min="1" max="20" style="width:60px;">
               <button id="bCapDemo">🔁 Rải lại với CAP này</button>
             </div>
-            <div class="legend" id="capStats" style="min-height:18px;"></div>
-          </div>
-          <div class="card"><h3>Minh hoạ · Tìm điểm gần nhất</h3>
-            <div class="row" style="margin-bottom:8px">
+            <div class="legend" id="capStats" style="min-height:18px;margin-top:6px;"></div>
+            <div class="row" style="margin-top:12px;">
               <button id="bNNSearch">🔍 Tìm gần nhất (điểm ngẫu nhiên)</button>
               <button id="bNNClear" class="ghost">✖ Xoá</button>
             </div>
-            <div class="legend">Vòng nét đứt = phạm vi tìm · <span style="color:#5AA0FF">viền xanh</span> = ô ĐÃ kiểm tra · ô mờ = bị CẮT NHÁNH · <span style="color:#B8860B">●vàng</span> = điểm gần nhất.</div>
+            <div class="legend" style="margin-top:6px;">Vòng nét đứt = bán kính CO DẦN cuối cùng (khoảng cách tới điểm gần nhất) · <span style="color:#5AA0FF">viền xanh</span> = ô ĐÃ kiểm tra · ô mờ = bị CẮT NHÁNH · <span style="color:#B8860B">●vàng</span> = điểm gần nhất.</div>
             <div class="legend" id="nnStats" style="margin-top:6px;min-height:18px;"></div>
           </div>
         </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card"><h3>Code Add (JS · chạy thật)</h3>
+        <div class="code-title">// insert(): còn chỗ thì thêm · đầy thì chẻ 4 rồi đệ quy</div>
+        <div class="code" id="code"></div></div>
+        <div class="card"><h3>Code Remove (JS · chạy thật)</h3>
+        <div class="code-title">// remove(): tìm điểm, xoá, rồi gộp lại (tryMerge) nếu đủ nhỏ</div>
+        <div class="code" id="codeRemove"></div></div>
+        <div class="card"><h3>Code Find nearest (JS · chạy thật)</h3>
+        <div class="code-title">// nearest(): cắt nhánh xa hơn bestSoFar, co bestSoFar khi tìm được gần hơn</div>
+        <div class="code" id="codeNN"></div></div>
       </div>
     </div>
   </section>
@@ -266,7 +415,55 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
+const {$, nap, hl, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
+function narrate(html){
+  const t=document.getElementById('techNarr');
+  if(t){
+    if(t.firstElementChild && !t.firstElementChild.classList.contains('click-note')){ t.innerHTML=''; }
+    const div=document.createElement('div');
+    div.className='click-note';
+    div.innerHTML=html;
+    const hlIds=[...document.querySelectorAll('#code .hl')].map(e=>e.id);
+    const hl2Ids=[...document.querySelectorAll('#codeRemove .hl')].map(e=>e.id);
+    const hl3Ids=[...document.querySelectorAll('#codeNN .hl')].map(e=>e.id);
+    div._step={
+      node: curNode,
+      hlIds, hl2Ids, hl3Ids,
+      nn: (typeof nnState!=='undefined' && nnState) ? {...nnState} : null,
+      line: (typeof checkLine!=='undefined' && checkLine) ? {...checkLine} : null
+    };
+    div.onclick=()=>{
+      document.querySelectorAll('#techNarr .click-note.active').forEach(e=>e.classList.remove('active'));
+      div.classList.add('active');
+      const st=div._step;
+      curNode=st.node; nnState=st.nn; checkLine=st.line;
+      draw();
+      document.querySelectorAll('#code .hl, #codeRemove .hl, #codeNN .hl').forEach(e=>e.classList.remove('hl'));
+      st.hlIds.forEach(id=>document.getElementById(id)?.classList.add('hl'));
+      st.hl2Ids.forEach(id=>document.getElementById(id)?.classList.add('hl'));
+      st.hl3Ids.forEach(id=>document.getElementById(id)?.classList.add('hl'));
+    };
+    document.querySelectorAll('#techNarr .click-note.active').forEach(e=>e.classList.remove('active'));
+    div.classList.add('active');
+    t.prepend(div);
+  }
+}
+const TECH_LOG_DEFAULT = '<div class="legend" style="text-align:center;">'
+  +'<svg viewBox="0 0 160 160" width="140" height="140" style="background:#fff;border-radius:10px;box-shadow:var(--shadow);">'
+  +'<rect x="10" y="10" width="140" height="140" fill="none" stroke="#2C4066" stroke-width="2"/>'
+  +'<line x1="80" y1="10" x2="80" y2="150" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>'
+  +'<line x1="10" y1="80" x2="150" y2="80" stroke="#B7CFE8" stroke-width="1.5" stroke-dasharray="4 3"/>'
+  +'<text x="20" y="30" font-size="13" font-weight="700" fill="#2C4066" font-family="\'JetBrains Mono\',monospace">NW</text>'
+  +'<text x="112" y="30" font-size="13" font-weight="700" fill="#2C4066" font-family="\'JetBrains Mono\',monospace">NE</text>'
+  +'<text x="20" y="140" font-size="13" font-weight="700" fill="#2C4066" font-family="\'JetBrains Mono\',monospace">SW</text>'
+  +'<text x="106" y="140" font-size="13" font-weight="700" fill="#2C4066" font-family="\'JetBrains Mono\',monospace">SE</text>'
+  +'</svg>'
+  +'<div style="margin-top:8px;">Ví dụ mặc định: 1 ô đầy sẽ <b>chia thành 4 ô con</b> NW · NE · SW · SE. Bấm vào bản đồ bên trái để xem thật diễn ra trên cây.</div>'
+  +'</div>';
+function clearTechLog(msg){
+  const t=document.getElementById('techNarr');
+  if(t) t.innerHTML = msg ? '<div class="legend">'+msg+'</div>' : TECH_LOG_DEFAULT;
+}
 renderToolbox('quadtree');
 initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
@@ -300,9 +497,66 @@ const CODE=[
 renderCode('code', CODE);
 const L={containsChk:18, roomChk:19, pushDirect:20, subdivideCall:22, recurseCall:23};
 
+const REMOVE_CODE=[
+ ['<span class="kw">function</span> <span class="fn">remove</span>(node, p) {'],
+ ['  <span class="kw">if</span> (!contains(node, p)) <span class="kw">return</span> <span class="kw">false</span>;              <span class="cm">// ngoài ô này</span>'],
+ ['  <span class="kw">const</span> idx = node.points.indexOf(p);'],
+ ['  <span class="kw">if</span> (idx !== -1) { node.points.splice(idx,1); <span class="kw">return</span> <span class="kw">true</span>; } <span class="cm">// có ngay ở ô này</span>'],
+ ['  <span class="kw">if</span> (!node.nw) <span class="kw">return</span> <span class="kw">false</span>;                        <span class="cm">// ô lá, không có gì để xoá</span>'],
+ ['  <span class="kw">const</span> child = pickChild(node, p);'],
+ ['  <span class="kw">const</span> removed = remove(child, p);'],
+ ['  <span class="kw">if</span> (removed) tryMerge(node);                       <span class="cm">// gộp lại nếu đủ nhỏ</span>'],
+ ['  <span class="kw">return</span> removed;'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">tryMerge</span>(node) {'],
+ ['  <span class="kw">if</span> (!node.nw) <span class="kw">return</span>;'],
+ ['  <span class="kw">const</span> kids = collectAllPoints(node);           <span class="cm">// gom hết điểm 4 ô con</span>'],
+ ['  <span class="kw">if</span> (node.points.length + kids.length &lt;= CAP) {'],
+ ['    node.points.push(...kids);'],
+ ['    node.nw = node.ne = node.sw = node.se = <span class="kw">null</span>; <span class="cm">// gộp: bỏ 4 ô con</span>'],
+ ['  }'],
+ ['}'],
+];
+function renderCode2(hostId, CODE){
+  const b=$(hostId); b.innerHTML='';
+  CODE.forEach((c,i)=>{ const d=document.createElement('div'); d.className='cl cl2'; d.id='R'+i; d.innerHTML=(c&&c[0])||' '; b.appendChild(d); });
+}
+function hl2(...idx){ document.querySelectorAll('.cl2').forEach(e=>e.classList.remove('hl')); idx.forEach(i=>{ const e=$('R'+i); if(e) e.classList.add('hl'); }); }
+renderCode2('codeRemove', REMOVE_CODE);
+const RL={containsChk:1, foundHere:3, leafMiss:4, recurseCall:6, mergeCall:7};
+
+const CODE_NN=[
+ ['<span class="kw">function</span> <span class="fn">distToRect2</span>(node, qx, qy) {'],
+ ['  <span class="kw">const</span> nx = clamp(qx, node.cx-node.half, node.cx+node.half);'],
+ ['  <span class="kw">const</span> ny = clamp(qy, node.cy-node.half, node.cy+node.half);'],
+ ['  <span class="kw">return</span> (qx-nx)**2 + (qy-ny)**2;'],
+ ['}'],
+ [''],
+ ['<span class="kw">function</span> <span class="fn">nearest</span>(node, qx, qy, state) {'],
+ ['  <span class="kw">if</span> (distToRect2(node,qx,qy) &gt; state.bestD2) <span class="kw">return</span>; <span class="cm">// xa hơn bestSoFar → cắt cả nhánh</span>'],
+ ['  node.points.forEach(p =&gt; {'],
+ ['    <span class="kw">const</span> d2 = (p.x-qx)**2 + (p.y-qy)**2;'],
+ ['    <span class="kw">if</span> (d2 &lt; state.bestD2) { state.bestD2 = d2; state.nearest = p; } <span class="cm">// gần hơn → co bestSoFar</span>'],
+ ['  });'],
+ ['  <span class="kw">if</span> (node.nw) {'],
+ ['    <span class="kw">const</span> kids = [node.nw,node.ne,node.sw,node.se]'],
+ ['      .sort((a,b) =&gt; distToRect2(a,qx,qy) - distToRect2(b,qx,qy)); <span class="cm">// ghé ô gần nhất trước</span>'],
+ ['    kids.forEach(c =&gt; nearest(c, qx, qy, state));'],
+ ['  }'],
+ ['}'],
+];
+function renderCode3(hostId, CODE){
+  const b=$(hostId); b.innerHTML='';
+  CODE.forEach((c,i)=>{ const d=document.createElement('div'); d.className='cl cl3'; d.id='N'+i; d.innerHTML=(c&&c[0])||' '; b.appendChild(d); });
+}
+function hl3(...idx){ document.querySelectorAll('.cl3').forEach(e=>e.classList.remove('hl')); idx.forEach(i=>{ const e=$('N'+i); if(e) e.classList.add('hl'); }); }
+renderCode3('codeNN', CODE_NN);
+const NL={distCalc:[1,2,3], pruneChk:7, pointsChk:9, bestUpdate:10, sortKids:13, recurseCall:15};
+
 let CAP=4; const MAX_DEPTH=5;
 function QN(cx,cy,half,depth){ return {cx,cy,half,depth,points:[],nw:null,ne:null,sw:null,se:null}; }
-let root=QN(200,200,200,0), curNode=null, flashPoint=null, busy=false;
+let root=QN(200,200,200,0), curNode=null, flashPoint=null, busy=false, insertedPoints=[], themeNN=null, themeSearchLine=null, themeSearchPruned=[];
 
 function contains(node,p){ return p.x>=node.cx-node.half && p.x<node.cx+node.half && p.y>=node.cy-node.half && p.y<node.cy+node.half; }
 function subdivide(node){ const h=node.half/2;
@@ -318,7 +572,43 @@ function randPoint(){
   return {x:Math.random()*370+15, y:Math.random()*370+15};
 }
 
-let nnState=null;
+function collectAllPoints(node){
+  const out=node.points.slice();
+  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>out.push(...collectAllPoints(c))); }
+  return out;
+}
+function tryMerge(node){
+  if(!node.nw) return false;
+  const kids=[]; [node.nw,node.ne,node.sw,node.se].forEach(c=>kids.push(...collectAllPoints(c)));
+  if(node.points.length+kids.length<=CAP){ node.points.push(...kids); node.nw=node.ne=node.sw=node.se=null; return true; }
+  return false;
+}
+async function removeRec(node,target,verbose){
+  curNode=node;
+  if(verbose){ draw(); hl2(RL.containsChk); narrate('Tìm điểm cần xoá: ô tâm ('+Math.round(node.cx)+','+Math.round(node.cy)+') có chứa điểm này không?'); await nap(240); }
+  if(!contains(node,target)){ if(verbose){ narrate('Ngoài ô này → không phải nhánh chứa điểm, quay lui.'); await nap(220); } return false; }
+  const idx=node.points.indexOf(target);
+  if(idx!==-1){
+    if(verbose) hl2(RL.foundHere);
+    node.points.splice(idx,1); draw();
+    if(verbose){ narrate('Tìm thấy ngay trong <code>points[]</code> của ô này → xoá.'); await nap(420); }
+    return true;
+  }
+  if(!node.nw){ if(verbose){ hl2(RL.leafMiss); narrate('Không có ở đây và ô chưa từng chẻ → điểm không nằm trong nhánh này.'); await nap(240); } return false; }
+  const child=pickChild(node,target);
+  if(verbose){ hl2(RL.recurseCall); narrate('Không có ở ô này (đã chẻ) → điểm hẳn nằm ở góc <b>'+child.name+'</b>, đệ quy xuống.'); await nap(260); }
+  const removed=await removeRec(child.node,target,verbose);
+  if(removed){
+    const wasSplit=!!node.nw;
+    if(verbose){ hl2(RL.mergeCall); await nap(180); }
+    const merged=tryMerge(node);
+    draw();
+    if(verbose && wasSplit && merged){ narrate('Sau khi xoá, tổng điểm nhánh này ≤ CAP ('+CAP+') → <b style="color:var(--lacquer)">GỘP</b> 4 ô con lại thành 1 (merge-back).'); await nap(520); }
+  }
+  return removed;
+}
+
+let nnState=null, checkLine=null;
 function drawTechNode(node, el){
   const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
   const isCur=(node===curNode);
@@ -346,19 +636,31 @@ function drawTech(){
     el.appendChild(SVG('circle',{cx:nnState.qx,cy:nnState.qy,r:nnState.r, fill:'none', stroke:'var(--amber)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
     el.appendChild(SVG('circle',{cx:nnState.qx,cy:nnState.qy,r:3.5, fill:'var(--amber)'}));
   }
+  if(checkLine){
+    const c = checkLine.pruned ? 'var(--red)' : '#5AA0FF';
+    el.appendChild(SVG('line',{x1:checkLine.qx,y1:checkLine.qy,x2:checkLine.nx,y2:checkLine.ny, stroke:c, 'stroke-width':2, 'stroke-dasharray':'3 2'}));
+    el.appendChild(SVG('circle',{cx:checkLine.nx,cy:checkLine.ny,r:4, fill:c}));
+    const t=SVG('text',{x:checkLine.qx+7,y:checkLine.qy-7,'font-size':12,'font-weight':700, fill:c,'font-family':"'JetBrains Mono',monospace"});
+    t.textContent=checkLine.label;
+    el.appendChild(t);
+  }
 }
 
 function drawMapNode(node, el){
   const x=node.cx-node.half, y=node.cy-node.half, s=node.half*2;
   const isCur=(node===curNode);
   const atMax=(node.depth>=MAX_DEPTH && node.points.length>CAP);
-  el.appendChild(SVG('rect',{x,y,width:s,height:s,fill:'none',
+  const isPruned=themeSearchPruned.includes(node);
+  const rectEl=SVG('rect',{x,y,width:s,height:s,fill:'none',
     stroke: atMax?'var(--red)':(isCur?'#1565C0':'#B7CFE8'),
     'stroke-width': (isCur||atMax)?2.5:1,
-    'stroke-dasharray': atMax?'5 4':'0'}));
+    'stroke-dasharray': atMax?'5 4':'0'});
+  if(isPruned) rectEl.style.opacity=0.2;
+  el.appendChild(rectEl);
   node.points.forEach(p=>{
     const isFlash=(p===flashPoint);
-    el.appendChild(SVG('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-size':isFlash?17:12}, [])).textContent='📍';
+    const isNearest=(themeNN && themeNN.nearest===p);
+    el.appendChild(SVG('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-size':isNearest?21:(isFlash?17:12)}, [])).textContent='📍';
   });
   if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>drawMapNode(c,el)); }
 }
@@ -366,11 +668,91 @@ function drawMap(){
   const el=$('svgTheme'); if(!el) return; el.innerHTML='';
   el.appendChild(SVG('rect',{x:0,y:0,width:400,height:400,fill:'#EAF2FB'}));
   drawMapNode(root, el);
+  if(themeSearchLine){
+    const {qx,qy,nx,ny,pruned}=themeSearchLine;
+    const col=pruned?'var(--lacquer)':'var(--accent)';
+    el.appendChild(SVG('line',{x1:qx,y1:qy,x2:nx,y2:ny, stroke:col, 'stroke-width':2}));
+    el.appendChild(SVG('circle',{cx:nx,cy:ny,r:3.5, fill:col}));
+    el.appendChild(SVG('circle',{cx:qx,cy:qy,r:4.5, fill:'var(--gold)', stroke:'#fff','stroke-width':1.5}));
+  } else if(themeNN){
+    el.appendChild(SVG('circle',{cx:themeNN.qx,cy:themeNN.qy,r:themeNN.r, fill:'none', stroke:'var(--gold)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
+    el.appendChild(SVG('circle',{cx:themeNN.qx,cy:themeNN.qy,r:4, fill:'var(--gold)', stroke:'#fff','stroke-width':1}));
+  }
 }
-function draw(){ drawMap(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bOne','bBulk','bMax','bReset','bPlay'], b); }
-function lockStep(b){ CL.lock(['bStep'], b); }
-function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; nnState=null; draw(); hl(); }
+/* ---- sơ đồ cây (node-link, giống hình root→NW/NE/SW/SE) — vẽ từ chính cây thật, không phải hình tĩnh ---- */
+function measureLeaves(node){
+  if(!node.nw) return 1;
+  return measureLeaves(node.nw)+measureLeaves(node.ne)+measureLeaves(node.sw)+measureLeaves(node.se);
+}
+function buildTreeLayout(node){
+  const list=[];
+  function rec(n,x0,x1,depth,parent,label){
+    const entry={node:n, cx:(x0+x1)/2, depth, parent, label};
+    list.push(entry);
+    if(n.nw){
+      const kids=[['NW',n.nw],['NE',n.ne],['SW',n.sw],['SE',n.se]];
+      const widths=kids.map(([,k])=>measureLeaves(k));
+      const total=widths.reduce((a,b)=>a+b,0);
+      let cur=x0;
+      kids.forEach(([nm,k],i)=>{
+        const w=(x1-x0)*widths[i]/total;
+        rec(k,cur,cur+w,depth+1,entry,nm);
+        cur+=w;
+      });
+    }
+  }
+  rec(node,0,measureLeaves(node),0,null,null);
+  return list;
+}
+function drawTreeDiagram(){
+  const el=$('svgTree'); if(!el) return; el.innerHTML='';
+  const list=buildTreeLayout(root);
+  const leaves=measureLeaves(root);
+  const UNIT=112, ROWH=118, TOP=46;
+  const maxDepth=list.reduce((m,e)=>Math.max(m,e.depth),0);
+  const W=Math.max(leaves*UNIT,340), H=(maxDepth+1)*ROWH+TOP+34;
+  el.setAttribute('viewBox','0 0 '+W+' '+H);
+  el.setAttribute('width',W); el.setAttribute('height',H);
+  const posMap=new Map();
+  list.forEach(e=>posMap.set(e,{x:e.cx*UNIT+UNIT/2, y:TOP+e.depth*ROWH}));
+  list.forEach(e=>{
+    if(e.parent){
+      const p=posMap.get(e.parent), c=posMap.get(e), midY=(p.y+c.y)/2;
+      el.appendChild(SVG('path',{d:'M'+p.x+','+(p.y+32)+' V'+midY+' H'+c.x+' V'+(c.y-29), stroke:'#B7CFE8','stroke-width':2, fill:'none'}));
+    }
+  });
+  list.forEach(e=>{
+    const {x,y}=posMap.get(e); const n=e.node;
+    const isCur=(n===curNode);
+    const atMax=(n.depth>=MAX_DEPTH && n.points.length>CAP);
+    const isLeaf=!n.nw;
+    const fill = atMax?'#FBE3DC':(isCur?'#D9A441':(isLeaf?'#EAF2FB':'#E4EED9'));
+    const stroke = atMax?'var(--red)':(isCur?'#8a6a2a':'#2C4066');
+    el.appendChild(SVG('ellipse',{cx:x,cy:y,rx:isLeaf?36:40,ry:29, fill, stroke, 'stroke-width':isCur?3.5:2}));
+    const t1=SVG('text',{x,y:y-5,'text-anchor':'middle','font-size':15,'font-weight':700,'font-family':"'JetBrains Mono',monospace",fill:'#2C4066'});
+    t1.textContent = e.label || 'Gốc';
+    el.appendChild(t1);
+    const t2=SVG('text',{x,y:y+15,'text-anchor':'middle','font-size':13,'font-family':"'JetBrains Mono',monospace",fill:'#6b5c46'});
+    t2.textContent = n.points.length+'đ';
+    el.appendChild(t2);
+  });
+}
+let vizMode='square';
+function setViz(m){
+  vizMode=m;
+  $('vizSquare').classList.toggle('active', m==='square');
+  $('vizTree').classList.toggle('active', m==='tree');
+  $('svg').style.display = m==='square' ? '' : 'none';
+  $('svgTreeWrap').style.display = m==='tree' ? '' : 'none';
+}
+$('vizSquare').onclick=()=>setViz('square');
+$('vizTree').onclick=()=>setViz('tree');
+
+function draw(){ drawMap(); drawTech(); drawTreeDiagram(); }
+function lock(b){ busy=b; CL.lock(['bOne','bRemove','bBulk','bMax','bReset','themeModeAdd','themeModeFind'], b); }
+function resetTree(){ root=QN(200,200,200,0); curNode=null; flashPoint=null; nnState=null; checkLine=null; themeNN=null; themeSearchLine=null; themeSearchPruned=[]; insertedPoints=[]; draw(); hl(); hl2();
+  const log=$('clickLog'); if(log) log.innerHTML='<div class="legend">Chưa có ghim nào do bạn thả — bấm thử vào bản đồ xem sao.</div>';
+  clearTechLog(); }
 
 async function insertRec(node,p,verbose){
   curNode=node;
@@ -379,7 +761,7 @@ async function insertRec(node,p,verbose){
   if(verbose){ hl(L.roomChk); await nap(200); }
   if(node.points.length<CAP || node.depth>=MAX_DEPTH){
     if(verbose) hl(L.pushDirect);
-    node.points.push(p); flashPoint=p; draw();
+    node.points.push(p); flashPoint=p; insertedPoints.push(p); draw();
     if(verbose){
       if(node.depth>=MAX_DEPTH && node.points.length>CAP){
         narrate('Ô đã đủ CAP ('+CAP+'/'+CAP+') <b>NHƯNG</b> đã chạm <b style="color:var(--red)">MAX_DEPTH='+MAX_DEPTH+'</b> → <b style="color:var(--red)">KHÔNG chẻ tiếp</b>, cứ giữ ghim dư ở đây.');
@@ -420,76 +802,246 @@ async function runCapDemo(){
 }
 $('bCapDemo').onclick = runCapDemo;
 
-/* ---- minh hoạ · tìm điểm gần nhất, có cắt nhánh thật ---- */
-function nnCollect(node, qx,qy,r, visited, pruned, candidates){
+/* ---- minh hoạ · tìm điểm gần nhất thật sự (bán kính CO DẦN, không cố định) ---- */
+function distToRect2(node,qx,qy){
   const nx=Math.max(node.cx-node.half, Math.min(qx, node.cx+node.half));
   const ny=Math.max(node.cy-node.half, Math.min(qy, node.cy+node.half));
-  const d2=(qx-nx)*(qx-nx)+(qy-ny)*(qy-ny);
-  if(d2 > r*r){ pruned.push(node); return; }
-  visited.push(node);
-  node.points.forEach(p=>candidates.push(p));
-  if(node.nw){ [node.nw,node.ne,node.sw,node.se].forEach(c=>nnCollect(c,qx,qy,r,visited,pruned,candidates)); }
+  return (qx-nx)*(qx-nx)+(qy-ny)*(qy-ny);
+}
+function nnSearch(node,qx,qy,state){
+  if(distToRect2(node,qx,qy) > state.bestD2){ state.pruned.push(node); return; } // cả nhánh không thể có điểm gần hơn
+  state.visited.push(node);
+  node.points.forEach(p=>{
+    const d2=(p.x-qx)*(p.x-qx)+(p.y-qy)*(p.y-qy);
+    if(d2<state.bestD2){ state.bestD2=d2; state.nearest=p; } // bán kính CO LẠI ngay khi tìm được điểm gần hơn
+  });
+  if(node.nw){
+    [node.nw,node.ne,node.sw,node.se]
+      .sort((a,b)=>distToRect2(a,qx,qy)-distToRect2(b,qx,qy)) // xét ô gần nhất trước → cắt nhánh sớm hơn
+      .forEach(c=>nnSearch(c,qx,qy,state));
+  }
 }
 $('bNNSearch').onclick = ()=>{
-  const qx=30+Math.random()*340, qy=30+Math.random()*340, r=70;
-  const visited=[], pruned=[], candidates=[];
-  nnCollect(root, qx,qy,r, visited, pruned, candidates);
-  let nearest=null, bestD=Infinity;
-  candidates.forEach(p=>{ const d=Math.hypot(p.x-qx,p.y-qy); if(d<bestD){ bestD=d; nearest=p; } });
-  nnState={qx,qy,r,visited,pruned,nearest};
+  const qx=30+Math.random()*340, qy=30+Math.random()*340;
+  const state={bestD2:Infinity, nearest:null, visited:[], pruned:[]};
+  nnSearch(root, qx,qy, state);
+  const bestD = state.nearest ? Math.sqrt(state.bestD2) : 0;
+  nnState={qx,qy,r:bestD,visited:state.visited,pruned:state.pruned,nearest:state.nearest};
   draw();
-  $('nnStats').innerHTML = nearest
-    ? 'Kiểm tra <b>'+visited.length+'</b> ô, CẮT NHÁNH <b>'+pruned.length+'</b> ô · gần nhất cách <b>'+bestD.toFixed(1)+'</b>px.'
-    : 'Không có ghim nào trong bán kính '+r+'px — bấm lại để thử điểm khác.';
+  $('nnStats').innerHTML = state.nearest
+    ? 'Kiểm tra <b>'+state.visited.length+'</b> ô, CẮT NHÁNH <b>'+state.pruned.length+'</b> ô · gần nhất cách <b>'+bestD.toFixed(1)+'</b>px — không dùng bán kính cố định, <code>bestSoFar</code> tự co dần trong lúc tìm.'
+    : 'Cây rỗng — chưa có ghim nào để tìm.';
 };
-$('bNNClear').onclick = ()=>{ nnState=null; draw(); $('nnStats').innerHTML=''; };
+$('bNNClear').onclick = ()=>{ nnState=null; checkLine=null; draw(); $('nnStats').innerHTML=''; };
 
-/* ---- one shared script: automatic play or one-step-at-a-time ---- */
-const DUP_POINT={x:137.3,y:84.6};
-const SCRIPT=[
-  {narrate:'🗺️ Ứng dụng bản đồ: người dùng thả ghim khắp thành phố…', pause:500},
-  {op:'scatter'},
-  {narrate:'📍 Vùng ĐÔNG tự động chia nhỏ để tra cứu nhanh, vùng THƯA vẫn giữ nguyên 1 ô lớn.', pause:1700},
-  {narrate:'🏢 Giờ thử: rất nhiều đơn hàng cùng MỘT toà nhà (trùng địa chỉ)…', pause:900},
-  {op:'resetForDup'},
-  {op:'pileDup'},
-  {narrate:'Bản đồ đã chia nhỏ liên tục xuống tới độ sâu tối đa. Thả thêm 1 ghim nữa…', pause:900},
-  {op:'insertVerboseDup'},
-  {narrate:'Xong! Ô đó GIỮ NGUYÊN các ghim dư, không chia mãi — nhờ giới hạn MAX_DEPTH.', pause:0},
-];
-async function runBeat(beat){
-  if(beat.op==='scatter'){ for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); draw(); await nap(70); } curNode=null; flashPoint=null; draw(); }
-  else if(beat.op==='resetForDup'){ resetTree(); }
-  else if(beat.op==='pileDup'){ for(let i=0;i<24;i++){ await insertRec(root,DUP_POINT,false); draw(); await nap(35); } }
-  else if(beat.op==='insertVerboseDup'){ await insertRec(root,DUP_POINT,true); curNode=null; flashPoint=null; draw(); hl(); }
-  else narrate(beat.narrate);
+/* ---- ví dụ thực tế: bấm thẳng vào cây thật (~30 điểm) để xem Add/Remove/Find nearest chạy từng bước ---- */
+let mode='add';
+function setMode(m){
+  mode=m;
+  ['modeAdd','modeRemove','modeFind'].forEach(id=>$(id).classList.remove('active'));
+  $('mode'+m[0].toUpperCase()+m.slice(1)).classList.add('active');
+  const hint = m==='add' ? 'Bấm vào bản đồ để thêm 1 điểm ở đúng chỗ bạn bấm — xem nó đi qua từng tầng ô.'
+    : m==='remove' ? 'Bấm gần 1 chấm có sẵn để xoá đúng điểm đó — xem xoá + gộp diễn ra thế nào.'
+    : 'Bấm bất kỳ đâu — xem quadtree tìm điểm gần nhất từ đó, từng ô một.';
+  clearTechLog(hint);
 }
+$('modeAdd').onclick=()=>setMode('add');
+$('modeRemove').onclick=()=>setMode('remove');
+$('modeFind').onclick=()=>setMode('find');
+
+function findNearestExistingPoint(qx,qy){
+  let best=null,bestD2=Infinity;
+  insertedPoints.forEach(p=>{ const d2=(p.x-qx)*(p.x-qx)+(p.y-qy)*(p.y-qy); if(d2<bestD2){ bestD2=d2; best=p; } });
+  return best;
+}
+
+async function nnSearchVerbose(qx,qy){
+  const state={bestD2:Infinity, nearest:null, visited:[], pruned:[]};
+  function bestTxt(){ return state.bestD2===Infinity ? '∞' : Math.round(Math.sqrt(state.bestD2))+'px'; }
+  async function visit(node){
+    curNode=node;
+    const nx=Math.max(node.cx-node.half, Math.min(qx, node.cx+node.half));
+    const ny=Math.max(node.cy-node.half, Math.min(qy, node.cy+node.half));
+    const d2=(qx-nx)*(qx-nx)+(qy-ny)*(qy-ny);
+    const d=Math.sqrt(d2);
+    hl3(...NL.distCalc);
+    checkLine={qx,qy,nx,ny,pruned:false,label:'d≈'+Math.round(d)+'px'};
+    draw();
+    narrate('So khoảng cách tới ô tâm ('+Math.round(node.cx)+','+Math.round(node.cy)+'): <b>d≈'+Math.round(d)+'px</b> so với <b>bestSoFar='+bestTxt()+'</b> (đường nét đứt trên hình).');
+    await nap(340);
+    hl3(NL.pruneChk);
+    if(d2>state.bestD2){
+      state.pruned.push(node);
+      checkLine.pruned=true; draw();
+      narrate('<b>'+Math.round(d)+'px &gt; bestSoFar('+bestTxt()+')</b> → <b style="color:var(--lacquer)">CẮT CẢ NHÁNH</b>, khỏi xét bên trong.');
+      await nap(380);
+      checkLine=null; draw();
+      return;
+    }
+    state.visited.push(node);
+    checkLine=null; draw();
+    narrate(state.bestD2===Infinity
+      ? 'Chưa có bestSoFar → ghé ô này, kiểm tra '+node.points.length+' điểm.'
+      : '<b>'+Math.round(d)+'px ≤ bestSoFar('+bestTxt()+')</b> → còn khả năng có điểm gần hơn, ghé vào kiểm tra '+node.points.length+' điểm.');
+    await nap(300);
+    hl3(NL.pointsChk);
+    node.points.forEach(p=>{
+      const pd2=(p.x-qx)*(p.x-qx)+(p.y-qy)*(p.y-qy);
+      if(pd2<state.bestD2){
+        const oldTxt=bestTxt(); const pd=Math.sqrt(pd2);
+        state.bestD2=pd2; state.nearest=p;
+        hl3(NL.bestUpdate);
+        nnState={qx,qy,r:Math.sqrt(state.bestD2),visited:state.visited,pruned:state.pruned,nearest:state.nearest}; draw();
+        narrate('Điểm ('+Math.round(p.x)+','+Math.round(p.y)+') cách Q <b>'+Math.round(pd)+'px</b> — gần hơn → <b>CẬP NHẬT bestSoFar: '+oldTxt+' → '+Math.round(pd)+'px</b>.');
+      }
+    });
+    await nap(300);
+    if(node.nw){
+      hl3(NL.sortKids);
+      narrate('Ô đã chẻ → sắp xếp 4 ô con theo khoảng cách, ghé ô gần nhất trước để cắt nhánh sớm hơn.');
+      await nap(260);
+      hl3(NL.recurseCall);
+      const kids=[node.nw,node.ne,node.sw,node.se].sort((a,b)=>distToRect2(a,qx,qy)-distToRect2(b,qx,qy));
+      for(const c of kids) await visit(c);
+    }
+  }
+  await visit(root);
+  curNode=null; checkLine=null; draw();
+  narrate(state.nearest
+    ? 'Xong — ghé <b>'+state.visited.length+'</b> ô, cắt <b>'+state.pruned.length+'</b> ô, gần nhất cách <b>'+Math.round(Math.sqrt(state.bestD2))+'px</b>. Không cần quét hết mọi điểm.'
+    : 'Cây rỗng — chưa có điểm nào để tìm.');
+}
+
+$('svg').addEventListener('click',async(e)=>{
+  if(busy) return;
+  const svgEl=$('svg');
+  const pt=svgEl.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+  const ctm=svgEl.getScreenCTM(); if(!ctm) return;
+  const loc=pt.matrixTransform(ctm.inverse());
+  if(loc.x<0||loc.x>400||loc.y<0||loc.y>400) return;
+  lock(true);
+  clearTechLog();
+  if(mode==='add'){
+    await insertRec(root,{x:loc.x,y:loc.y},true);
+    curNode=null; flashPoint=null; draw(); hl();
+  } else if(mode==='remove'){
+    const target=findNearestExistingPoint(loc.x,loc.y);
+    if(!target){ narrate('Chưa có điểm nào để xoá.'); }
+    else { await removeRec(root,target,true); const idx=insertedPoints.indexOf(target); if(idx!==-1) insertedPoints.splice(idx,1); curNode=null; flashPoint=null; draw(); hl(); hl2(); }
+  } else {
+    nnState=null; checkLine=null;
+    await nnSearchVerbose(loc.x,loc.y);
+  }
+  lock(false);
+});
+
+/* ví dụ khởi đầu: rải sẵn ~30 điểm để mọi thứ "thực tế" ngay khi mở tab kỹ thuật */
+(async function seedExample(){
+  for(let i=0;i<30;i++){ await insertRec(root,randPoint(),false); }
+  curNode=null; flashPoint=null; draw();
+})();
+
+/* ---- minh hoạ · bấm chuột lên bản đồ để tự thả ghim, ghi chú kế bên ---- */
+function insertTrace(node,p,path){
+  if(node.points.length<CAP || node.depth>=MAX_DEPTH){
+    const capped = node.depth>=MAX_DEPTH && node.points.length>=CAP;
+    node.points.push(p);
+    return {path, capped};
+  }
+  if(!node.nw) subdivide(node);
+  const child=pickChild(node,p);
+  path.push(child.name);
+  return insertTrace(child.node,p,path);
+}
+function logClickNote(p,res){
+  const log=$('clickLog');
+  const div=document.createElement('div');
+  div.className='click-note'+(res.path.length?' split':'');
+  const route=res.path.length? res.path.join(' → ') : '(ô gốc)';
+  const why=res.capped
+    ? 'đã chạm <b>MAX_DEPTH</b>, ô giữ ghim dư — không chia thêm.'
+    : (res.path.length? 'ô còn chỗ ở đây → thả trực tiếp.' : 'ô gốc còn chỗ → thả trực tiếp, chưa cần chia.');
+  div.innerHTML='📍 Thả ghim → '+route+' → '+why;
+  log.innerHTML=''; log.appendChild(div);
+}
+function logFindNote(res){
+  const log=$('clickLog');
+  const div=document.createElement('div');
+  div.className='click-note find';
+  div.innerHTML = res.nearest
+    ? '🔍 Ghim gần nhất cách <b>'+Math.round(Math.sqrt(res.bestD2))+'px</b> · kiểm tra '+res.visitedCount+' ô, cắt '+res.prunedCount+' ô — không cần quét hết mọi ghim.'
+    : '🔍 Bản đồ chưa có ghim nào để tìm — thả vài ghim trước đã.';
+  log.innerHTML=''; log.appendChild(div);
+}
+
+let themeMode='add';
+function setThemeMode(m){
+  themeMode=m;
+  $('themeModeAdd').classList.toggle('active', m==='add');
+  $('themeModeFind').classList.toggle('active', m==='find');
+  $('themeModeHint').innerHTML = m==='add'
+    ? 'Luật chia: mỗi ô tối đa <b>CAP=4</b> ghim, trừ khi đã chạm <b>MAX_DEPTH=5</b> — đầy thì ô tự động chia 4. Bấm vào bản đồ bên trái để thả ghim.'
+    : 'Bấm bất kỳ đâu trên bản đồ. <span style="color:var(--accent)">Đường xanh</span> = khoảng cách quadtree đang đo tới cạnh gần nhất của 1 ô (nửa cạnh của ô) — còn khả năng chứa ghim gần hơn nên phải mở ra xem; <span style="color:var(--lacquer)">đường đỏ</span> = khoảng cách đó đã xa hơn ghim gần nhất từng thấy → <b>CẮT CẢ Ô</b>, khỏi mở ra xem bên trong.';
+}
+$('themeModeAdd').onclick=()=>setThemeMode('add');
+$('themeModeFind').onclick=()=>setThemeMode('find');
+
+/* tìm gần nhất từng bước: mỗi ô được xét vẽ 1 đường thẳng từ điểm bấm tới điểm gần nhất TRÊN CẠNH ô đó (nửa cạnh) — xanh = còn xét, đỏ = bị cắt nhánh */
+async function themeFindNearest(qx,qy){
+  themeSearchPruned=[];
+  let bestD2=Infinity, nearest=null, visitedCount=0, prunedCount=0;
+  async function visit(node){
+    const nx=Math.max(node.cx-node.half, Math.min(qx, node.cx+node.half));
+    const ny=Math.max(node.cy-node.half, Math.min(qy, node.cy+node.half));
+    const d2=(qx-nx)*(qx-nx)+(qy-ny)*(qy-ny);
+    curNode=node;
+    const pruned=d2>bestD2;
+    themeSearchLine={qx,qy,nx,ny,pruned};
+    draw();
+    await nap(280);
+    if(pruned){ themeSearchPruned.push(node); prunedCount++; return; }
+    visitedCount++;
+    node.points.forEach(p=>{
+      const pd2=(p.x-qx)*(p.x-qx)+(p.y-qy)*(p.y-qy);
+      if(pd2<bestD2){ bestD2=pd2; nearest=p; }
+    });
+    if(nearest){ themeNN={qx,qy,r:Math.sqrt(bestD2),nearest}; }
+    draw();
+    await nap(220);
+    if(node.nw){
+      const kids=[node.nw,node.ne,node.sw,node.se].sort((a,b)=>distToRect2(a,qx,qy)-distToRect2(b,qx,qy));
+      for(const c of kids) await visit(c);
+    }
+  }
+  await visit(root);
+  curNode=null; themeSearchLine=null; themeSearchPruned=[]; draw();
+  return {bestD2, nearest, visitedCount, prunedCount};
+}
+
+$('svgTheme').addEventListener('click',async(e)=>{
+  if(busy) return;
+  const svgEl=$('svgTheme');
+  const pt=svgEl.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+  const ctm=svgEl.getScreenCTM(); if(!ctm) return;
+  const loc=pt.matrixTransform(ctm.inverse());
+  if(loc.x<0||loc.x>400||loc.y<0||loc.y>400) return;
+  if(themeMode==='find'){
+    lock(true);
+    const res=await themeFindNearest(loc.x,loc.y);
+    logFindNote(res);
+    lock(false);
+    return;
+  }
+  const p={x:loc.x,y:loc.y};
+  const res=insertTrace(root,p,[]);
+  insertedPoints.push(p);
+  flashPoint=p; themeNN=null; draw();
+  logClickNote(p,res);
+});
 
 $('bReset').onclick=()=>{
   if(busy)return;
-  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
-  resetTree(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
-};
-
-$('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); resetTree();
-  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
-  lock(false);
-};
-
-let stepMode=false, stepIdx=0;
-$('bStep').onclick=async()=>{
-  if(busy)return;
-  if(!stepMode){ stepMode=true; stepIdx=0; resetTree(); $('bPlay').disabled=true; }
-  if(stepIdx>=SCRIPT.length){
-    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
-    return;
-  }
-  lockStep(true);
-  await runBeat(SCRIPT[stepIdx]);
-  stepIdx++;
-  lockStep(false);
-  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+  resetTree(); setThemeMode('add');
 };
 
 $('bOne').onclick=async()=>{
@@ -498,6 +1050,18 @@ $('bOne').onclick=async()=>{
   narrate('Chèn điểm mới ('+Math.round(p.x)+','+Math.round(p.y)+')…'); await nap(300);
   await insertRec(root,p,true);
   curNode=null; flashPoint=null; draw(); hl();
+  lock(false);
+};
+$('bRemove').onclick=async()=>{
+  if(busy)return;
+  if(insertedPoints.length===0){ narrate('Chưa có ghim nào trên bản đồ để xoá — bấm "Thêm 1 điểm" trước đã.'); return; }
+  lock(true);
+  const i=Math.floor(Math.random()*insertedPoints.length);
+  const target=insertedPoints[i];
+  narrate('Xoá điểm ('+Math.round(target.x)+','+Math.round(target.y)+')…'); await nap(300);
+  await removeRec(root,target,true);
+  insertedPoints.splice(i,1);
+  curNode=null; flashPoint=null; nnState=null; draw(); hl(); hl2();
   lock(false);
 };
 $('bBulk').onclick=async()=>{

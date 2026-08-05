@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trạm 5 · Segment Tree · Ngăn kéo Thu ngân</title>
+<title>Trạm 5 · Segment Tree · Doanh Thu Cửa Hàng</title>
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,9 +64,11 @@
   .k-chip .t b{display:block;color:var(--indigo);font-size:13px;}
   .k-chip .t code{font-family:'JetBrains Mono',monospace;background:#fff;border-radius:5px;padding:1px 6px;font-size:11.5px;color:var(--lacquer);}
 
-  .viewtoggle{margin-top:6px;}
   .k-main{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start;}
   @media(max-width:980px){.k-main{grid-template-columns:1fr;}}
+
+  .k-avt{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-bottom:20px;}
+  @media(max-width:980px){.k-avt{grid-template-columns:1fr;}}
 
   .tray{background:var(--nori);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
   .tray .bar{display:flex;align-items:center;gap:8px;background:#121a17;padding:11px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#9FB8A8;letter-spacing:.06em;}
@@ -77,10 +79,19 @@
   .tray .cl.hl{background:#324237;border-left-color:var(--gold);}
   .tray .code-title{color:#8ea0b8;}
 
-  .k-scene{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+  .idxnote{background:#22314E;color:#F0E9D8;border-left:5px solid var(--gold);border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.6;margin-bottom:16px;}
+  .idxnote code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.12);border-radius:5px;padding:1px 6px;color:#FFD98A;}
+  .node.hp circle{stroke:var(--lacquer);stroke-width:4;fill:#3A1712;}
+  .node.hc circle{stroke:var(--wasabi);stroke-width:4;fill:#16321F;}
+  .svg-scroll{overflow-x:auto;}
+  #svgArr{width:820px;max-width:none;height:182px;}
+  #svg{width:640px;max-width:none;height:293px;}
+  .node text.idx{fill:var(--gold);font:800 10px 'JetBrains Mono',monospace;text-anchor:middle;}
 
   .ticker{margin:16px auto 0;max-width:560px;background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13.5px;min-height:20px;}
   .ticker b{color:var(--indigo);}
+  .formula{margin:10px auto 0;max-width:560px;background:var(--nori);color:#F0E9D8;border-radius:10px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:18px;text-align:center;}
+  .formula b{color:var(--gold);}
 
   .k-controls{display:flex;flex-wrap:wrap;gap:9px;justify-content:space-between;align-items:center;margin-top:16px;}
   .k-controls .play-btn{font-family:'Baloo 2',cursive;}
@@ -102,8 +113,8 @@
 
   <div class="k-noren">
     <div class="k-eyebrow">Trạm 5 · Cấu trúc dữ liệu</div>
-    <h1>Segment Tree<br><span class="accent">= Ngăn kéo thu ngân 💰</span></h1>
-    <p class="sub2">Bó tiền từng ngăn lại thành <b>CỤM</b> đã đếm sẵn — hỏi tổng chỉ cần cộng vài bó, không đếm từng tờ. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
+    <h1>Segment Tree<br><span class="accent">= Doanh thu bán hàng theo ngày 📈</span></h1>
+    <p class="sub2">Gộp doanh thu từng ngày lại thành <b>CỤM</b> đã cộng sẵn — hỏi tổng một khoảng ngày chỉ cần cộng vài cụm, không cộng lại từng ngày. Bấm ▶ Play và xem tự chạy — không cần đọc hay giải thích gì cả.</p>
   </div>
 
   <div id="toolbox"></div>
@@ -114,81 +125,79 @@
       <div class="dish problem">
         <div class="ic">🎯</div>
         <h3>Bài toán</h3>
-        <p>Cần hỏi <b>TỔNG</b> một đoạn ngăn kéo, và <b>SỬA</b> 1 ngăn, lặp lại rất nhiều lần trong ca làm.</p>
+        <p>Cần hỏi <b>TỔNG</b> doanh thu một khoảng ngày, và <b>SỬA</b> doanh thu 1 ngày (phát hiện sai sót), lặp lại rất nhiều lần trong tháng.</p>
       </div>
       <div class="dish bad">
         <div class="ic">❌</div>
-        <h3>Đếm tay thì sao?</h3>
-        <p>Cộng lại cả đoạn mỗi lần hỏi = chậm; nhớ tổng dồn thì sửa 1 ngăn phải tính lại từ đầu.</p>
+        <h3>Cộng tay thì sao?</h3>
+        <p>Cộng lại cả khoảng mỗi lần hỏi = chậm; nhớ tổng dồn thì sửa 1 ngày phải tính lại từ đầu.</p>
       </div>
       <div class="dish idea">
         <div class="ic">💡</div>
         <h3>Ý tưởng</h3>
-        <p>Bó tiền thành <b>CỤM</b> đã đếm sẵn tổng; hỏi đoạn chỉ cộng vài cụm, sửa 1 ngăn chỉ tính lại các cụm phía trên nó.</p>
+        <p>Gộp doanh thu thành <b>CỤM</b> đã cộng sẵn tổng; hỏi khoảng chỉ cộng vài cụm, sửa 1 ngày chỉ tính lại các cụm phía trên nó.</p>
       </div>
     </div>
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">02</span> Từ điển ngăn kéo ↔ khoa học máy tính</h2>
+    <h2 class="k-h2"><span class="tag">02</span> Các thành phần chính</h2>
     <div class="k-map">
-      <div class="k-chip"><span class="em">💵</span><div class="t"><b>Ngăn kéo N ô</b>mảng gốc <code>a[]</code></div></div>
-      <div class="k-chip"><span class="em">💰</span><div class="t"><b>Bó tiền theo cụm</b>node cây đoạn <code>seg[v]</code></div></div>
-      <div class="k-chip"><span class="em">🧮</span><div class="t"><b>Tổng cả bó</b><code>seg[v] = trái+phải</code></div></div>
-      <div class="k-chip"><span class="em">🙋</span><div class="t"><b>Khách hỏi tổng đoạn</b>truy vấn <code>sum(l,r)</code></div></div>
-      <div class="k-chip"><span class="em">💱</span><div class="t"><b>Đổi tiền 1 ngăn</b><code>update(i, x)</code></div></div>
+      <div class="k-chip"><span class="em">📐</span><div class="t"><b>Mảng gốc</b>N phần tử doanh thu, mỗi ô 1 ngày — <code>revenue[]</code></div></div>
+      <div class="k-chip"><span class="em">🌳</span><div class="t"><b>Node cây đoạn</b>lưu tổng của đoạn [l,r] mà nó phụ trách — <code>seg[v]</code></div></div>
+      <div class="k-chip"><span class="em">🔍</span><div class="t"><b>Truy vấn đoạn</b>tính tổng từ chỉ số l đến r — <code>sum(l,r)</code></div></div>
+      <div class="k-chip"><span class="em">✏️</span><div class="t"><b>Cập nhật 1 phần tử</b>đổi giá trị tại vị trí i — <code>update(i, x)</code></div></div>
     </div>
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">03</span> Vào ca làm ngay tại quầy</h2>
+    <h2 class="k-h2"><span class="tag">03</span> Tính thử doanh thu ngay</h2>
 
-    <div class="viewtoggle" id="viewtoggle">
-      <button class="vt-btn active" data-view="theme">💰 Xem theo chủ đề</button>
-      <button class="vt-btn" data-view="tech">🔧 Xem kỹ thuật</button>
-    </div>
+    <div class="idxnote">⚠️ <b>Đây không phải cây thật</b> — không có node, không có con trỏ. Toàn bộ dữ liệu nằm trong <b>1 mảng phẳng <code>seg[]</code></b>. "Cây" chỉ là cách <i>vẽ ra</i> cho dễ hình dung; quan hệ cha–con là do <b>TÍNH bằng chỉ số</b>: node <code>v</code> → con trái <code>2v</code>, con phải <code>2v+1</code>, cha <code>v&gt;&gt;1</code>. Nhãn <span style="color:var(--gold);font-weight:800">vàng</span> dưới mỗi node trong hình = chỉ số <code>v</code> thật của nó trong mảng.</div>
 
-    <div id="themeView">
-      <div class="k-scene" style="max-width:740px;margin:0 auto;">
-        <svg id="svgTheme" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả ca làm việc tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-        <div class="k-controls">
-          <div class="row" style="gap:8px">
-            <button class="play-btn" id="bPlay">▶ Tự động</button>
-            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
-          </div>
-          <div class="k-side"><button id="bReset">↺ Reset</button></div>
-        </div>
+    <div class="k-avt">
+      <div class="card">
+        <h3>revenue[] → seg[] — xem v rơi đúng vị trí trong mảng</h3>
+        <div class="svg-scroll"><svg id="svgArr" viewBox="0 0 900 200" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div class="legend">Hàng trên = <code>revenue[]</code> · hàng dưới = <code>seg[]</code> thật (không phải cây, chỉ vẽ theo hàng) · <span style="color:var(--lacquer)">viền đỏ</span> = đang là CHA · <span style="color:var(--wasabi)">viền xanh lá</span> = đang là CON · nét đứt vàng = revenue[l] đang chép vào seg[v]</div>
+      </div>
+      <div class="card">
+        <h3>seg[] vẽ như cây (revenue, 8 ngày)</h3>
+        <div class="svg-scroll"><svg id="svg" viewBox="0 0 700 320" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div class="legend">Nhãn trên = [l,r] · số trong vòng = seg[v] · <span style="color:var(--gold)">nhãn vàng dưới</span> = chỉ số v trong mảng · <span style="color:var(--lacquer)">viền đỏ</span> = đang là CHA · <span style="color:var(--wasabi)">viền xanh lá</span> = đang là CON · nền xanh nhạt = TRỌN · <span style="color:var(--amber)">viền cam</span> = DÍNH · mờ = NGOÀI</div>
       </div>
     </div>
 
-    <div id="techView" style="display:none">
-      <div class="wrap">
-        <div class="col-code"><div class="card"><h3>Code (JS · chạy thật)</h3>
-          <div class="code-title">// build dựng cây · sum hỏi đoạn · update sửa 1 ô</div>
-          <div class="code" id="code"></div></div></div>
-        <div class="col-viz">
-          <div class="card"><h3>Cây đoạn (a = [5,2,2,1,5,2,1,2])</h3>
-            <svg id="svg" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet"></svg>
-            <div class="legend">Nhãn trên = [l,r] · số trong vòng = seg[v] · <span style="color:#5AA0FF">viền xanh dương</span> = đang xét · <span style="color:var(--green)">xanh lá</span> = TRỌN · <span style="color:var(--amber)">viền cam</span> = DÍNH · mờ = NGOÀI</div>
-          </div>
-          <div class="card"><h3>Điều khiển thủ công</h3>
-            <div class="row" style="margin-bottom:8px">
-              <button id="bBuild">▶ Xây cây (build)</button>
-            </div>
-            <div class="row" style="margin-bottom:8px">
-              <input type="number" id="sumL" value="1" min="0" max="7" style="width:56px;">
-              <input type="number" id="sumR" value="6" min="0" max="7" style="width:56px;">
-              <button id="bSum" class="ghost" disabled>▶ sum(l..r)</button>
-            </div>
-            <div class="row">
-              <input type="number" id="updIdx" value="2" min="0" max="7" style="width:56px;">
-              <input type="number" id="updVal" value="9" min="0" max="99" style="width:56px;">
-              <button id="bUpdate" class="ghost" disabled>✏️ update(idx, val)</button>
-            </div>
-          </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem cả tháng tính doanh thu tự chạy, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
+      <div class="formula" id="idxFormula">Bấm ▶ hoặc ⏭ để xem phép tính ra chỉ số của từng node.</div>
+      <div class="k-controls">
+        <div class="row" style="gap:8px">
+          <button class="play-btn" id="bPlay">▶ Tự động</button>
+          <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
         </div>
+        <div class="k-side"><button id="bReset">↺ Reset</button></div>
       </div>
+      <hr style="border:none;border-top:1px solid #E4D6B4;margin:16px 0;">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:15px;color:var(--indigo);margin:0 0 10px;">Hoặc tự bấm thủ công</h3>
+      <div class="row" style="margin-bottom:8px">
+        <button id="bBuild">▶ Xây cây (build)</button>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <input type="number" id="sumL" value="3" min="0" max="7" style="width:56px;">
+        <input type="number" id="sumR" value="7" min="0" max="7" style="width:56px;">
+        <button id="bSum" class="ghost" disabled>▶ sum(l..r)</button>
+      </div>
+      <div class="row">
+        <input type="number" id="updIdx" value="4" min="0" max="7" style="width:56px;">
+        <input type="number" id="updVal" value="455" min="0" max="2000" style="width:66px;">
+        <button id="bUpdate" class="ghost" disabled>✏️ update(idx, val)</button>
+      </div>
+    </div>
+
+    <div class="card"><h3>Code (JS · chạy thật)</h3>
+      <div class="code-title">// build dựng cây · sum hỏi khoảng ngày · update sửa doanh thu 1 ngày</div>
+      <div class="code" id="code"></div>
     </div>
   </section>
 
@@ -208,7 +217,7 @@
         <div class="ic">❌</div>
         <h3>Nhược điểm</h3>
         <ul>
-          <li>Tốn bộ nhớ hơn mảng gốc (khoảng <b>4×N</b> ô).</li>
+          <li>Tốn bộ nhớ hơn mảng gốc <b>một chút</b>.</li>
           <li>Cài đặt phức tạp hơn, dễ sai off-by-one khi mới học.</li>
           <li>Phải <b>xây lại cả cây</b> nếu đổi kích thước mảng gốc.</li>
         </ul>
@@ -217,8 +226,8 @@
         <div class="ic">🧩</div>
         <h3>Thường dùng ở đâu?</h3>
         <ul>
+          <li>Chính là ví dụ trên: <b>doanh thu/doanh số theo khoảng ngày</b>, dashboard phân tích.</li>
           <li>Truy vấn khoảng trong thi đấu lập trình (competitive programming).</li>
-          <li>Range query trên dữ liệu lớn — vd tổng doanh thu theo khoảng ngày.</li>
           <li>Lịch đặt phòng/tài nguyên chồng lấn, biến thể interval tree.</li>
         </ul>
       </div>
@@ -227,8 +236,8 @@
 
   <section class="k-section">
     <div class="k-quiz">
-      <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho quầy thu ngân</h2>
-      <div class="q" id="quiz">Khi đoạn của 1 node GIAO một phần với đoạn truy vấn (không NGOÀI, không TRỌN), thuật toán làm gì?
+      <h2 class="k-h2" style="color:var(--soy)">🤔 Câu hỏi cho bảng doanh thu</h2>
+      <div class="q" id="quiz">Khi khoảng ngày của 1 cụm GIAO một phần với khoảng đang hỏi (không NGOÀI, không TRỌN), thuật toán làm gì?
         <div class="row" style="margin-top:10px">
           <button data-a="zero">Trả về 0 luôn</button>
           <button data-a="grab">Bốc thẳng seg[v]</button>
@@ -245,17 +254,16 @@
 <script src="common.js"></script>
 <script>
 (function(){
-const {$, nap, hl, narrate, renderCode, renderToolbox, initViewToggle, initQuiz, svg:SVG} = CL;
+const {$, nap, hl, narrate, renderCode, renderToolbox, initQuiz, svg:SVG} = CL;
 renderToolbox('segment');
-initViewToggle('viewtoggle', {theme:'themeView', tech:'techView'});
 
 const CODE=[
  ['<span class="kw">const</span> N = 8;'],
- ['<span class="kw">const</span> a = [5,2,2,1,5,2,1,2];'],
+ ['<span class="kw">const</span> revenue = [420,380,510,460,395,605,580,340];'],
  ['<span class="kw">let</span> seg = <span class="kw">new</span> Array(4*N).fill(0);'],
  [''],
  ['<span class="kw">function</span> <span class="fn">build</span>(v, l, r) {'],
- ['  <span class="kw">if</span> (l === r) { seg[v] = a[l]; <span class="kw">return</span>; }   <span class="cm">// lá: copy trực tiếp</span>'],
+ ['  <span class="kw">if</span> (l === r) { seg[v] = revenue[l]; <span class="kw">return</span>; }   <span class="cm">// lá: copy trực tiếp</span>'],
  ['  <span class="kw">const</span> m = (l+r) &gt;&gt; 1;'],
  ['  build(2*v, l, m); build(2*v+1, m+1, r);       <span class="cm">// xây 2 con</span>'],
  ['  seg[v] = seg[2*v] + seg[2*v+1];               <span class="cm">// gộp lên: cha = trái+phải</span>'],
@@ -281,13 +289,16 @@ const L={buildSig:4, buildLeaf:5, buildMid:6, buildRecurse:7, buildMerge:8,
          sumSig:11, sumOutside:12, sumFull:13, sumMid:14, sumRecurse:15,
          updSig:18, updLeaf:19, updMid:20, updGo:21, updMerge:23};
 
-const N=8, a=[5,2,2,1,5,2,1,2];
+const N=8, revenue=[420,380,510,460,395,605,580,340];
 let seg = new Array(4*N).fill(0);
 let curV=null, caseOf={}, busy=false, built=false;
+let hiParent=null, hiChildren=[];
 
 const pos={};
+let maxDepth=0;
 (function initPos(){
   function rec(v,l,r,depth){
+    maxDepth=Math.max(maxDepth,depth);
     if(l===r){ pos[v]={l,r,depth,x:l}; return l; }
     const m=(l+r)>>1;
     const xl=rec(2*v,l,m,depth+1), xr=rec(2*v+1,m+1,r,depth+1);
@@ -295,9 +306,53 @@ const pos={};
   }
   rec(1,0,N-1,0);
 })();
-const W=700,H=300,padX=40,padY=42;
-const dx=(W-2*padX)/(N-1), dy=(H-2*padY)/3;
+const W=700,H=320,padX=40,padY=42;
+const dx=(W-2*padX)/(N-1), dy=maxDepth>0?(H-2*padY)/maxDepth:0;
 const px=v=>padX+pos[v].x*dx, py=v=>padY+pos[v].depth*dy;
+
+/* flat-array view: seg[] drawn as an actual row of boxes (heap-style),
+   arcs show v -> 2v/2v+1 landing at real positions, no tree shape at all */
+const order=Object.keys(pos).map(Number).sort((a,b)=>a-b);
+const orderPos={}; order.forEach((v,i)=>orderPos[v]=i);
+const AW=900, APAD=34, revStepX=(AW-2*APAD)/(N-1), segStepX=order.length>1?(AW-2*APAD)/(order.length-1):0;
+const revX=i=>APAD+i*revStepX, segX=v=>APAD+orderPos[v]*segStepX;
+const revY=48, segY=152, abw=46, abh=40;
+
+function drawArray(){
+  const el=$('svgArr'); if(!el) return; el.innerHTML='';
+
+  revenue.forEach((val,i)=>{
+    const isActiveLeaf = curV!==null && pos[curV] && pos[curV].l===pos[curV].r && pos[curV].l===i;
+    const g=SVG('g',{transform:'translate('+revX(i)+','+revY+')'});
+    g.appendChild(SVG('rect',{x:-abw/2,y:-abh/2,width:abw,height:abh,rx:6,
+      fill:isActiveLeaf?'#FFF3D6':'#fff', stroke:isActiveLeaf?'var(--gold)':'#C7D0DC','stroke-width':isActiveLeaf?3:1.5}));
+    const t=SVG('text',{x:0,y:5,'text-anchor':'middle','font-size':15,'font-weight':700,fill:'#22314E'}); t.textContent=val; g.appendChild(t);
+    const lbl=SVG('text',{x:0,y:abh/2+16,'text-anchor':'middle','font-size':11,'font-weight':700,fill:'#8A93A6'}); lbl.textContent='revenue['+i+']'; g.appendChild(lbl);
+    el.appendChild(g);
+  });
+
+  if(curV!==null && pos[curV] && pos[curV].l===pos[curV].r){
+    const l=pos[curV].l;
+    el.appendChild(SVG('line',{x1:revX(l),y1:revY+abh/2,x2:segX(curV),y2:segY-abh/2,
+      stroke:'var(--gold)','stroke-width':2,'stroke-dasharray':'4 3'}));
+  }
+
+  order.forEach(v=>{
+    const kase=caseOf[v], isCur=v===curV, isParent=v===hiParent, isChild=hiChildren.includes(v);
+    let fill='#fff', stroke='#C7D0DC', sw=1.5;
+    if(kase==='full') fill='#BFE8C6';
+    if(isParent){ fill='#FBE1DC'; stroke='var(--lacquer)'; sw=3.5; }
+    else if(isChild){ fill='var(--wasabi-soft)'; stroke='var(--wasabi)'; sw=3.5; }
+    else if(kase==='part'){ stroke='var(--amber)'; sw=3; }
+    else if(isCur){ stroke='#5AA0FF'; sw=3; }
+    const opacity=kase==='out'?0.35:1;
+    const g=SVG('g',{transform:'translate('+segX(v)+','+segY+')', style:'opacity:'+opacity});
+    g.appendChild(SVG('rect',{x:-abw/2,y:-abh/2,width:abw,height:abh,rx:6,fill,stroke,'stroke-width':sw}));
+    const t=SVG('text',{x:0,y:5,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#1B2420'}); t.textContent=seg[v]; g.appendChild(t);
+    const lbl=SVG('text',{x:0,y:abh/2+16,'text-anchor':'middle','font-size':11.5,'font-weight':800,fill:'var(--gold)'}); lbl.textContent='v'+v; g.appendChild(lbl);
+    el.appendChild(g);
+  });
+}
 
 function drawTech(){
   const el=$('svg'); if(!el) return; el.innerHTML='';
@@ -306,152 +361,193 @@ function drawTech(){
     [c1,c2].forEach(c=>{ if(pos[c]){ el.appendChild(SVG('line',{class:'edge',x1:px(v),y1:py(v),x2:px(c),y2:py(c)})); } });
   });
   Object.keys(pos).map(Number).forEach(v=>{
-    const kase=caseOf[v];
-    let cls='node'; if(v===curV) cls+=' cur'; if(kase==='full') cls+=' flash'; if(kase==='part') cls+=' rot';
+    const kase=caseOf[v], isParent=v===hiParent, isChild=hiChildren.includes(v);
+    let cls='node';
+    if(isParent) cls+=' hp'; else if(isChild) cls+=' hc'; else if(v===curV) cls+=' cur';
+    if(kase==='full') cls+=' flash'; if(kase==='part') cls+=' rot';
     const opacity = kase==='out' ? 0.35 : 1;
     const g=SVG('g',{class:cls, transform:'translate('+px(v)+','+py(v)+')', style:'opacity:'+opacity});
     g.appendChild(SVG('circle',{r:20}));
     const t=SVG('text',{}); t.textContent=seg[v]; g.appendChild(t);
     const rg=SVG('text',{class:'h', y:-27}); rg.textContent='['+pos[v].l+','+pos[v].r+']'; g.appendChild(rg);
+    const iv=SVG('text',{class:'idx', y:30}); iv.textContent='v'+v; g.appendChild(iv);
     el.appendChild(g);
   });
 }
-function drawCash(){
-  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
-  Object.keys(pos).map(Number).forEach(v=>{
-    const c1=2*v, c2=2*v+1;
-    [c1,c2].forEach(c=>{ if(pos[c]){ el.appendChild(SVG('line',{x1:px(v),y1:py(v),x2:px(c),y2:py(c),stroke:'#BFE0C4','stroke-width':2})); } });
-  });
-  Object.keys(pos).map(Number).forEach(v=>{
-    const {l,r}=pos[v], isLeaf=(l===r);
-    const kase=caseOf[v];
-    const fill = kase==='full' ? '#BFE8C6' : (isLeaf?'#F4FBF5':'#E8F5E9');
-    const stroke = kase==='part' ? 'var(--amber)' : (v===curV?'#5AA0FF':'#6FBF7A');
-    const opacity = kase==='out' ? 0.35 : 1;
-    const g=SVG('g',{transform:'translate('+px(v)+','+py(v)+')', style:'opacity:'+opacity});
-    g.appendChild(SVG('rect',{x:-26,y:-16,width:52,height:32,rx:7,fill,stroke,'stroke-width':(v===curV||kase==='part')?3:2}));
-    const t=SVG('text',{x:0,y:5,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#1B5E20'}); t.textContent=(isLeaf?'💵':'💰')+' $'+seg[v];
-    g.appendChild(t);
-    const lbl=SVG('text',{x:0,y:-22,'text-anchor':'middle','font-size':9,'font-weight':700,fill:'#5B6472'});
-    lbl.textContent = isLeaf ? ('Ngăn '+l) : ('['+l+','+r+']');
-    g.appendChild(lbl);
-    el.appendChild(g);
-  });
+function drawFormula(){
+  const el=$('idxFormula'); if(!el) return;
+  if(curV===null || !pos[curV]){ el.innerHTML='Bấm ▶ hoặc ⏭ để xem phép tính ra chỉ số của từng node.'; return; }
+  const v=curV, isLeaf=(pos[v].l===pos[v].r), parent=v>>1;
+  if(isLeaf){
+    el.innerHTML = 'v = <b>'+v+'</b> → là LÁ, hết chia được nữa &nbsp;|&nbsp; cha = v&gt;&gt;1 = '+v+'&gt;&gt;1 = <b>'+parent+'</b>';
+  } else {
+    el.innerHTML = 'v = <b>'+v+'</b> &nbsp;→&nbsp; trái = 2×v = 2×'+v+' = <b>'+(2*v)+'</b> &nbsp;·&nbsp; phải = 2×v+1 = 2×'+v+'+1 = <b>'+(2*v+1)+'</b>';
+  }
 }
-function draw(){ drawCash(); drawTech(); }
+function draw(){ drawArray(); drawTech(); drawFormula(); }
 function lock(b){ busy=b; CL.lock(['bBuild','bSum','bUpdate','bReset','bPlay'], b); if(!b){ CL.lock(['bSum','bUpdate'], !built); } }
-function lockStep(b){ CL.lock(['bStep'], b); }
-function resetState(){ seg=new Array(4*N).fill(0); caseOf={}; curV=null; built=false; draw(); hl(); CL.lock(['bSum','bUpdate'], true); }
+function resetState(){ seg=new Array(4*N).fill(0); caseOf={}; curV=null; hiParent=null; hiChildren=[]; built=false; draw(); hl(); CL.lock(['bSum','bUpdate'], true); }
 
-async function build(v,l,r){
-  curV=v; draw(); hl(L.buildSig); await nap(140);
+/* ---- trace functions: walk the recursion and record ONE step per atomic
+   action (arrive at node / compute mid / choose child / merge up) — used by
+   BOTH auto-play and click-through step mode, so both see the same granularity.
+   `ts` is a scratch copy of seg[] mutated as tracing goes, so later steps
+   (e.g. a merge) know the correct child values even though the REAL seg[]
+   array is only updated later, when each step is actually applied on screen. */
+function traceBuild(steps, ts, v, l, r){
+  steps.push({kind:'enter', v, l, r, hl:L.buildSig});
   if(l===r){
-    hl(L.buildLeaf); seg[v]=a[l]; draw();
-    narrate('Đếm ngăn '+l+': <b>'+a[l]+'</b> tờ.'); await nap(320);
+    ts[v]=revenue[l];
+    steps.push({kind:'leaf', v, l, value:ts[v], hl:L.buildLeaf, narrate:'Doanh thu ngày '+l+': <b>$'+ts[v]+'</b>.'});
     return;
   }
-  hl(L.buildMid); const m=(l+r)>>1; await nap(120);
-  hl(L.buildRecurse); await build(2*v,l,m); await build(2*v+1,m+1,r);
-  curV=v; hl(L.buildMerge); seg[v]=seg[2*v]+seg[2*v+1]; draw();
-  narrate('Bó gộp lại: ['+pos[v].l+','+pos[v].r+'] = '+seg[2*v]+' + '+seg[2*v+1]+' = <b>'+seg[v]+'</b> tờ.'); await nap(320);
+  const m=(l+r)>>1;
+  steps.push({kind:'mid', v, l, r, m, hl:L.buildMid});
+  steps.push({kind:'recurse', v, hl:L.buildRecurse});
+  traceBuild(steps, ts, 2*v, l, m);
+  traceBuild(steps, ts, 2*v+1, m+1, r);
+  ts[v]=ts[2*v]+ts[2*v+1];
+  steps.push({kind:'merge', v, hl:L.buildMerge, value:ts[v], narrate:'Cụm gộp lại: ['+l+','+r+'] = $'+ts[2*v]+' + $'+ts[2*v+1]+' = <b>$'+ts[v]+'</b>.'});
 }
-async function sumQ(v,l,r,ql,qr){
-  curV=v; draw(); hl(L.sumSig); await nap(260);
-  hl(L.sumOutside);
-  if(qr<l || r<ql){ caseOf[v]='out'; draw(); narrate('Ngăn ['+l+'..'+r+'] <b>NGOÀI</b> đoạn khách hỏi → bỏ qua.'); await nap(360); return 0; }
-  hl(L.sumFull);
-  if(ql<=l && r<=qr){ caseOf[v]='full'; draw(); narrate('Bó ['+l+'..'+r+'] <b style="color:var(--green)">TRỌN</b> trong đoạn hỏi → lấy nguyên bó <b>$'+seg[v]+'</b>, khỏi đếm lại.'); await nap(400); return seg[v]; }
-  caseOf[v]='part'; draw(); hl(L.sumMid); const m=(l+r)>>1; await nap(220);
-  hl(L.sumRecurse); narrate('Bó ['+l+'..'+r+'] dính <b>MỘT PHẦN</b> đoạn hỏi — phải tách bó ra xem từng nửa.'); await nap(420);
-  const left=await sumQ(2*v,l,m,ql,qr), right=await sumQ(2*v+1,m+1,r,ql,qr);
-  curV=v; draw(); narrate('Cộng lại: '+left+' + '+right+' = <b>$'+(left+right)+'</b>.'); await nap(340);
+function traceSum(steps, ts, v, l, r, ql, qr){
+  steps.push({kind:'enter', v, l, r, hl:L.sumSig});
+  if(qr<l || r<ql){
+    steps.push({kind:'out', v, l, r, hl:L.sumOutside, caseKind:'out', narrate:'Ngày ['+l+'..'+r+'] <b>NGOÀI</b> khoảng đang hỏi → bỏ qua.'});
+    return 0;
+  }
+  if(ql<=l && r<=qr){
+    steps.push({kind:'full', v, l, r, hl:L.sumFull, caseKind:'full', narrate:'Cụm ['+l+'..'+r+'] <b style="color:var(--green)">TRỌN</b> trong khoảng hỏi → lấy nguyên cụm <b>$'+ts[v]+'</b>, khỏi cộng lại.'});
+    return ts[v];
+  }
+  const m=(l+r)>>1;
+  steps.push({kind:'mid', v, l, r, m, hl:L.sumMid, caseKind:'part'});
+  steps.push({kind:'recurse', v, hl:L.sumRecurse, narrate:'Cụm ['+l+'..'+r+'] dính <b>MỘT PHẦN</b> khoảng đang hỏi — phải tách cụm ra xem từng nửa.'});
+  const left=traceSum(steps, ts, 2*v, l, m, ql, qr);
+  const right=traceSum(steps, ts, 2*v+1, m+1, r, ql, qr);
+  steps.push({kind:'combine', v, narrate:'Cộng lại: $'+left+' + $'+right+' = <b>$'+(left+right)+'</b>.'});
   return left+right;
 }
-async function update(v,l,r,p,x){
-  curV=v; draw(); hl(L.updSig); await nap(200);
-  if(l===r){ hl(L.updLeaf); seg[v]=x; draw(); narrate('Tới ngăn '+l+' → đổi thành <b>'+x+'</b> tờ.'); await nap(380); return; }
-  hl(L.updMid); const m=(l+r)>>1; await nap(180);
-  hl(L.updGo);
-  if(p<=m){ narrate('Ngăn '+p+' nằm bên TRÁI → đi xuống nửa trái.'); await nap(300); await update(2*v,l,m,p,x); }
-  else { narrate('Ngăn '+p+' nằm bên PHẢI → đi xuống nửa phải.'); await nap(300); await update(2*v+1,m+1,r,p,x); }
-  curV=v; hl(L.updMerge); seg[v]=seg[2*v]+seg[2*v+1]; draw();
-  narrate('Bó lại: $'+seg[2*v]+' + $'+seg[2*v+1]+' = <b>$'+seg[v]+'</b>.'); await nap(340);
+function traceUpdate(steps, ts, v, l, r, p, x){
+  steps.push({kind:'enter', v, l, r, hl:L.updSig});
+  if(l===r){
+    ts[v]=x;
+    steps.push({kind:'leaf', v, l, value:x, hl:L.updLeaf, narrate:'Tới ngày '+l+' → sửa doanh thu thành <b>$'+x+'</b>.'});
+    return;
+  }
+  const m=(l+r)>>1;
+  steps.push({kind:'mid', v, l, r, m, hl:L.updMid});
+  const goLeft=(p<=m), child=goLeft?2*v:2*v+1;
+  steps.push({kind:'go', v, child, hl:L.updGo, narrate:'Ngày '+p+' nằm bên '+(goLeft?'TRÁI':'PHẢI')+' → đi xuống nửa '+(goLeft?'trái':'phải')+'.'});
+  traceUpdate(steps, ts, child, goLeft?l:m+1, goLeft?m:r, p, x);
+  ts[v]=ts[2*v]+ts[2*v+1];
+  steps.push({kind:'merge', v, hl:L.updMerge, value:ts[v], narrate:'Cụm lại: $'+ts[2*v]+' + $'+ts[2*v+1]+' = <b>$'+ts[v]+'</b>.'});
 }
 
-/* ---- one shared script: automatic play or one-step-at-a-time ---- */
-let lastSumResult=0;
-const SCRIPT=[
-  {narrate:'🧑‍💼 Đầu ca làm việc: đếm và bó tiền từng ngăn kéo lại…', pause:600},
-  {op:'build'},
-  {narrate:()=>'✅ Bó xong! Tổng cả ngăn kéo = <b>$'+seg[1]+'</b>.', pause:1200},
-  {narrate:'🙋 Khách hỏi: "Từ ngăn 1 tới ngăn 6 có bao nhiêu tiền?"', pause:900},
-  {op:'sum'},
-  {narrate:()=>'💬 Trả lời ngay: <b>$'+lastSumResult+'</b> — chỉ cộng vài bó, không đếm lại từng tờ!', pause:1500},
-  {narrate:'💱 Một khách đổi tiền lẻ ở ngăn 2 — 2 tờ đổi thành 9 tờ.', pause:900},
-  {op:'update'},
-  {narrate:'Xong! Chỉ tính lại các bó PHÍA TRÊN ngăn 2 — không phải đếm lại cả ngăn kéo.', pause:0},
-];
-async function runBeat(beat){
-  if(beat.op==='build'){ await build(1,0,N-1); curV=null; draw(); built=true; CL.lock(['bSum','bUpdate'], false); }
-  else if(beat.op==='sum'){ caseOf={}; curV=null; draw(); lastSumResult=await sumQ(1,0,N-1,1,6); curV=null; draw(); }
-  else if(beat.op==='update'){ caseOf={}; curV=null; draw(); await update(1,0,N-1,2,9); curV=null; draw(); }
-  else narrate(typeof beat.narrate==='function' ? beat.narrate() : beat.narrate);
+/* apply one recorded step to the real seg[]/caseOf/curV state and redraw */
+function applyStep(step){
+  if(step.kind==='narrate'){
+    if(step.resetCase){ caseOf={}; curV=null; hiParent=null; hiChildren=[]; draw(); }
+    narrate(typeof step.narrate==='function' ? step.narrate() : step.narrate);
+    return;
+  }
+  if(step.kind==='buildDone'){ built=true; CL.lock(['bSum','bUpdate'], false); return; }
+  hiParent=null; hiChildren=[];
+  curV=step.v;
+  if(step.hl!==undefined) hl(step.hl);
+  if(step.caseKind) caseOf[step.v]=step.caseKind;
+  if(step.kind==='leaf' || step.kind==='merge') seg[step.v]=step.value;
+  if(step.kind==='mid' || step.kind==='recurse' || step.kind==='merge' || step.kind==='combine'){
+    hiParent=step.v; hiChildren=[2*step.v, 2*step.v+1];
+  } else if(step.kind==='go'){
+    hiParent=step.v; hiChildren=[step.child];
+  }
+  draw();
+  if(step.narrate) narrate(step.narrate);
+}
+
+const PACE={enter:140, leaf:320, mid:150, recurse:300, go:300, merge:320, combine:300, out:300, full:340};
+async function playAuto(steps){
+  for(const step of steps){
+    applyStep(step);
+    const p = step.pause!==undefined ? step.pause : (PACE[step.kind]!==undefined ? PACE[step.kind] : 250);
+    if(p) await nap(p);
+  }
+}
+
+function buildScenarioSteps(){
+  const ts=new Array(4*N).fill(0);
+  const steps=[];
+  steps.push({kind:'narrate', narrate:'📊 Đầu tháng: cộng dồn doanh thu từng ngày thành các cụm…', pause:600});
+  traceBuild(steps, ts, 1, 0, N-1);
+  steps.push({kind:'buildDone'});
+  steps.push({kind:'narrate', narrate:'✅ Gộp xong! Tổng doanh thu cả 8 ngày = <b>$'+ts[1]+'</b>.', pause:1200});
+  steps.push({kind:'narrate', narrate:'🙋 Chủ quán hỏi: "Doanh thu từ ngày 3 tới ngày 7 là bao nhiêu?"', pause:900, resetCase:true});
+  const sumResult = traceSum(steps, ts, 1, 0, N-1, 3, 7);
+  steps.push({kind:'narrate', narrate:'💬 Trả lời ngay: <b>$'+sumResult+'</b> — chỉ cộng vài cụm, không cộng lại từng ngày!', pause:1500});
+  steps.push({kind:'narrate', narrate:'✏️ Phát hiện sai sót: doanh thu ngày 4 phải là <b>$455</b>, không phải $395 (một khoản hoàn tiền bị trễ).', pause:900, resetCase:true});
+  traceUpdate(steps, ts, 1, 0, N-1, 4, 455);
+  steps.push({kind:'narrate', narrate:'Xong! Chỉ tính lại các cụm PHÍA TRÊN ngày 4 — không phải cộng lại cả tháng.', pause:0});
+  return steps;
 }
 
 $('bReset').onclick=()=>{
   if(busy)return;
-  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
+  stepMode=false; stepPos=0; scenarioSteps=[]; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
   resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
 };
 
 $('bPlay').onclick=async()=>{
   if(busy)return; lock(true); resetState();
-  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
+  await playAuto(buildScenarioSteps());
+  curV=null; hiParent=null; hiChildren=[]; draw();
   lock(false);
 };
 
-let stepMode=false, stepIdx=0;
-$('bStep').onclick=async()=>{
+let stepMode=false, scenarioSteps=[], stepPos=0;
+$('bStep').onclick=()=>{
   if(busy)return;
-  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
-  if(stepIdx>=SCRIPT.length){
-    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
+  if(!stepMode){
+    stepMode=true; resetState(); $('bPlay').disabled=true;
+    scenarioSteps=buildScenarioSteps(); stepPos=0;
+  }
+  if(stepPos>=scenarioSteps.length){
+    stepMode=false; stepPos=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
     return;
   }
-  lockStep(true);
-  await runBeat(SCRIPT[stepIdx]);
-  stepIdx++;
-  lockStep(false);
-  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
+  applyStep(scenarioSteps[stepPos]); stepPos++;
+  $('bStep').textContent = stepPos>=scenarioSteps.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepPos+'/'+scenarioSteps.length+')';
 };
 
 $('bBuild').onclick=async()=>{
-  if(busy)return; lock(true); seg=new Array(4*N).fill(0); caseOf={}; curV=null; draw();
-  narrate('Xây cây từ mảng a — đệ quy xuống LÁ rồi GỘP ngược lên.'); await nap(500);
-  await build(1,0,N-1);
-  curV=null; draw(); built=true;
-  narrate('Xây xong! seg[1] (gốc) = tổng cả mảng = <b>'+seg[1]+'</b>.');
+  if(busy)return; lock(true); seg=new Array(4*N).fill(0); caseOf={}; curV=null; hiParent=null; hiChildren=[]; draw();
+  narrate('Xây cây từ mảng doanh thu — đệ quy xuống LÁ rồi GỘP ngược lên.'); await nap(500);
+  const ts=new Array(4*N).fill(0), steps=[]; traceBuild(steps, ts, 1, 0, N-1);
+  await playAuto(steps);
+  curV=null; hiParent=null; hiChildren=[]; draw(); built=true;
+  narrate('Xây xong! seg[1] (gốc) = tổng doanh thu cả tháng = <b>$'+seg[1]+'</b>.');
   lock(false);
 };
 $('bSum').onclick=async()=>{
-  if(busy)return; lock(true); caseOf={}; curV=null; draw();
+  if(busy)return; lock(true); caseOf={}; curV=null; hiParent=null; hiChildren=[]; draw();
   let l=parseInt($('sumL').value,10), r=parseInt($('sumR').value,10);
   if(isNaN(l))l=0; if(isNaN(r))r=N-1;
   l=Math.max(0,Math.min(N-1,l)); r=Math.max(l,Math.min(N-1,r));
-  narrate('Truy vấn <b>sum(a['+l+'..'+r+'])</b> — 3 ca: NGOÀI→0 · TRỌN→bốc seg[v] · DÍNH→chẻ đôi.'); await nap(500);
-  const result = await sumQ(1,0,N-1,l,r);
-  curV=null; draw();
-  narrate('Xong! <b>sum(a['+l+'..'+r+']) = '+result+'</b>.');
+  narrate('Truy vấn <b>sum(revenue['+l+'..'+r+'])</b> — 3 ca: NGOÀI→0 · TRỌN→bốc seg[v] · DÍNH→chẻ đôi.'); await nap(500);
+  const ts=seg.slice(), steps=[]; const result=traceSum(steps, ts, 1, 0, N-1, l, r);
+  await playAuto(steps);
+  curV=null; hiParent=null; hiChildren=[]; draw();
+  narrate('Xong! <b>sum(revenue['+l+'..'+r+']) = $'+result+'</b>.');
   lock(false);
 };
 $('bUpdate').onclick=async()=>{
-  if(busy)return; lock(true); caseOf={}; curV=null; draw();
+  if(busy)return; lock(true); caseOf={}; curV=null; hiParent=null; hiChildren=[]; draw();
   let idx=parseInt($('updIdx').value,10), val=parseInt($('updVal').value,10);
   if(isNaN(idx))idx=0; if(isNaN(val))val=0;
   idx=Math.max(0,Math.min(N-1,idx));
-  narrate('update(a['+idx+'] = <b>'+val+'</b>) — xuống tới lá rồi đi lên gộp lại, KHÔNG xây lại cả cây.'); await nap(500);
-  await update(1,0,N-1,idx,val);
-  curV=null; draw();
+  narrate('update(revenue['+idx+'] = <b>$'+val+'</b>) — xuống tới lá rồi đi lên gộp lại, KHÔNG xây lại cả cây.'); await nap(500);
+  const ts=seg.slice(), steps=[]; traceUpdate(steps, ts, 1, 0, N-1, idx, val);
+  await playAuto(steps);
+  curV=null; hiParent=null; hiChildren=[]; draw();
   narrate('Cập nhật xong — chỉ 1 đường từ gốc xuống lá rồi lên: O(log n).');
   lock(false);
 };

@@ -81,7 +81,8 @@
     animation:drop .25s ease;
   }
   .plate.top::after{
-    content:"TOP ← chỉ đụng được đĩa này";position:absolute;left:132px;top:-2px;white-space:nowrap;
+    content:"▾ TOP — chỉ đụng được đĩa này";position:absolute;left:50%;top:-22px;
+    transform:translateX(-50%);white-space:nowrap;
     font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--lacquer);font-weight:700;
   }
   @keyframes drop{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
@@ -132,11 +133,11 @@
   .cl .ln{width:26px;flex:none;text-align:right;margin-right:12px;color:#59695f;user-select:none}
   .cl.on{background:rgba(217,164,65,.18);box-shadow:inset 3px 0 0 var(--gold)}
 
-  .asmline{
-    font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--nori);color:#F5C97B;
-    border-radius:12px;padding:12px 16px;display:flex;gap:10px;align-items:baseline;
-  }
-  .asmline .lbl{color:#9FB8A8;font-size:11px;letter-spacing:.1em;flex:none}
+  .asmline{background:var(--nori);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+  .asmline .eyebrow{color:#9FB8A8;font-size:11px;letter-spacing:.1em;margin-bottom:6px}
+  .asmline-say{font-size:14.5px;font-weight:700;color:#F6F1E4;line-height:1.4;margin-bottom:8px}
+  .asmline-tech{font-family:'JetBrains Mono',monospace;font-size:12px;color:#9FB8A8;display:flex;gap:8px;align-items:baseline}
+  .asmline-tech .lbl{color:#6E8177;font-size:10px;letter-spacing:.08em;flex:none}
 
   .note{
     background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;
@@ -211,7 +212,7 @@
 
 <header>
   <div class="eyebrow">TRẠM 2 · CẤU TRÚC DỮ LIỆU</div>
-  <h1>Stack &amp; Call Stack<br><span class="accent">CPU gọi hàm như thế nào? 🍡</span></h1>
+  <h1>Stack &amp; Call Stack<br><span class="accent">= Chồng đĩa sushi 🍡</span></h1>
   <p class="sub">Từ chồng đĩa LIFO đến <b>mỗi lời gọi hàm tạo ra một stack frame riêng</b> như thế nào, biến cục bộ với biến global khác nhau ra sao — và vì sao đệ quy vô hạn làm chương trình… nổ.</p>
 </header>
 
@@ -256,32 +257,12 @@
       <p style="margin-top:16px;font-size:14.5px;">Gọi hàm khác bên trong hàm đang chạy → thêm một frame <b>MỚI chồng lên trên</b>. Hàm nào chạy xong trước thì frame đó <b>biến mất trước</b> — đúng thứ tự LIFO đã nói ở mục 01.</p>
     </div>
 
-    <p class="lead" style="margin-top:24px;">Vậy <b>biến global</b> thì sao — chẳng lẽ nó cũng nằm trong một frame nào đó? <b>Không.</b> Biến global/tĩnh không thuộc về frame của bất kỳ hàm nào cả — nó sống trong một vùng nhớ riêng, tồn tại suốt từ lúc chương trình bắt đầu chạy tới lúc kết thúc, không phụ thuộc hàm nào đang được gọi. Vì vậy hàm nào cũng đọc/ghi được nó trực tiếp, không cần "mang theo" trong frame của mình.</p>
-
-    <div class="duo" style="grid-template-columns:1fr 1fr;">
-      <div class="stcard">
-        <h3 style="font-family:'Baloo 2',cursive;color:var(--wasabi);font-size:16px;margin-bottom:8px;">📦 Biến cục bộ</h3>
-        <ul style="margin-left:18px;font-size:13.5px;line-height:1.7;">
-          <li>Sinh ra <b>khi hàm được gọi</b>, nằm trong frame của đúng hàm đó.</li>
-          <li>Chỉ hàm chứa nó nhìn thấy được.</li>
-          <li><b>Biến mất</b> ngay khi hàm chạy xong (frame bị dỡ).</li>
-        </ul>
-      </div>
-      <div class="stcard">
-        <h3 style="font-family:'Baloo 2',cursive;color:var(--lacquer);font-size:16px;margin-bottom:8px;">🌍 Biến global</h3>
-        <ul style="margin-left:18px;font-size:13.5px;line-height:1.7;">
-          <li>Sinh ra <b>khi chương trình bắt đầu chạy</b>, nằm ngoài mọi frame.</li>
-          <li><b>Mọi hàm</b> đều đọc/ghi trực tiếp được.</li>
-          <li>Sống tới tận khi <b>chương trình kết thúc</b>.</li>
-        </ul>
-      </div>
-    </div>
   </section>
 
   <!-- ══ 04 · SIMULATOR ══ -->
   <section>
     <h2><span class="tag">03</span> Mô phỏng call stack — từng lệnh một 🔬</h2>
-    <p class="lead">Ta chạy chương trình C bên dưới đúng theo cách CPU chạy (tinh thần <code>gcc -O0</code>, x86-64). Quan sát: <code>call</code> push địa chỉ trả về, đối số đi qua <b>rdi/rsi</b> rồi bị "spill" xuống frame, kết quả trả về nằm trong <b>rax</b>, và frame cũ trở thành <b>rác</b> chứ không hề bị xoá.</p>
+    <p class="lead">Ta chạy <code>factorial(4)</code> bên dưới đúng theo cách CPU chạy thật (tinh thần <code>gcc -O0</code>, x86-64). Đây là <b>đệ quy</b> — cùng một hàm tự gọi lại chính nó: quan sát <b>4 tầng frame giống hệt nhau</b> chồng lên nhau, mỗi tầng giữ một giá trị <code>n</code> riêng, rồi lần lượt sụp xuống khi <b>base case</b> (<code>n ≤ 1</code>) chạm đáy.</p>
 
     <div class="sim">
       <div class="sim-left">
@@ -294,8 +275,6 @@
           </div>
           <div class="csrc" id="csrc"></div>
         </div>
-
-        <div class="asmline"><span class="lbl">CPU ĐANG CHẠY ▸</span><span id="asm">—</span></div>
 
         <div class="note" id="simnote">Bấm <b>▶ Tiến</b> để chạy từng bước, hoặc <b>▶▶ Tự động</b> để xem cả vở kịch.</div>
 
@@ -312,6 +291,11 @@
       <div class="ramcol">
         <h3>Stack lúc này</h3>
         <div class="capline">Mỗi khung = một lời gọi hàm — khung mới luôn xếp lên trên, đang chạy thì viền vàng.</div>
+        <div class="asmline">
+          <div class="eyebrow">CPU ĐANG LÀM GÌ ▸</div>
+          <div class="asmline-say" id="asmSay">—</div>
+          <div class="asmline-tech"><span class="lbl">mã máy</span><span id="asm">—</span></div>
+        </div>
         <div class="fstack" id="ram"></div>
       </div>
     </div>
@@ -322,17 +306,17 @@
     <h2><span class="tag">04</span> Khi chồng đĩa chạm trần: Stack Overflow 💥</h2>
     <div class="ovf">
       <div class="stcard ovf-note">
-        <p>Stack có <b>giới hạn cứng</b> (Linux mặc định ~8 MB/thread; V8 của Chrome/Node giới hạn theo số frame, cỡ ~10.000). Mỗi lời gọi hàm "ăn" một frame — đệ quy không có điểm dừng sẽ ăn sạch:</p>
+        <p>Nhớ <code>factorial(4)</code> ở mục 03 chứ? Nó dừng gọn gàng sau đúng 4 tầng nhờ một dòng duy nhất: <code>if (n &lt;= 1) return 1;</code> — <b>base case</b>. Stack có <b>giới hạn cứng</b> (Linux mặc định ~8 MB/thread; V8 của Chrome/Node giới hạn theo số frame, cỡ ~10.000). Giờ thử xoá đúng dòng base case đó khỏi factorial:</p>
         <div class="prolog" style="margin:12px 0">
-          <div class="hd">boom.js</div>
-<pre><span class="k">function</span> <span class="f">boom</span>() {
-  <span class="k">return</span> <span class="f">boom</span>();   <span class="c">// gọi chính mình, không điều kiện dừng</span>
+          <div class="hd">factorial.c</div>
+<pre><span class="k">int</span> <span class="f">factorial</span>(<span class="k">int</span> n) {
+  <span class="k">return</span> n * <span class="f">factorial</span>(n - 1);   <span class="c">// thiếu if(n&lt;=1) return 1; — base case biến mất!</span>
 }
-<span class="f">boom</span>();</pre>
+<span class="f">factorial</span>(1000000);</pre>
         </div>
         <ul>
           <li>Mỗi frame ở đây chỉ vài chục byte, nhưng <b>hàng vạn frame</b> thì trần nào cũng thủng.</li>
-          <li>Đệ quy đúng cách = luôn có <b>base case</b> (điều kiện dừng) + mỗi lần gọi phải <b>tiến gần</b> base case hơn.</li>
+          <li>Đệ quy đúng cách = luôn có <b>base case</b> (điều kiện dừng) + mỗi lần gọi phải <b>tiến gần</b> base case hơn — đúng như <code>factorial(4)</code> ở mục 03 đã làm.</li>
           <li>Với dữ liệu sâu (cây, đồ thị lớn), dân chuyên đổi đệ quy thành <b>vòng lặp + stack tự quản trên heap</b> — cùng thuật toán, trần cao hơn hàng nghìn lần.</li>
           <li>Fun fact: trang hỏi-đáp lập trình lớn nhất thế giới đặt tên theo đúng lỗi này. 😄</li>
         </ul>
@@ -348,31 +332,29 @@
           <span>đã dùng: <b id="ovfBytes">0 KB</b></span>
         </div>
         <div class="mini-btns">
-          <button class="b-salmon" id="ovfGo">💥 Gọi boom()</button>
+          <button class="b-salmon" id="ovfGo">💥 Gọi factorial(1000000)</button>
           <button class="b-ghost" id="ovfReset">↺ Reset</button>
         </div>
         <div class="ovf-err" id="ovfErr">
-Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
-&nbsp;&nbsp;at boom (boom.js:2)<br>
-&nbsp;&nbsp;at boom (boom.js:2)<br>
-&nbsp;&nbsp;at boom (boom.js:2)<br>
-&nbsp;&nbsp;… ×10 000 dòng giống hệt nhau …<br><br>
-<span style="color:#9FB8A8">// bản C thì phũ hơn: Segmentation fault (core dumped)</span>
+Segmentation fault (core dumped)<br><br>
+<span style="color:#9FB8A8">// factorial(n) gọi lại chính nó ×1.000.000 lần, mỗi lần một frame mới,<br>
+&nbsp;&nbsp;chẳng có <code>if (n&lt;=1)</code> nào cản lại — cùng một hàm ở mục 03,<br>
+&nbsp;&nbsp;chỉ khác đúng 1 dòng bị xoá.<br><br>
+// bản JS thì lịch sự hơn: Uncaught RangeError: Maximum call stack size exceeded</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ 06 · Stack vs Heap + security + ứng dụng ══ -->
+  <!-- ══ 06 · Ưu điểm, nhược điểm & khi nào dùng ══ -->
   <section>
-    <h2><span class="tag">05</span> Stack vs Heap — và vì sao hacker mê stack</h2>
-
+    <h2><span class="tag">05</span> Ưu điểm, nhược điểm &amp; khi nào dùng</h2>
     <div class="stcard" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
       <div>
         <h3 style="color:var(--wasabi);font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:8px;">✅ Ưu điểm</h3>
         <ul style="margin-left:18px;font-size:14px;line-height:1.7;">
           <li><code>push</code>/<code>pop</code> <b>O(1)</b>, cực đơn giản để cài đặt.</li>
-          <li>Khớp tự nhiên với cấu trúc lồng nhau (ngoặc, hàm gọi hàm).</li>
+          <li>Khớp tự nhiên với cấu trúc lồng nhau (ngoặc, hàm gọi hàm, undo/redo).</li>
           <li>Không cần thanh ghi/con trỏ phức tạp — chỉ 1 chỉ số đỉnh (<code>top</code>).</li>
         </ul>
       </div>
@@ -380,41 +362,19 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
         <h3 style="color:var(--lacquer);font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:8px;">❌ Nhược điểm</h3>
         <ul style="margin-left:18px;font-size:14px;line-height:1.7;">
           <li>Chỉ truy cập được <b>đỉnh</b> — muốn lấy phần tử giữa phải pop hết bên trên.</li>
-          <li>Kích thước có giới hạn — đệ quy quá sâu gây <b>stack overflow</b>.</li>
+          <li>Kích thước có giới hạn — đệ quy quá sâu gây <b>stack overflow</b> (xem mục 04).</li>
           <li>Không hỗ trợ tìm kiếm nhanh, phải duyệt tuần tự nếu cần.</li>
         </ul>
       </div>
     </div>
-
-    <div class="duo">
-      <table>
-        <tr><th></th><th>🥞 Stack</th><th>🍲 Heap</th></tr>
-        <tr><td>Cấp phát</td><td>Tự động — chỉ cần <code>sub rsp, N</code>, một lệnh duy nhất</td><td><code>malloc</code>/<code>new</code> phải <b>đi tìm</b> khối trống phù hợp</td></tr>
-        <tr><td>Tốc độ</td><td>Cực nhanh, cache-friendly (dữ liệu nóng nằm sát nhau)</td><td>Chậm hơn; dễ phân mảnh (fragmentation)</td></tr>
-        <tr><td>Kích thước</td><td>Nhỏ, cố định (~1–8 MB mỗi thread)</td><td>Lớn — giới hạn bởi RAM/OS</td></tr>
-        <tr><td>Vòng đời</td><td>Gắn với hàm: <code>ret</code> là hết — dọn dẹp <b>miễn phí</b></td><td>Tự quản (<code>free</code>) hoặc chờ Garbage Collector</td></tr>
-        <tr><td>Đa luồng</td><td>Mỗi thread một stack riêng</td><td>Dùng chung → cần khoá/đồng bộ</td></tr>
-        <tr><td>Lỗi kinh điển</td><td>Stack overflow · dangling pointer (use-after-return)</td><td>Memory leak · use-after-free · double free</td></tr>
-      </table>
-      <div class="sec-card">
-        <h3>🔓 Buffer overflow — cú hack huyền thoại</h3>
-        <p>Nhìn lại giải phẫu frame: <b>biến cục bộ nằm ngay dưới địa chỉ trả về</b>. Nếu code bất cẩn kiểu <code>char ten[16]; gets(ten);</code> mà kẻ tấn công gõ 200 ký tự?</p>
-        <p>Dữ liệu tràn qua <code>ten</code>, đè lên <b>saved rbp</b>, rồi đè luôn <b>địa chỉ trả về</b>. Khi hàm <code>ret</code>, CPU ngoan ngoãn nhảy tới… địa chỉ do hacker chọn. Toàn quyền điều khiển chương trình chỉ bằng một chuỗi ký tự!</p>
-        <ul>
-          <li><b>Stack canary</b> — đặt giá trị "chim hoàng yến" trước ret addr, bị đè là báo động</li>
-          <li><b>NX bit</b> — cấm thực thi mã nằm trên stack</li>
-          <li><b>ASLR</b> — xáo trộn địa chỉ để hacker khó nhắm</li>
-        </ul>
-      </div>
-    </div>
-
+    <h3 style="font-family:'Baloo 2',cursive;font-size:16px;color:var(--indigo);margin-bottom:8px;">🧩 Thường dùng ở đâu?</h3>
     <div class="apps">
       <div class="chip"><span class="em">↩️</span><div class="t"><b>Undo / Redo</b>mỗi thao tác push vào stack lịch sử</div></div>
       <div class="chip"><span class="em">🕸️</span><div class="t"><b>DFS duyệt đồ thị</b>đệ quy = call stack, hoặc stack tự quản</div></div>
       <div class="chip"><span class="em">🧮</span><div class="t"><b>Tính biểu thức</b>trung tố → hậu tố, máy ảo dạng stack (JVM!)</div></div>
       <div class="chip"><span class="em">🧩</span><div class="t"><b>Kiểm tra ngoặc</b><code>{[()]}</code> — mở thì push, đóng thì pop &amp; so khớp</div></div>
       <div class="chip"><span class="em">🌐</span><div class="t"><b>Nút Back trình duyệt</b>hai stack: back &amp; forward</div></div>
-      <div class="chip"><span class="em">🐞</span><div class="t"><b>Stack trace khi crash</b>debugger in call stack — giờ bạn đọc hiểu nó rồi!</div></div>
+      <div class="chip"><span class="em">🐞</span><div class="t"><b>Stack trace khi crash</b>debugger in call stack — chính là những gì bạn vừa mô phỏng ở mục 03!</div></div>
     </div>
   </section>
 
@@ -445,16 +405,12 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
 
   /* ═══ 04 · CALL STACK SIMULATOR ═══ */
   const C_SRC = [
-    'int square(int x) {',
-    '    int y = x * x;',
-    '    return y;',
-    '}',
-    'int sum_sq(int a, int b) {',
-    '    int s = square(a) + square(b);',
-    '    return s;',
+    'int factorial(int n) {',
+    '    if (n <= 1) return 1;',
+    '    return n * factorial(n - 1);',
     '}',
     'int main(void) {',
-    '    int r = sum_sq(3, 4);',
+    '    int r = factorial(4);',
     '    return r;',
     '}'
   ];
@@ -462,110 +418,132 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
   // ── dựng danh sách bước ──
   const steps = [];
   let mem = [], sp = 0, bp = -1;
-  let regs = {rdi:'—', rsi:'—', rax:'—', rbx:'—'};
+  let regs = {rdi:'—', rax:'—'};
   let out = '';
   function push(label,val,cls,frame){
     const slot={label,val,cls,frame};
     if(sp < mem.length) mem[sp]=slot; else mem.push(slot);
     sp++;
   }
-  function snap(cLine, asm, note){
+  function snap(cLine, asm, note, say){
     steps.push({
       mem: JSON.parse(JSON.stringify(mem)),
-      sp, bp, regs: {...regs}, out, cLine, asm, note
+      sp, bp, regs: {...regs}, out, cLine, asm, note, say
     });
   }
   function setVal(i, v){ mem[i].val = v; mem[i].label = mem[i].label.replace(/=.*$/,'= '+v); }
 
   // trước main
   push('ret addr → libc', '', 'ret', 'libc');
-  snap(8, 'call main', 'Trước cả <b>main</b>: thư viện khởi động (libc) gọi <code>call main</code> → <b>địa chỉ trả về</b> (nằm trong vùng .text của libc) đã được push sẵn lên đỉnh stack. Mọi hàm — kể cả main — đều được "ai đó" gọi.');
+  snap(4, 'call main', 'Trước cả <b>main</b>: thư viện khởi động (libc) gọi <code>call main</code> → <b>địa chỉ trả về</b> đã được push sẵn lên đỉnh stack.', 'libc gọi hàm main() — chương trình bắt đầu chạy');
 
   // main prologue
   push('saved rbp (libc)', '', 'sbp', 'main');
-  snap(8, 'push rbp', '<b>Prologue của main, lệnh 1:</b> cất mốc frame (<code>rbp</code>) của caller vào stack — để lúc return còn khôi phục nguyên trạng.');
+  snap(4, 'push rbp', '<b>Prologue của main, lệnh 1:</b> cất mốc frame (<code>rbp</code>) của caller vào stack.', 'main() cất giữ con trỏ khung của hàm gọi nó');
   bp = 1;
-  snap(8, 'mov rbp, rsp', '<b>Lệnh 2:</b> <code>rbp</code> nay trỏ đúng ô vừa push — đây là <b>mốc cố định</b> của frame main. Từ giờ, mọi biến cục bộ của main đều tính theo <code>rbp − k</code>.');
+  snap(4, 'mov rbp, rsp', '<b>Lệnh 2:</b> <code>rbp</code> nay trỏ đúng ô vừa push — mốc cố định của frame main.', 'main() đã có khung riêng, sẵn sàng chạy');
   push('r = ?', '?', 'local', 'main');
   push('(đệm 8B — căn lề 16)', '', 'pad', 'main');
-  snap(9, 'sub rsp, 16', '<b>Lệnh 3:</b> "xin" 16 byte cho biến cục bộ <code>r</code> (+ đệm). Vì sao 16 mà không phải 8? ABI x86-64 bắt buộc <code>rsp</code> chia hết cho 16 trước mỗi <code>call</code> — compiler tự thêm đệm.');
+  snap(5, 'sub rsp, 16', '<b>Lệnh 3:</b> xin 16 byte cho biến cục bộ <code>r</code> (+ đệm căn lề 16 theo ABI x86-64).', 'main() xin chỗ trống cho biến r');
 
-  regs.rdi = 3;
-  snap(9, 'mov edi, 3', 'Chuẩn bị gọi <code>sum_sq(3, 4)</code>. Theo System V AMD64: <b>6 đối số đầu đi bằng thanh ghi</b> <code>rdi, rsi, rdx, rcx, r8, r9</code> — nhanh hơn hẳn đi qua RAM. Đối số 1 = 3 → <code>rdi</code>.');
-  regs.rsi = 4;
-  snap(9, 'mov esi, 4', 'Đối số 2 = 4 → <code>rsi</code>. (Chỉ khi có đối số thứ 7 trở đi chúng mới phải nằm trên stack.)');
-
-  push('ret addr → main:10', '', 'ret', 'sum');
-  snap(9, 'call sum_sq', '<b>call = push + jmp:</b> CPU push địa chỉ của <b>lệnh kế tiếp trong main</b> (để biết đường về), rồi nhảy <code>rip</code> tới <code>sum_sq</code>. Chú ý: call KHÔNG push đối số, KHÔNG push rbp — chỉ đúng một thứ: địa chỉ trả về.');
-
-  // sum_sq prologue
-  push('saved rbp (main)', '', 'sbp', 'sum');
-  snap(4, 'push rbp', 'Vào <code>sum_sq</code> — prologue quen thuộc lặp lại: cất <code>rbp</code> của main. Giá trị được cất chính là <b>địa chỉ</b> ô mốc của frame main → các saved-rbp tạo thành <b>chuỗi móc xích</b> mà debugger lần theo để in stack trace!');
-  bp = 5;
-  snap(4, 'mov rbp, rsp', 'Đặt mốc frame mới cho <code>sum_sq</code>. Mốc của main không mất — nó đang nằm an toàn trong ô "saved rbp".');
-  push('s = ?', '?', 'local', 'sum');
-  push('a = ?', '?', 'local', 'sum');
-  push('b = ?', '?', 'local', 'sum');
-  snap(4, 'sub rsp, 24', 'Xin chỗ cho <code>s</code> và hai bản sao của đối số <code>a, b</code>.');
-  setVal(7, 3);
-  snap(4, 'mov [rbp−16], edi', '<b>Spill:</b> ở <code>-O0</code>, compiler chép đối số từ thanh ghi xuống frame (<code>a = 3</code>) để debugger nhìn thấy được và thanh ghi được rảnh tay. (Bật <code>-O2</code> là bước này biến mất — mọi thứ ở lì trong thanh ghi.)');
-  setVal(8, 4);
-  snap(4, 'mov [rbp−24], esi', 'Tương tự: <code>b = 4</code> xuống frame.');
-
-  regs.rdi = 3;
-  snap(5, 'mov edi, [rbp−16]', 'Tính <code>square(a)</code> trước: nạp lại <code>a</code> từ frame vào <code>rdi</code> làm đối số.');
-  push('ret addr → sum_sq:6', '', 'ret', 'sq');
-  snap(5, 'call square', '<code>call</code> lần nữa: push địa chỉ quay về giữa dòng 6 của <code>sum_sq</code>, nhảy tới <code>square</code>. Stack đã chồng <b>3 tầng frame</b>: main → sum_sq → square.');
-
-  // square #1
-  push('saved rbp (sum_sq)', '', 'sbp', 'sq');
-  snap(1, 'push rbp', 'Prologue của <code>square</code> — vẫn đúng nghi thức đó, hàm nào cũng thế.');
-  bp = 10;
-  snap(1, 'mov rbp, rsp', 'Mốc frame của <code>square</code>.');
-  push('x = ?', '?', 'local', 'sq');
-  push('y = ?', '?', 'local', 'sq');
-  snap(1, 'sub rsp, 16', 'Chỗ cho <code>x</code> (bản spill của đối số) và <code>y</code>.');
-  setVal(11, 3);
-  snap(1, 'mov [rbp−8], edi', 'Spill đối số: <code>x = 3</code>.');
-  setVal(12, 9); regs.rax = 9;
-  snap(2, 'mov eax,[rbp−8] · imul eax,eax', 'Thân hàm: <code>y = 3 × 3 = 9</code>. Theo ABI, <b>giá trị trả về được đặt vào <code>rax</code></b> (bản 32-bit: <code>eax</code>) — caller sẽ đến đó mà nhận.');
-
-  sp = bp + 1; sp--; bp = 5;
-  snap(2, 'leave', '<b>Epilogue, lệnh 1 — <code>leave</code></b> = <code>mov rsp,rbp</code> (vứt biến cục bộ) + <code>pop rbp</code> (khôi phục mốc của sum_sq). Nhìn cột RAM: các ô của square <b>mờ đi thành "rác"</b> — dữ liệu 3, 9 vẫn nằm y nguyên trong RAM, chỉ là rsp không còn bảo kê vùng đó nữa.');
-  sp--;
-  snap(5, 'ret', '<b><code>ret</code></b> pop địa chỉ trả về → nạp vào <code>rip</code> → CPU quay đúng chỗ giữa dòng 6 của <code>sum_sq</code>. Kết quả 9 đi theo trong <code>rax</code>.');
-
-  regs.rbx = 9;
-  snap(5, 'mov ebx, eax', 'Giữ tạm kết quả 9 vào <code>rbx</code> (thanh ghi callee-saved) — vì <code>rax</code> sắp bị lời gọi <code>square(b)</code> ghi đè.');
   regs.rdi = 4;
-  snap(5, 'mov edi, [rbp−24]', 'Nạp <code>b = 4</code> vào <code>rdi</code>, chuẩn bị lời gọi thứ hai.');
+  snap(5, 'mov edi, 4', 'Chuẩn bị gọi <code>factorial(4)</code>. Đối số đầu tiên đi qua <code>edi</code> theo System V AMD64.', 'Chuẩn bị đối số n = 4 để gọi factorial');
+  push('ret addr → main:6', '', 'ret', 'f4');
+  snap(5, 'call factorial', '<b>call = push + jmp:</b> push địa chỉ trả về (giữa dòng 6 của main), nhảy vào <code>factorial(4)</code>. Đệ quy bắt đầu — đây sẽ là tầng đầu tiên trong 4 tầng giống hệt nhau.', 'Gọi factorial(4) — bắt đầu đệ quy');
 
-  // square #2 — tua nhanh, tái sử dụng ô rác
-  push('ret addr → sum_sq:6', '', 'ret', 'sq');
-  push('saved rbp (sum_sq)', '', 'sbp', 'sq');
-  bp = 10;
-  push('x = 4', 4, 'local', 'sq');
-  push('y = ?', '?', 'local', 'sq');
-  snap(1, 'call square → push rbp → mov rbp,rsp → sub rsp,16 → spill', '<b>Tua nhanh cả prologue.</b> Điểm đắt giá nhất nằm ở cột RAM: frame của <code>square(4)</code> mọc lên <b>đè đúng những địa chỉ</b> mà square(3) vừa bỏ lại — "rác" bị ghi đè, bộ nhớ được tái chế tự động, miễn phí. Đây là lý do stack rẻ hơn heap.');
-  setVal(12, 16); regs.rax = 16;
-  snap(2, 'imul → eax = 16', '<code>y = 4 × 4 = 16</code> → vào <code>rax</code>.');
-  sp = bp; bp = 5; sp--;
-  snap(3, 'leave · ret', 'Epilogue lần hai: frame square(4) thành rác, CPU về lại <code>sum_sq</code> với 16 trong <code>rax</code>.');
+  // factorial(4)
+  push('saved rbp (main)', '', 'sbp', 'f4');
+  snap(0, 'push rbp', 'Prologue của <code>factorial</code> — y hệt mọi hàm khác: cất <code>rbp</code> của caller.', 'factorial(4) cất giữ con trỏ khung của main()');
+  bp = 5;
+  snap(0, 'mov rbp, rsp', 'Mốc frame mới cho <b>factorial(n=4)</b>.', 'factorial(4) đã có khung riêng, sẵn sàng chạy');
+  push('n = ?', '?', 'local', 'f4');
+  snap(1, 'sub rsp, 16', 'Xin chỗ cho tham số <code>n</code> (bị spill xuống frame).', 'factorial(4) xin chỗ trống cho biến n');
+  setVal(6, 4);
+  snap(1, 'mov [rbp−4], edi', '<b>Spill:</b> <code>n = 4</code> được chép từ thanh ghi xuống frame.', 'Lưu n = 4 vào khung của factorial(4)');
+  snap(1, 'cmp n,1 · jg .L2', 'Kiểm tra <b>base case</b>: <code>n ≤ 1</code>? 4 &gt; 1 → sai, nhảy sang nhánh đệ quy.', 'n = 4 có ≤ 1 không? Chưa — phải gọi tiếp');
 
-  setVal(6, 25); regs.rax = 25;
-  snap(5, 'add eax, ebx · mov [rbp−8], eax', 'Cộng hai kết quả: <code>s = 9 + 16 = 25</code>, cất vào frame. (9 nãy giờ vẫn kiên nhẫn ngồi trong <code>rbx</code>.)');
+  regs.rdi = 3;
+  snap(2, 'mov edi,[rbp−4] · sub edi,1', 'Tính <code>n − 1 = 3</code>, chuẩn bị làm đối số cho lời gọi đệ quy tiếp theo.', 'Tính n − 1 = 3');
+  push('ret addr → factorial:3', '', 'ret', 'f3');
+  snap(2, 'call factorial', 'Gọi lại chính <code>factorial</code> — lần này <code>n=3</code>. Stack giờ có <b>2 tầng factorial</b> chồng lên main.', 'Gọi factorial(3) — đệ quy sâu thêm một tầng');
 
-  sp = bp; bp = 1;
-  snap(6, 'mov eax,[rbp−8] · leave', '<code>return s</code>: nạp 25 vào <code>rax</code>, rồi <code>leave</code> — toàn bộ frame <code>sum_sq</code> (kèm a, b, s) thành rác.');
+  // factorial(3)
+  push('saved rbp (factorial n=4)', '', 'sbp', 'f3');
+  snap(0, 'push rbp', 'Prologue lặp lại y hệt — hàm nào, tầng nào cũng chung một nghi thức.', 'factorial(3) cất giữ con trỏ khung của factorial(4)');
+  bp = 8;
+  snap(0, 'mov rbp, rsp', 'Mốc frame cho <b>factorial(n=3)</b>. Mốc của factorial(n=4) không mất — đang nằm an toàn trong ô "saved rbp".', 'factorial(3) đã có khung riêng, sẵn sàng chạy');
+  push('n = ?', '?', 'local', 'f3');
+  snap(1, 'sub rsp, 16', 'Chỗ cho <code>n</code> của tầng này.', 'factorial(3) xin chỗ trống cho biến n');
+  setVal(9, 3);
+  snap(1, 'mov [rbp−4], edi', '<code>n = 3</code>.', 'Lưu n = 3 vào khung của factorial(3)');
+  snap(1, 'cmp n,1 · jg .L2', '3 &gt; 1 → vẫn chưa chạm base case, tiếp tục đệ quy.', 'n = 3 có ≤ 1 không? Chưa — tiếp tục đệ quy');
+
+  regs.rdi = 2;
+  snap(2, 'mov edi,[rbp−4] · sub edi,1', '<code>n − 1 = 2</code>.', 'Tính n − 1 = 2');
+  push('ret addr → factorial:3', '', 'ret', 'f2');
+  snap(2, 'call factorial', 'Gọi tiếp <code>factorial(2)</code>. 3 tầng factorial chồng lên nhau rồi.', 'Gọi factorial(2)');
+
+  // factorial(2)
+  push('saved rbp (factorial n=3)', '', 'sbp', 'f2');
+  snap(0, 'push rbp', 'Vẫn đúng nghi thức đó.', 'factorial(2) cất giữ con trỏ khung của factorial(3)');
+  bp = 11;
+  snap(0, 'mov rbp, rsp', 'Mốc frame cho <b>factorial(n=2)</b>.', 'factorial(2) đã có khung riêng, sẵn sàng chạy');
+  push('n = ?', '?', 'local', 'f2');
+  snap(1, 'sub rsp, 16', 'Chỗ cho <code>n</code>.', 'factorial(2) xin chỗ trống cho biến n');
+  setVal(12, 2);
+  snap(1, 'mov [rbp−4], edi', '<code>n = 2</code>.', 'Lưu n = 2 vào khung của factorial(2)');
+  snap(1, 'cmp n,1 · jg .L2', '2 &gt; 1 → tiếp tục đệ quy.', 'n = 2 có ≤ 1 không? Chưa — tiếp tục đệ quy');
+
+  regs.rdi = 1;
+  snap(2, 'mov edi,[rbp−4] · sub edi,1', '<code>n − 1 = 1</code>.', 'Tính n − 1 = 1');
+  push('ret addr → factorial:3', '', 'ret', 'f1');
+  snap(2, 'call factorial', 'Gọi <code>factorial(1)</code> — tầng thứ 4, sắp chạm base case.', 'Gọi factorial(1) — sắp chạm base case');
+
+  // factorial(1) — base case
+  push('saved rbp (factorial n=2)', '', 'sbp', 'f1');
+  snap(0, 'push rbp', 'Prologue lần cuối trong chuỗi đệ quy này.', 'factorial(1) cất giữ con trỏ khung của factorial(2)');
+  bp = 14;
+  snap(0, 'mov rbp, rsp', 'Mốc cho <b>factorial(n=1)</b> — tầng sâu nhất. Ngay lúc này có <b>5 frame</b> đang sống cùng lúc: main + 4 factorial.', 'factorial(1) đã có khung riêng — tầng sâu nhất');
+  push('n = ?', '?', 'local', 'f1');
+  snap(1, 'sub rsp, 16', 'Chỗ cho <code>n</code>.', 'factorial(1) xin chỗ trống cho biến n');
+  setVal(15, 1);
+  snap(1, 'mov [rbp−4], edi', '<code>n = 1</code>.', 'Lưu n = 1 vào khung của factorial(1)');
+  snap(1, 'cmp n,1 · jg .L2', 'Kiểm tra: <code>1 ≤ 1</code>? <b>Đúng!</b> Base case chạm rồi — không gọi đệ quy nữa.', 'n = 1 có ≤ 1 không? Đúng! Base case chạm rồi');
+  regs.rax = 1;
+  snap(1, 'mov eax, 1', '<code>return 1</code> — base case trả thẳng giá trị, không gọi thêm. Đây là điểm quay đầu của cả chuỗi đệ quy.', 'factorial(1) trả về 1 — không gọi tiếp nữa');
+
+  sp = bp + 1; sp--; bp = 11;
+  snap(1, 'leave', '<b>Epilogue của factorial(1):</b> <code>leave</code> vứt biến cục bộ + khôi phục <code>rbp</code> về factorial(2). Frame n=1 giờ là "rác" trong RAM.', 'factorial(1) dọn khung của mình, trả quyền lại cho factorial(2)');
   sp--;
-  snap(9, 'ret', 'Về tới <code>main</code>, mang theo 25 trong <code>rax</code>. Để ý stack lúc này: y hệt trước khi gọi <code>sum_sq</code> — <b>cân bằng push/pop tuyệt đối</b>, đó là hợp đồng của mọi hàm tử tế.');
+  snap(2, 'ret', '<code>ret</code> pop địa chỉ trả về, quay lại factorial(2) — mang theo <b>1</b> trong <code>rax</code>.', 'Quay lại factorial(2), mang theo kết quả 1');
 
-  setVal(2, 25);
-  snap(9, 'mov [rbp−8], eax', '<code>r = 25</code> — kết quả cuối cùng nằm trong frame của main.');
-  regs.rax = 25;
-  sp = bp + 1; sp--; sp--; bp = -1;  // leave (rsp=rbp, pop rbp) + ret → stack rỗng
-  out = 'exit code = 25 · sum_sq(3,4) = 25 ✓';
-  snap(10, 'mov eax,[rbp−8] · leave · ret', '<code>return r</code> → main cũng leave/ret nốt, trả 25 về libc làm <b>exit code</b>. Toàn bộ stack thành rác trong… 2 lệnh. Không <code>free()</code>, không garbage collector — dọn dẹp bằng đúng một phép gán con trỏ. Đó là vẻ đẹp của stack. 🍡');
+  regs.rax = 2;
+  snap(2, 'imul eax,[rbp−4]', '<code>eax = 1 × 2 = 2</code> — factorial(2) tính xong.', 'factorial(2) tính: 2 × 1 = 2');
+  sp = bp + 1; sp--; bp = 8;
+  snap(2, 'leave', 'Frame n=2 thành rác, <code>rbp</code> khôi phục về factorial(3).', 'factorial(2) dọn khung của mình, trả quyền lại cho factorial(3)');
+  sp--;
+  snap(2, 'ret', 'Quay lại factorial(3), mang theo <b>2</b>.', 'Quay lại factorial(3), mang theo kết quả 2');
+
+  regs.rax = 6;
+  snap(2, 'imul eax,[rbp−4]', '<code>eax = 2 × 3 = 6</code>.', 'factorial(3) tính: 3 × 2 = 6');
+  sp = bp + 1; sp--; bp = 5;
+  snap(2, 'leave', 'Frame n=3 thành rác, <code>rbp</code> khôi phục về factorial(4).', 'factorial(3) dọn khung của mình, trả quyền lại cho factorial(4)');
+  sp--;
+  snap(2, 'ret', 'Quay lại factorial(4), mang theo <b>6</b>.', 'Quay lại factorial(4), mang theo kết quả 6');
+
+  regs.rax = 24;
+  snap(2, 'imul eax,[rbp−4]', '<code>eax = 6 × 4 = 24</code> — kết quả cuối cùng của <code>factorial(4)</code>!', 'factorial(4) tính: 4 × 6 = 24 — xong!');
+  sp = bp + 1; sp--; bp = 1;
+  snap(2, 'leave', 'Frame n=4 thành rác, <code>rbp</code> khôi phục về main. Cả 4 tầng factorial giờ đều là rác — dọn dẹp chỉ bằng vài phép gán con trỏ, không <code>free()</code> nào cả.', 'factorial(4) dọn khung của mình, trả quyền lại cho main()');
+  sp--;
+  snap(5, 'ret', 'Về tới <b>main</b>, mang theo <b>24</b> trong <code>rax</code>.', 'Quay lại main(), mang theo kết quả 24');
+
+  setVal(2, 24);
+  snap(5, 'mov [rbp−8], eax', '<code>r = 24</code> — kết quả cuối cùng nằm trong frame của main.', 'main() lưu kết quả: r = 24');
+  regs.rax = 24;
+  sp = bp + 1; sp--; sp--; bp = -1;
+  out = 'exit code = 24 · factorial(4) = 24 ✓';
+  snap(6, 'mov eax,[rbp−8] · leave · ret', '<code>return r</code> → main cũng leave/ret nốt, trả <b>24</b> về libc làm exit code. Toàn bộ 5 tầng frame đã dựng lên rồi sụp xuống, dọn dẹp hoàn toàn tự động. Muốn biết điều gì xảy ra nếu <b>quên</b> dòng <code>if (n≤1) return 1;</code>? Xem mục 04 ngay bên dưới. 🍡', 'main() kết thúc, trả 24 làm exit code');
 
   // ── render simulator ──
   const csrcEl = document.getElementById('csrc');
@@ -578,12 +556,13 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
 
   const ramEl=document.getElementById('ram');
   const asmEl=document.getElementById('asm');
+  const asmSayEl=document.getElementById('asmSay');
   const noteEl=document.getElementById('simnote');
   const cntEl=document.getElementById('stepcnt');
   let cur=0, prevTopFrame=null, autoT=null, reachedEnd=false;
 
-  const FR={libc:'f-libc',main:'f-main',sum:'f-sum',sq:'f-sq'};
-  const FNAME={libc:'libc', main:'main()', sum:'sum_sq()', sq:'square()'};
+  const FR={libc:'f-libc',main:'f-main',f4:'f-sq',f3:'f-sq',f2:'f-sq',f1:'f-sq'};
+  const FNAME={libc:'libc', main:'main()', f4:'factorial(4)', f3:'factorial(3)', f2:'factorial(2)', f1:'factorial(1)'};
 
   function show(i){
     cur=Math.max(0,Math.min(steps.length-1,i));
@@ -591,6 +570,7 @@ Uncaught <b>RangeError</b>: Maximum call stack size exceeded<br>
 
     // C highlight
     csrcEl.querySelectorAll('.cl').forEach(d=>d.classList.toggle('on',+d.dataset.i===s.cLine));
+    asmSayEl.textContent=s.say;
     asmEl.textContent=s.asm;
     noteEl.innerHTML=s.note;
     cntEl.textContent='bước '+(cur+1)+' / '+steps.length;

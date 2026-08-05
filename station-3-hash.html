@@ -81,25 +81,22 @@
 
   .ticker{margin:16px auto 0;max-width:560px;background:var(--tatami);border-left:5px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13.5px;min-height:20px;}
   .ticker b{color:var(--indigo);}
+  .ticker.typing::after{content:'▍';color:var(--accent);animation:tickBlink .8s step-end infinite;}
+  @keyframes tickBlink{50%{opacity:0}}
+  .collide-entry{opacity:0;animation:collideIn .35s ease forwards;font-size:12px;background:#FFF3D6;border-left:3px solid var(--amber);border-radius:6px;padding:6px 10px;margin-top:6px;}
+  @keyframes collideIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
 
-  .k-controls{display:flex;flex-wrap:wrap;gap:9px;justify-content:space-between;align-items:center;margin-top:16px;}
-  .k-controls .play-btn{font-family:'Baloo 2',cursive;}
-  .k-side{display:flex;gap:8px;}
-  .k-side button{font-family:'Be Vietnam Pro',sans-serif;background:#fff;color:var(--indigo);border:2px solid var(--indigo);box-shadow:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;}
-  .k-side button:hover{background:var(--indigo);color:#fff;}
-
-  #hashInput,#sipInput{width:130px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+  #sipInput,#tableInput{width:130px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;}
   .hash-trace{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;background:var(--tatami);border-radius:10px;padding:10px 14px;min-height:24px;}
   .hash-trace .step{opacity:0;animation:hashStepIn .3s ease forwards;}
   .hash-trace .step.final{margin-top:6px;padding-top:8px;border-top:1px dashed #D8CDB6;font-weight:800;}
   @keyframes hashStepIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .sip-fp{display:inline-block;background:#1B2330;color:#8FD9C4;border:1px solid #3B78C4;border-radius:5px;padding:1px 7px;font-size:11.5px;}
 
-  .mini-strip{display:flex;gap:3px;}
-  .mini-cell{flex:1;min-width:0;background:#14261C;border-radius:6px;padding:4px 2px;text-align:center;transition:box-shadow .2s;}
-  .mini-cell.flash{box-shadow:0 0 0 2px var(--gold);}
-  .mini-cell .midx{display:block;color:#7C9184;font-family:'JetBrains Mono',monospace;font-size:8.5px;}
-  .mini-cell .mchip{display:block;background:#1B2330;color:#fff;border:1px solid var(--green);border-radius:4px;font-size:9px;font-weight:700;padding:0 2px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .mini-cell .mchip.blue{border-color:#5AA0FF;}
+  .mb-new{animation:mbPop .4s ease;transform-box:fill-box;transform-origin:center;}
+  @keyframes mbPop{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+  .mb-flash{animation:mbFlash 1.1s ease-in-out infinite;}
+  @keyframes mbFlash{0%,100%{stroke-width:2;}50%{stroke-width:5;}}
 
   .k-quiz{background:linear-gradient(135deg,#FFF6E4,#FBEED2);border:2px dashed var(--gold);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
   .k-quiz .q{font-size:15px;margin-bottom:12px;font-weight:700;color:var(--soy);}
@@ -123,6 +120,7 @@
 
   <section class="k-section">
     <h2 class="k-h2"><span class="tag">01</span> Vì sao cần bảng băm?</h2>
+    <p style="max-width:760px;font-size:15px;margin-bottom:16px;">📖 <b>Bảng băm (Hash Table)</b> là một cấu trúc dữ liệu lưu dữ liệu theo từng cặp <b>khoá → giá trị</b> (ví dụ: tên khách → số phòng), cho phép <b>tìm, thêm, xoá gần như tức thì</b> (trung bình <b>O(1)</b>) mà không cần dò qua từng phần tử.</p>
     <div class="k-menu">
       <div class="dish problem">
         <div class="ic">🎯</div>
@@ -143,13 +141,11 @@
   </section>
 
   <section class="k-section">
-    <h2 class="k-h2"><span class="tag">02</span> Từ điển khách sạn ↔ khoa học máy tính</h2>
+    <h2 class="k-h2"><span class="tag">02</span> 3 thành phần cốt lõi của Hash Table</h2>
     <div class="k-map">
-      <div class="k-chip"><span class="em">🏨</span><div class="t"><b>Khách sạn N phòng</b>mảng cố định <code>table[M]</code></div></div>
-      <div class="k-chip"><span class="em">🛎️</span><div class="t"><b>Lễ tân tính số phòng</b>hàm băm <code>hash(key)</code></div></div>
-      <div class="k-chip"><span class="em">🙋</span><div class="t"><b>2 khách trùng phòng</b>va chạm (collision)</div></div>
-      <div class="k-chip"><span class="em">🛏️</span><div class="t"><b>Ở chung phòng</b>nối chain (chaining)</div></div>
-      <div class="k-chip"><span class="em">📋</span><div class="t"><b>Sổ khách trong phòng</b>linked list tại bucket</div></div>
+      <div class="k-chip"><span class="em">📦</span><div class="t"><b><code>table[M]</code></b>Mảng cố định gồm M ô nhớ (bucket), mỗi ô lưu 0 hoặc nhiều cặp khoá-giá trị.</div></div>
+      <div class="k-chip"><span class="em">#️⃣</span><div class="t"><b><code>hash(key)</code></b>Hàm biến 1 khoá bất kỳ thành 1 chỉ số nguyên trong khoảng [0, M).</div></div>
+      <div class="k-chip"><span class="em">⚠️</span><div class="t"><b>Va chạm (collision)</b>2 khoá khác nhau ra cùng 1 chỉ số — xử lý bằng chaining hoặc open addressing.</div></div>
     </div>
   </section>
 
@@ -162,15 +158,15 @@
     </div>
 
     <div id="themeView">
-      <div class="k-scene" style="max-width:640px;margin:0 auto;">
-        <svg id="svgTheme" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="ticker" id="narr">Bấm <b>▶ Tự động</b> để xem 3 vị khách check-in tự động, hoặc <b>⏭ Từng bước</b> để tự bấm qua từng bước một.</div>
-        <div class="k-controls">
-          <div class="row" style="gap:8px">
-            <button class="play-btn" id="bPlay">▶ Tự động</button>
-            <button class="play-btn" id="bStep" style="background:var(--indigo)">⏭ Từng bước</button>
-          </div>
-          <div class="k-side"><button id="bReset">↺ Reset</button></div>
+      <div class="k-scene" style="max-width:640px;margin:0 auto 18px;">
+        <h3 style="font-family:'Baloo 2',cursive;color:var(--accent);font-size:16px;margin-bottom:10px;">🔑 Trước tiên: ngoài đời bạn tìm phòng khách sạn thế nào?</h3>
+        <svg id="roomKeySvg" viewBox="0 0 560 390" preserveAspectRatio="xMidYMid meet" style="width:100%;display:block"></svg>
+        <div class="ticker" id="roomKeyNarr"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="ghost" id="rkPrev">◀ Lùi</button>
+          <button id="rkNext">Tiến ▶</button>
+          <button class="ghost" id="rkReset">↺ Reset</button>
+          <span id="rkStepCnt" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--soy-light,#8A7660);margin-left:auto"></span>
         </div>
       </div>
     </div>
@@ -181,15 +177,13 @@
           <div class="code-title">// hash() băm khóa · put() chèn, va chạm thì nối chain</div>
           <div class="code" id="code"></div></div></div>
         <div class="col-viz">
-          <div class="card"><h3>Xem hàm băm tính từng bước</h3>
-            <div class="row" style="margin-bottom:10px">
-              <input type="text" id="hashInput" value="Mai" maxlength="14">
-              <button id="bHashDemo">🔍 Băm thử chuỗi này</button>
-            </div>
-            <div id="hashTrace" class="hash-trace"></div>
-          </div>
           <div class="card"><h3>Bảng băm (M = 8 ô, chaining)</h3>
+            <div class="row" style="margin-bottom:10px">
+              <input type="text" id="tableInput" placeholder="Gõ tên bất kỳ..." maxlength="14">
+              <button id="bTableInsert">➕ Chèn vào bảng</button>
+            </div>
             <svg id="svg" viewBox="0 0 560 330" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="ticker" id="tableCaption" style="margin-top:10px">Gõ 1 cái tên rồi bấm "Chèn vào bảng", hoặc dùng nút có sẵn ở khung bên dưới.</div>
             <div class="legend">Ô = chỉ số bucket · vòng tròn nối tiếp = danh sách liên kết (chaining) trong ô đó</div>
           </div>
           <div class="card"><h3>Điều khiển thủ công</h3>
@@ -198,17 +192,30 @@
               <button id="bAn">Chèn 'An'</button>
               <button id="bMai" class="ghost" style="border-color:var(--amber);color:var(--amber)">Chèn 'Mai' (va chạm!)</button>
             </div>
+            <div class="ticker" id="narr" style="margin-top:10px">Bấm một nút để chèn khoá và xem hàm băm tính bucket.</div>
+            <div id="collideLog"></div>
           </div>
           <div class="card"><h3>Minh hoạ · Chaining vs Open Addressing</h3>
-            <div class="row" style="margin-bottom:8px">
-              <button id="bCollideDemo">⏭ Chèn "Minh" (1/3)</button>
-              <button id="bCollideReset" class="ghost">↺ Reset</button>
+            <div class="row" style="align-items:flex-start;gap:16px;">
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:4px;">🔗 Chaining</div>
+                <svg id="bucketsChain" viewBox="0 0 200 300" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:200px;display:block"></svg>
+                <div class="legend" id="chainNarr" style="margin-top:8px;min-height:32px;"></div>
+                <div class="row" style="margin-top:8px;gap:6px;">
+                  <button id="bChainStep">⏭ Chèn "Minh" (1/3)</button>
+                  <button id="bChainReset" class="ghost">↺ Reset</button>
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:11px;font-weight:800;color:#3B78C4;margin-bottom:4px;">➡️ Open Addressing</div>
+                <svg id="bucketsOpen" viewBox="0 0 200 300" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:200px;display:block"></svg>
+                <div class="legend" id="openNarr" style="margin-top:8px;min-height:32px;"></div>
+                <div class="row" style="margin-top:8px;gap:6px;">
+                  <button id="bOpenStep">⏭ Chèn "Minh" (1/3)</button>
+                  <button id="bOpenReset" class="ghost">↺ Reset</button>
+                </div>
+              </div>
             </div>
-            <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:3px;">🔗 Chaining</div>
-            <div id="bucketsChain"></div>
-            <div style="font-size:11px;font-weight:800;color:#3B78C4;margin:8px 0 3px;">➡️ Open Addressing</div>
-            <div id="bucketsOpen"></div>
-            <div class="legend" id="collideNarr" style="margin-top:8px;min-height:18px;"></div>
           </div>
           <div class="card"><h3>Minh hoạ · SipHash vs hàm băm kiểu Java</h3>
             <div class="row" style="margin-bottom:8px">
@@ -216,7 +223,18 @@
               <button id="bSipDemo">🔍 So sánh</button>
               <button id="bReseed" class="ghost">🎲 Đổi seed</button>
             </div>
+            <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:4px;">☕ Java — polynomial rolling hash (h = h×31 + code)</div>
+            <table class="summary" id="javaTable" style="margin-bottom:14px;"></table>
+            <div style="font-size:11px;font-weight:800;color:#3B78C4;margin-bottom:4px;">🔐 SipHash-2-4 — khoá bí mật 128-bit, xem từng vòng trộn thật</div>
             <div id="sipTrace" class="hash-trace"></div>
+            <div class="row" style="margin-top:10px">
+              <button class="ghost" id="bSipFirst">⏮</button>
+              <button class="ghost" id="bSipPrev">◀ Lùi</button>
+              <button id="bSipNext">Tiến ▶</button>
+              <button class="ghost" id="bSipLast">⏭</button>
+              <button class="ghost" id="bSipAuto">▶▶ Tự động</button>
+              <span id="sipStepCnt" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--soy-light);margin-left:auto"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -253,6 +271,123 @@
           <li>Đếm tần suất từ, phát hiện phần tử trùng lặp.</li>
           <li>Kiểm tra tồn tại nhanh (set membership).</li>
         </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="k-section">
+    <h2 class="k-h2"><span class="tag">05</span> Điều gì làm nên một bảng băm tốt?</h2>
+    <p style="max-width:780px;font-size:15px;margin-bottom:18px;">Bảng băm nhanh hay chậm phụ thuộc vào <b>2 thứ</b>: hàm băm (lễ tân) có tính số phòng khéo không, và cách khách sạn xử lý va chạm có thông minh không.</p>
+
+    <h3 style="font-family:'Baloo 2',cursive;font-size:17px;color:var(--indigo);margin-bottom:10px;">1. Hàm băm tốt cần 4 thứ</h3>
+    <div class="k-menu" style="grid-template-columns:repeat(4,1fr);">
+      <div class="dish idea">
+        <div class="ic">🎯</div>
+        <h3>Phân bố đều</h3>
+        <p>Khoá phải rải <b>đều khắp</b> các bucket — tránh dồn cục, tránh "điểm nóng" (hot spot).</p>
+      </div>
+      <div class="dish usecase">
+        <div class="ic">🎲</div>
+        <h3>Ít va chạm</h3>
+        <p>Giảm thiểu trường hợp <b>2 khoá khác nhau</b> ra cùng 1 chỉ số bucket.</p>
+      </div>
+      <div class="dish problem" style="--card-c:var(--gold);">
+        <div class="ic">⚡</div>
+        <h3>Tính nhanh</h3>
+        <p>Đủ nhanh để <b>không</b> trở thành nút thắt cổ chai của cả hệ thống.</p>
+      </div>
+      <div class="dish bad" style="--card-c:var(--accent);">
+        <div class="ic">🔁</div>
+        <h3>Tất định</h3>
+        <p>Cùng <b>1 khoá đầu vào</b> → luôn ra đúng 1 chỉ số bucket, không bao giờ đổi.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:16px;color:var(--indigo);margin-bottom:10px;">Cùng tên <code>hash(key)</code> — nhưng 1 cái TỆ, 1 cái TỐT</h3>
+      <div class="row" style="align-items:flex-start;gap:16px;margin-bottom:12px;">
+        <div style="flex:1;min-width:220px;">
+          <div class="code-title">❌ hash() TỆ — chỉ cộng dồn</div>
+          <div class="code">
+            <div class="cl"><span class="kw">function</span> <span class="fn">hash</span>(key) {</div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">let</span> h = 0;</div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">const</span> c <span class="kw">of</span> key)</div>
+            <div class="cl">&nbsp;&nbsp;&nbsp;&nbsp;h += c.charCodeAt(0); <span class="cm">// chỉ CỘNG</span></div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">return</span> h % M;</div>
+            <div class="cl">}</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="code-title">✅ hash() TỐT — nhân 31 mỗi bước</div>
+          <div class="code">
+            <div class="cl"><span class="kw">function</span> <span class="fn">hash</span>(key) {</div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">let</span> h = 0;</div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">const</span> c <span class="kw">of</span> key)</div>
+            <div class="cl">&nbsp;&nbsp;&nbsp;&nbsp;h = h*31 + c.charCodeAt(0); <span class="cm">// NHÂN rồi cộng</span></div>
+            <div class="cl">&nbsp;&nbsp;<span class="kw">return</span> h % M;</div>
+            <div class="cl">}</div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:13.5px;margin-bottom:10px;">Thử băm <b>6 cách hoán vị</b> của cùng 3 chữ cái "e", "v", "a" — cùng bộ ký tự, chỉ khác thứ tự:</p>
+      <table class="summary" id="badGoodTable"></table>
+      <div class="legend" id="badGoodNote" style="margin-top:10px;"></div>
+    </div>
+
+    <h3 style="font-family:'Baloo 2',cursive;font-size:17px;color:var(--indigo);margin:24px 0 10px;">2. Xử lý va chạm thông minh</h3>
+    <p style="max-width:780px;font-size:14.5px;margin-bottom:12px;">Vì kiểu gì cũng sẽ có khoá trùng ô (pigeonhole principle), bảng băm tốt cần xử lý gọn:</p>
+    <div class="k-menu" style="grid-template-columns:repeat(2,1fr);">
+      <div class="dish idea">
+        <div class="ic">🔗</div>
+        <h3>Separate Chaining</h3>
+        <p>Mỗi ô giữ <b>1 danh sách liên kết</b> (hoặc cây cân bằng khi danh sách quá dài). Chịu tải tốt kể cả khi rất nhiều khách dồn vào 1 ô.</p>
+      </div>
+      <div class="dish usecase">
+        <div class="ic">➡️</div>
+        <h3>Open Addressing</h3>
+        <p>Dò tìm ô trống <b>ngay trong mảng</b> (linear/quadratic probing). Dữ liệu nằm sát nhau → tận dụng CPU cache tốt hơn hẳn.</p>
+      </div>
+    </div>
+
+    <div class="k-map" style="margin-top:14px;">
+      <div class="k-chip"><span class="em">☕</span><div class="t"><b>Java HashMap</b>Separate chaining — nếu 1 ô chứa ≥8 phần tử <b>và</b> bảng ≥64 ô, tự chuyển danh sách đó thành Red-Black Tree (O(log n) thay vì O(n)).</div></div>
+      <div class="k-chip"><span class="em">🐍</span><div class="t"><b>Python dict</b>Open addressing — dò theo chuỗi <b>giả-ngẫu-nhiên</b> (không phải dò tuần tự đơn thuần) để giảm dồn cục thành từng đám.</div></div>
+    </div>
+
+    <div class="row" style="align-items:flex-start;gap:16px;margin-top:16px;">
+      <div class="card" style="flex:1;min-width:220px;">
+        <h3 style="font-family:'Baloo 2',cursive;font-size:15px;color:var(--indigo);margin-bottom:8px;">☕ Java HashMap — khi nào chuyển sang cây?</h3>
+        <svg id="javaTreeSvg" viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:260px;display:block;margin:0 auto;"></svg>
+        <div class="legend" id="javaTreeNarr" style="margin-top:8px;min-height:32px;"></div>
+        <div class="row" style="margin-top:8px;gap:6px;">
+          <button id="bJavaAdd">➕ Thêm khoá va chạm</button>
+          <button id="bJavaReset" class="ghost">↺ Reset</button>
+        </div>
+      </div>
+      <div class="card" style="flex:1;min-width:260px;">
+        <h3 style="font-family:'Baloo 2',cursive;font-size:15px;color:var(--indigo);margin-bottom:8px;">🐍 Python dò kiểu "giả-ngẫu-nhiên" so với dò tuyến tính</h3>
+        <p style="font-size:12.5px;margin:0 0 8px;">Không phải random thật — <b>CPython</b> tính ô tiếp theo bằng đúng 1 công thức cố định (trong <code>dictobject.c</code>), chỉ là nhìn rối hơn "+1" của dò tuyến tính:</p>
+        <div class="code-title" style="padding:0 0 4px;">mỗi lần ô đang xét đã có người, lặp lại:</div>
+        <div class="code" style="margin-bottom:10px;">
+          <div class="cl">perturb = perturb &gt;&gt; 5;               <span class="cm">// "trộn" thêm bit từ hash gốc</span></div>
+          <div class="cl">i = (5*i + perturb + 1) % M;      <span class="cm">// ô tiếp theo để thử</span></div>
+        </div>
+        <p style="font-size:12.5px;margin:0 0 10px;"><code>perturb</code> khởi đầu = <b>toàn bộ giá trị hash</b> của khoá (không chỉ phần dư lấy % M), rồi dịch phải 5 bit sau mỗi vòng. Vì <code>perturb</code> đổi liên tục nên chuỗi ô bị nhảy lung tung — nhưng <b>cùng 1 khoá luôn cho đúng cùng 1 chuỗi dò</b> (tất định, không phải ngẫu nhiên thật).</p>
+        <div class="row" style="align-items:flex-start;gap:12px;">
+          <div style="flex:1;min-width:110px;">
+            <div style="font-size:11px;font-weight:800;color:var(--lacquer);margin-bottom:4px;">➡️ Dò tuyến tính (i+1)</div>
+            <svg id="linearProbeSvg" viewBox="0 0 100 300" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:120px;display:block;"></svg>
+          </div>
+          <div style="flex:1;min-width:110px;">
+            <div style="font-size:11px;font-weight:800;color:#3B78C4;margin-bottom:4px;">🎲 Dò kiểu Python</div>
+            <svg id="pyProbeSvg" viewBox="0 0 100 300" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:120px;display:block;"></svg>
+          </div>
+        </div>
+        <div class="legend" id="pyProbeNarr" style="margin-top:8px;min-height:32px;"></div>
+        <div class="row" style="margin-top:8px;gap:6px;">
+          <button id="bPyProbeStep">➕ Chèn khoá tiếp theo (1/4)</button>
+          <button id="bPyProbeReset" class="ghost">↺ Reset</button>
+        </div>
       </div>
     </div>
   </section>
@@ -300,9 +435,167 @@ const L={hashSig:0, hashLoop:2, hashMod:3, putSig:6, putHash:7, putScan:8, putMa
 
 const M=8;
 let table = Array.from({length:M},()=>[]);
-let flashBucket=null, busy=false, lobbyName=null, hashBoardText=null;
+let flashBucket=null, busy=false;
 
 function hashFn(key){ let h=0; for(const ch of String(key)) h=(h*31+ch.charCodeAt(0))>>>0; return h%M; }
+
+/* ---- hàm băm TỆ vs TỐT — minh hoạ bằng hoán vị (anagram) ---- */
+function badHashFn(key){ let h=0; for(const ch of String(key)) h=(h+ch.charCodeAt(0))>>>0; return h%M; }
+function renderBadGoodDemo(){
+  const words=['eva','eav','vea','vae','ave','aev'];
+  const el=$('badGoodTable'); if(!el) return;
+  el.innerHTML='<tr><th>Chuỗi (hoán vị)</th><th style="color:var(--lacquer)">hash TỆ → ô</th><th style="color:var(--wasabi)">hash TỐT → ô</th></tr>';
+  words.forEach(w=>{
+    const b=badHashFn(w), g=hashFn(w);
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><code>"'+w+'"</code></td><td><b style="color:var(--lacquer)">Ô '+b+'</b></td><td><b style="color:var(--wasabi)">Ô '+g+'</b></td>';
+    el.appendChild(tr);
+  });
+  const bSet=new Set(words.map(badHashFn));
+  const gSet=new Set(words.map(hashFn));
+  const noteEl=$('badGoodNote');
+  if(noteEl) noteEl.innerHTML='⚠️ Hàm <b style="color:var(--lacquer)">TỆ</b>: cả '+words.length+' hoán vị đều rơi vào <b style="color:var(--lacquer)">chỉ '+bSet.size+' ô</b> — không phải xui, mà <b>CHẮC CHẮN</b> (tổng mã ký tự không đổi dù đảo thứ tự chữ cái, nên hàm dễ bị đoán trước — đúng kiểu lỗ hổng hash-flooding đã nói ở trên). Hàm <b style="color:var(--wasabi)">TỐT</b>: trải ra <b style="color:var(--wasabi)">'+gSet.size+' ô khác nhau</b> — phép nhân 31 mỗi bước khiến THỨ TỰ ký tự ảnh hưởng tới kết quả.';
+}
+
+/* ---- Java HashMap: mô phỏng treeify khi 1 bucket quá dài ---- */
+let javaTreeItems=[];
+const JAVA_TREEIFY_THRESHOLD=8;
+function drawJavaTree(){
+  const el=$('javaTreeSvg'); if(!el) return; el.innerHTML='';
+  const n=javaTreeItems.length;
+  if(n<JAVA_TREEIFY_THRESHOLD){
+    const boxX=10, boxY=85, boxW=40, boxH=30;
+    el.appendChild(SVG('rect',{x:boxX,y:boxY,width:boxW,height:boxH,rx:6,fill:'#14261C',stroke:'var(--green)','stroke-width':2}));
+    const idxT=SVG('text',{x:boxX+boxW/2,y:boxY+boxH/2+4,'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':800}); idxT.textContent='3'; el.appendChild(idxT);
+    const cy=boxY+boxH/2;
+    const startX=boxX+boxW, endX=248;
+    const r = n>=6 ? 9 : (n>=4 ? 10.5 : 12);
+    const pitch = n>0 ? Math.min(40, (endX-startX-r)/n) : 40;
+    const fontSize = r<11 ? 7 : 8;
+    let prevX=startX;
+    javaTreeItems.forEach((k,j)=>{
+      const cx=prevX+pitch;
+      el.appendChild(SVG('line',{x1:prevX,y1:cy,x2:cx-r,y2:cy,stroke:'#9FB0C0','stroke-width':2}));
+      const isNew=j===javaTreeItems.length-1;
+      const circ=SVG('circle',{cx,cy,r,fill:isNew?'#0A5A3A':'#1B2330',stroke:isNew?'#5FE0A0':'#39506b','stroke-width':2});
+      if(isNew) circ.setAttribute('class','mb-new');
+      el.appendChild(circ);
+      const t=SVG('text',{x:cx,y:cy+3,'text-anchor':'middle',fill:'#fff','font-size':fontSize}); t.textContent=k; el.appendChild(t);
+      prevX=cx;
+    });
+  } else {
+    const nodes=[
+      {x:130,y:20,label:javaTreeItems[3]||''},
+      {x:80,y:70,label:javaTreeItems[1]||''}, {x:180,y:70,label:javaTreeItems[5]||''},
+      {x:50,y:120,label:javaTreeItems[0]||''}, {x:110,y:120,label:javaTreeItems[2]||''},
+      {x:150,y:120,label:javaTreeItems[4]||''}, {x:210,y:120,label:javaTreeItems[6]||''},
+    ];
+    const edges=[[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]];
+    edges.forEach(([a,b])=>{
+      el.appendChild(SVG('line',{x1:nodes[a].x,y1:nodes[a].y,x2:nodes[b].x,y2:nodes[b].y,stroke:'#9FB0C0','stroke-width':2}));
+    });
+    nodes.forEach((nd,i)=>{
+      const circ=SVG('circle',{cx:nd.x,cy:nd.y,r:14,fill:'#0A5A3A',stroke:'#5FE0A0','stroke-width':2});
+      if(i===0) circ.setAttribute('class','mb-new');
+      el.appendChild(circ);
+      const t=SVG('text',{x:nd.x,y:nd.y+3,'text-anchor':'middle',fill:'#fff','font-size':8,'font-weight':700}); t.textContent=nd.label; el.appendChild(t);
+    });
+    const badge=SVG('text',{x:130,y:170,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'var(--lacquer)'}); badge.textContent='🌳 Red-Black Tree'; el.appendChild(badge);
+    const n8=javaTreeItems[7];
+    if(n8){
+      const t2=SVG('text',{x:130,y:186,'text-anchor':'middle','font-size':9,fill:'var(--soy-light)'}); t2.textContent='(+ '+n8+' …)'; el.appendChild(t2);
+    }
+  }
+}
+function javaTreeNoteText(){
+  const n=javaTreeItems.length;
+  if(n===0) return 'Bấm "Thêm khoá va chạm" để mô phỏng nhiều khoá cùng rơi vào 1 bucket.';
+  if(n<JAVA_TREEIFY_THRESHOLD) return 'Bucket này đang có <b>'+n+'/'+JAVA_TREEIFY_THRESHOLD+'</b> phần tử — vẫn là danh sách liên kết (chaining) bình thường, O(n).';
+  return '🌳 Đủ <b>'+JAVA_TREEIFY_THRESHOLD+' phần tử</b> (và bảng thật ≥64 ô) → Java tự động <b>treeify</b>: chuyển sang Red-Black Tree, tra cứu còn <b>O(log n)</b> thay vì O(n).';
+}
+function resetJavaTree(){
+  javaTreeItems=[];
+  drawJavaTree();
+  $('javaTreeNarr').innerHTML=javaTreeNoteText();
+}
+function javaTreeAdd(){
+  if(javaTreeItems.length>=10) return;
+  javaTreeItems.push('K'+(javaTreeItems.length+1));
+  drawJavaTree();
+  $('javaTreeNarr').innerHTML=javaTreeNoteText();
+}
+$('bJavaAdd').onclick=javaTreeAdd;
+$('bJavaReset').onclick=resetJavaTree;
+
+/* ---- Python dò kiểu perturbation (công thức CPython thật) vs dò tuyến tính ---- */
+const PROBE_KEYS=['eav','vea','vae','aev'];
+let linProbeTable, pyProbeTable, probeStepIdx=0;
+function rawHashFn(key){ let h=0; for(const ch of String(key)) h=(h*31+ch.charCodeAt(0))>>>0; return h; }
+function linearProbeIdx(startIdx, tbl){
+  let i=startIdx;
+  while(tbl[i]!=null) i=(i+1)%M;
+  return i;
+}
+function pyProbeIdx(fullHash, tbl){
+  let perturb=fullHash>>>0;
+  let i=fullHash & (M-1);
+  const trace=[];
+  while(tbl[i]!=null){
+    const from=i;
+    perturb = perturb>>>5;
+    i = (i*5+perturb+1) & (M-1);
+    trace.push({from, perturb, to:i});
+  }
+  return {idx:i, trace};
+}
+function drawProbeBoard(svgId, tbl, landIdx){
+  const el=$(svgId); if(!el) return; el.innerHTML='';
+  const boxX=6, boxW=32, rowH=34;
+  for(let i=0;i<M;i++){
+    const y=6+i*rowH, cy=y+(rowH-6)/2;
+    const isLand=(i===landIdx);
+    const rect=SVG('rect',{x:boxX,y,width:boxW,height:rowH-6,rx:6,fill:isLand?'#0A5A3A':'#14261C',stroke:isLand?'#5FE0A0':'var(--green)','stroke-width':2});
+    if(isLand) rect.setAttribute('class','mb-new');
+    el.appendChild(rect);
+    const idxT=SVG('text',{x:boxX+boxW/2,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':10,'font-weight':800}); idxT.textContent=i; el.appendChild(idxT);
+    if(tbl[i]!=null){
+      const t=SVG('text',{x:boxX+boxW+8,y:cy+4,'font-size':9,fill:'var(--soy)','font-weight':700}); t.textContent=tbl[i]; el.appendChild(t);
+    }
+  }
+}
+function probeBtnLabel(){
+  return probeStepIdx>=PROBE_KEYS.length ? '↺ Xong! Bấm để làm lại' : '➕ Chèn khoá tiếp theo ('+(probeStepIdx+1)+'/'+PROBE_KEYS.length+')';
+}
+function resetProbeDemo(){
+  linProbeTable=Array(M).fill(null);
+  pyProbeTable=Array(M).fill(null);
+  probeStepIdx=0;
+  drawProbeBoard('linearProbeSvg', linProbeTable, null);
+  drawProbeBoard('pyProbeSvg', pyProbeTable, null);
+  $('pyProbeNarr').innerHTML='4 khoá thật ("eav","vea","vae","aev") đều băm ra <b>cùng 1 bucket</b> — bấm để chèn từng khoá, xem 2 kiểu dò khác nhau thế nào.';
+  $('bPyProbeStep').textContent=probeBtnLabel();
+}
+function probeStep(){
+  if(probeStepIdx>=PROBE_KEYS.length){ resetProbeDemo(); return; }
+  const key=PROBE_KEYS[probeStepIdx];
+  const h=rawHashFn(key);
+  const start=h & (M-1);
+  const li=linearProbeIdx(start, linProbeTable); linProbeTable[li]=key;
+  const py=pyProbeIdx(h, pyProbeTable); const pi=py.idx; pyProbeTable[pi]=key;
+  drawProbeBoard('linearProbeSvg', linProbeTable, li);
+  drawProbeBoard('pyProbeSvg', pyProbeTable, pi);
+  const head='<b>"'+key+'"</b> băm ra ô <b>'+start+'</b> (perturb ban đầu = <code>0x'+h.toString(16)+'</code>) — ô này đã có người, phải dò tiếp:';
+  const pySteps = py.trace.map((t,k)=>
+    '&nbsp;&nbsp;bước '+(k+1)+': perturb &gt;&gt;&gt; 5 = <code>0x'+t.perturb.toString(16)+'</code> → i = (5×'+t.from+' + '+t.perturb+' + 1) % '+M+' = <b style="color:#3B78C4">'+t.to+'</b>'+(t.to===pi?' ✅ trống, nhận!':' → vẫn có người, lặp lại')
+  ).join('<br>');
+  $('pyProbeNarr').innerHTML = py.trace.length===0
+    ? '<b>"'+key+'"</b> băm ra ô '+start+' — ô trống ngay, cả 2 kiểu dò đều nhận luôn tại ô <b>'+start+'</b> (chưa cần công thức nào).'
+    : head+'<br>'+pySteps+'<br><br>So sánh: dò tuyến tính chỉ +1 mỗi bước → dừng ở ô <b style="color:var(--lacquer)">'+li+'</b>. Dò kiểu Python nhảy xa hơn nhờ <code>perturb</code> → dừng ở ô <b style="color:#3B78C4">'+pi+'</b>.';
+  probeStepIdx++;
+  $('bPyProbeStep').textContent=probeBtnLabel();
+}
+$('bPyProbeStep').onclick=probeStep;
+$('bPyProbeReset').onclick=resetProbeDemo;
 
 function drawTech(){
   const el=$('svg'); if(!el) return; el.innerHTML='';
@@ -311,6 +604,7 @@ function drawTech(){
     const y = startY + i*rowH;
     const isFlash = (i===flashBucket);
     const rect=SVG('rect',{x:boxX,y,width:boxW,height:rowH-8,rx:8, fill: isFlash?'#0A5A3A':'#14261C', stroke: isFlash?'#5FE0A0':'var(--green)','stroke-width':2});
+    if(isFlash) rect.setAttribute('class','mb-flash');
     el.appendChild(rect);
     const idxT=SVG('text',{x:boxX+boxW/2,y:y+(rowH-8)/2+4,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':800}); idxT.textContent=i;
     el.appendChild(idxT);
@@ -320,240 +614,378 @@ function drawTech(){
       const cx = prevX + 42;
       el.appendChild(SVG('line',{x1:prevX,y1:cy,x2:cx-17,y2:cy,stroke:'#9FB0C0','stroke-width':2}));
       const isNew = isFlash && j===table[i].length-1;
-      el.appendChild(SVG('circle',{cx,cy,r:17, fill: isNew?'#0A5A3A':'#1B2330', stroke: isNew?'#5FE0A0':'#39506b','stroke-width':2}));
+      const circ=SVG('circle',{cx,cy,r:17, fill: isNew?'#0A5A3A':'#1B2330', stroke: isNew?'#5FE0A0':'#39506b','stroke-width':2});
+      if(isNew) circ.setAttribute('class','mb-new');
+      el.appendChild(circ);
       const t=SVG('text',{x:cx,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':10,'font-weight':700}); t.textContent=pair.key;
+      if(isNew) t.setAttribute('class','mb-new');
       el.appendChild(t);
       prevX = cx+17;
     });
   }
 }
-function drawHotel(){
-  const el=$('svgTheme'); if(!el) return; el.innerHTML='';
-  const doorW=58, doorH=90, gap=10, startX=20, y=110;
-  for(let i=0;i<M;i++){
-    const x = startX + i*(doorW+gap);
-    const isFlash = (i===flashBucket);
-    const g=SVG('g',{transform:'translate('+x+','+y+')'});
-    g.appendChild(SVG('rect',{width:doorW,height:doorH,rx:10, fill: isFlash?'#FFF1CE':'#FBF0DD', stroke: isFlash?'var(--accent)':'#D8B26A','stroke-width':isFlash?3:2}));
-    g.appendChild(SVG('circle',{cx:doorW-10,cy:doorH/2,r:3,fill:'#8a6a2a'}));
-    const numT=SVG('text',{x:doorW/2,y:-8,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'#7A5312'}); numT.textContent='Phòng '+i;
-    g.appendChild(numT);
-    const guests = table[i];
-    if(guests.length===1){
-      const t=SVG('text',{x:doorW/2,y:doorH/2+2,'text-anchor':'middle','font-size':24}); t.textContent='🧍'; g.appendChild(t);
-      const nm=SVG('text',{x:doorW/2,y:doorH-8,'text-anchor':'middle','font-size':9,'font-weight':700,fill:'#7A5312'}); nm.textContent=guests[0].key; g.appendChild(nm);
-    } else if(guests.length>=2){
-      const t1=SVG('text',{x:doorW/2-13,y:doorH/2,'text-anchor':'middle','font-size':19}); t1.textContent='🧍'; g.appendChild(t1);
-      const t2=SVG('text',{x:doorW/2+13,y:doorH/2,'text-anchor':'middle','font-size':19}); t2.textContent='🧍'; g.appendChild(t2);
-      const nm=SVG('text',{x:doorW/2,y:doorH-6,'text-anchor':'middle','font-size':8,'font-weight':700,fill:'#7A5312'}); nm.textContent=guests.map(p=>p.key).join('+'); g.appendChild(nm);
-    }
-    el.appendChild(g);
+function draw(){ drawTech(); }
+function lock(b){ busy=b; CL.lock(['bMinh','bAn','bMai','bTableInsert'], b); $('tableInput').disabled=b; }
+function resetState(){ table=Array.from({length:M},()=>[]); flashBucket=null; draw(); hl(); }
+
+async function typeNarr(html){
+  const el=$('narr'); const el2=$('tableCaption'); if(!el) return;
+  const visibleLen = html.replace(/<[^>]*>/g,'').length;
+  const speed = Math.max(5, Math.min(18, Math.round(800/Math.max(visibleLen,1))));
+  el.classList.add('typing'); if(el2) el2.classList.add('typing');
+  el.innerHTML=''; if(el2) el2.innerHTML='';
+  let buf='', i=0;
+  while(i<html.length){
+    if(html[i]==='<'){ const end=html.indexOf('>',i); buf+=html.slice(i,end+1); i=end+1; }
+    else { buf+=html[i]; i++; el.innerHTML=buf; if(el2) el2.innerHTML=buf; await nap(speed); }
   }
-  if(lobbyName){
-    const t=SVG('text',{x:280,y:30,'text-anchor':'middle','font-size':26}); t.textContent='🧑'; el.appendChild(t);
-    const nm=SVG('text',{x:280,y:46,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'var(--accent)'}); nm.textContent=lobbyName; el.appendChild(nm);
-    if(hashBoardText){
-      el.appendChild(SVG('rect',{x:210,y:52,width:140,height:26,rx:13,fill:'#FFF8E7',stroke:'var(--accent)','stroke-width':1.5}));
-      const bt=SVG('text',{x:280,y:69,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#7A5312'});
-      bt.textContent = hashBoardText;
-      el.appendChild(bt);
-    }
-  }
+  el.classList.remove('typing'); if(el2) el2.classList.remove('typing');
 }
-function draw(){ drawHotel(); drawTech(); }
-function lock(b){ busy=b; CL.lock(['bPlay','bReset','bMinh','bAn','bMai'], b); }
-function lockStep(b){ CL.lock(['bStep'], b); }
-function resetState(){ table=Array.from({length:M},()=>[]); flashBucket=null; lobbyName=null; hashBoardText=null; draw(); hl(); }
+function logCollision(key, existingKey, idx){
+  const el=$('collideLog'); if(!el) return;
+  const entry=document.createElement('div');
+  entry.className='collide-entry';
+  entry.innerHTML='⚠️ <b>"'+key+'"</b> va chạm với <b>"'+existingKey+'"</b> tại ô <b>'+idx+'</b> → nối vào chain.';
+  el.appendChild(entry);
+}
 
 async function doInsert(key){
   const idx = hashFn(key);
-  lobbyName=key; hashBoardText='🔑 Phòng '+idx; draw();
-  narrate('🧑 Khách <b>"'+key+'"</b> bước vào, tay đã cầm sẵn <b>chìa khoá phòng '+idx+'</b> — tên nào cũng ra đúng 1 chìa, đi thẳng tới đó, khỏi cần hỏi lễ tân.'); await nap(950);
+  await typeNarr('🔑 <code>hash("'+key+'")</code> → <b>bucket '+idx+'</b> — hàm băm tính thẳng ra chỉ số, không cần dò tuần tự.'); await nap(300);
   hl(L.hashSig); await nap(200);
   hl(L.hashMod); await nap(200);
   hl(L.putSig); await nap(300);
   hl(L.putScan);
   const bucket = table[idx];
   if(bucket.length>0){
-    narrate('😮 Phòng '+idx+' đã có khách <b>"'+bucket[0].key+'"</b> rồi! Không phải xui — với đủ khách, trùng phòng là <b style="color:var(--amber)">CHẮC CHẮN</b> xảy ra (nghịch lý ngày sinh). Khách sạn xếp họ ở <b>CHUNG phòng</b>.'); await nap(1700);
+    logCollision(key, bucket[0].key, idx);
+    await typeNarr('⚠️ Bucket '+idx+' đã có <b>"'+bucket[0].key+'"</b> — <b style="color:var(--amber)">VA CHẠM (collision)!</b> Không phải hiếm: với đủ khoá, va chạm là <b style="color:var(--amber)">CHẮC CHẮN</b> xảy ra (nghịch lý ngày sinh). Có <b>2 cách xử lý</b>: <b>Chaining</b> (nối thêm vào danh sách tại bucket — cách bảng này đang dùng) hoặc <b>Open Addressing</b> (dò sang ô trống kế tiếp). Xem cả 2 cách hoạt động ở khung "Chaining vs Open Addressing" ngay bên dưới ↓'); await nap(500);
   } else {
-    narrate('🚪 "'+key+'" đi <b>THẲNG</b> tới phòng '+idx+' — không dò qua phòng nào khác, O(1).'); await nap(900);
+    await typeNarr('<b>"'+key+'"</b> → thẳng vào bucket '+idx+' — không phải dò qua ô nào khác, <b>O(1)</b>.'); await nap(300);
   }
   hl(L.putPush);
-  lobbyName=null; hashBoardText=null;
   bucket.push({key}); flashBucket=idx; draw();
-  narrate('✅ "'+key+'" đã nhận phòng '+idx+'.'); await nap(850);
+  await typeNarr('✅ <b>"'+key+'"</b> đã được chèn vào bucket '+idx+'.'); await nap(300);
   flashBucket=null; draw(); hl();
 }
-
-/* ---- one shared script: automatic play or one-step-at-a-time ---- */
-const SCRIPT=[
-  {op:'insert', key:'Minh'},
-  {op:'insert', key:'An'},
-  {narrate:'👀 Một vị khách nữa sắp tới — tên hoàn toàn khác, nhưng để xem phòng nào…', pause:1000},
-  {op:'insert', key:'Mai'},
-  {narrate:'Hết lượt check-in hôm nay — mỗi khách đều được xếp phòng ngay lập tức, kể cả khi trùng phòng.', pause:0},
-];
-async function runBeat(beat){
-  if(beat.op==='insert') await doInsert(beat.key);
-  else narrate(beat.narrate);
-}
-
-$('bReset').onclick=()=>{
-  if(busy)return;
-  stepMode=false; stepIdx=0; $('bStep').textContent='⏭ Từng bước'; $('bPlay').disabled=false;
-  resetState(); narrate('Đã reset. Bấm ▶ Tự động hoặc ⏭ Từng bước.');
-};
-
-$('bPlay').onclick=async()=>{
-  if(busy)return; lock(true); resetState();
-  for(const beat of SCRIPT){ await runBeat(beat); if(beat.pause) await nap(beat.pause); }
-  lock(false);
-};
-
-let stepMode=false, stepIdx=0;
-$('bStep').onclick=async()=>{
-  if(busy)return;
-  if(!stepMode){ stepMode=true; stepIdx=0; resetState(); $('bPlay').disabled=true; }
-  if(stepIdx>=SCRIPT.length){
-    stepMode=false; stepIdx=0; $('bPlay').disabled=false; $('bStep').textContent='⏭ Từng bước';
-    return;
-  }
-  lockStep(true);
-  await runBeat(SCRIPT[stepIdx]);
-  stepIdx++;
-  lockStep(false);
-  $('bStep').textContent = stepIdx>=SCRIPT.length ? '↺ Xong! Bấm để bắt đầu lại' : '⏭ Bước tiếp theo ('+stepIdx+'/'+SCRIPT.length+')';
-};
 
 $('bMinh').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Minh'); lock(false); };
 $('bAn').onclick=async()=>{ if(busy)return; lock(true); await doInsert('An'); lock(false); };
 $('bMai').onclick=async()=>{ if(busy)return; lock(true); await doInsert('Mai'); lock(false); };
+$('bTableInsert').onclick=async()=>{
+  if(busy)return;
+  const val=$('tableInput').value.trim();
+  if(!val)return;
+  lock(true); await doInsert(val); lock(false);
+  $('tableInput').value='';
+};
+$('tableInput').addEventListener('keydown', e=>{ if(e.key==='Enter') $('bTableInsert').click(); });
 
 /* ---- hàm băm hoạt động thế nào, đúng từng bước ---- */
-let hashDemoBusy=false;
 function traceRow(el, html, isFinal){
   const d=document.createElement('div');
   d.className='step'+(isFinal?' final':'');
   d.innerHTML=html;
   el.appendChild(d);
 }
-async function runHashDemo(){
-  if(hashDemoBusy) return;
-  hashDemoBusy=true; CL.lock(['bHashDemo'],true);
-  const key = $('hashInput').value.trim() || 'Mai';
-  const el = $('hashTrace'); el.innerHTML='';
-  traceRow(el, 'h = <b>0</b> (bắt đầu, trước khi đọc ký tự nào)');
-  await nap(400);
-  let h=0;
-  for(const ch of String(key)){
-    const code = ch.charCodeAt(0);
-    const newH = (h*31 + code) >>> 0;
-    traceRow(el, '\''+ch+'\' → mã ký tự <b>'+code+'</b> → h = '+h+'×31 + '+code+' = <b>'+newH+'</b>');
-    h = newH;
-    await nap(550);
+
+/* ---- ngoài đời bạn tìm phòng khách sạn thế nào — một toà nhà thật, tầng trước phòng sau ---- */
+const RK_FLOORS=6, RK_ROOMS=6, RK_TARGET_FLOOR=3, RK_TARGET_ROOM=5;
+const RK_CAPTIONS=[
+  '🔑 Bạn cầm chìa khoá, nhìn số phòng in trên đó: <b>305</b>. Toà nhà 6 tầng, mỗi tầng 6 phòng — biết đi đâu bây giờ?',
+  '1️⃣ Chữ số <b>ĐẦU</b> (hàng trăm) = <b>TẦNG</b> → <b>3</b>. Thang máy đưa bạn thẳng lên tầng 3 — chưa cần nhìn số phòng vội.',
+  '2️⃣ Hai chữ số <b>CÒN LẠI</b> = <b>SỐ PHÒNG trên tầng đó</b> → <b>05</b>. Ra khỏi thang máy, bạn chỉ dò trong đúng tầng 3 — 5 tầng kia không liên quan.',
+  '🚪 Tới đúng <b>Phòng 305</b>! Chỉ 2 bước — không cần gõ từng cửa của cả 36 phòng trong toà nhà.',
+  '💡 <b>Tên của khách</b> cũng hoạt động y như số phòng vậy: lễ tân chỉ cần nhìn tên là biết ngay đi tầng nào, phòng nào — không cần hỏi, không cần dò từng cửa. Nếu hai khách trùng tên ra cùng một phòng, đơn giản là họ <b>ở chung</b>.',
+];
+let rkCur=0;
+function drawRoomKeyBuilding(step){
+  const el=$('roomKeySvg'); el.innerHTML='';
+  const groundY=336, floorH=46, bx=130, bw=340, shaftX=78, shaftW=36;
+  const showFloor = step>=1, showRoom = step>=2, arrived = step>=3;
+  const topOfBuilding = groundY - RK_FLOORS*floorH;
+
+  el.appendChild(SVG('polygon',{points:(bx-16)+','+topOfBuilding+' '+(bx+bw/2)+','+(topOfBuilding-28)+' '+(bx+bw+16)+','+topOfBuilding, fill:'#7A5312'}));
+  el.appendChild(SVG('rect',{x:bx,y:topOfBuilding,width:bw,height:RK_FLOORS*floorH,fill:'#FBF0DD',stroke:'#D8B26A','stroke-width':2}));
+  el.appendChild(SVG('rect',{x:shaftX,y:topOfBuilding-6,width:shaftW,height:RK_FLOORS*floorH+6+30,rx:4,fill:'#EFE3C7',stroke:'#D8B26A','stroke-width':1.5}));
+  const shaftLbl=SVG('text',{x:shaftX+shaftW/2,y:topOfBuilding-12,'text-anchor':'middle','font-size':16}); shaftLbl.textContent='🛗'; el.appendChild(shaftLbl);
+
+  const doorGap=7, doorW=(bw-40-(RK_ROOMS-1)*doorGap)/RK_ROOMS, doorH=floorH-16;
+  for(let f=1; f<=RK_FLOORS; f++){
+    const topY = groundY - f*floorH, botY = groundY - (f-1)*floorH;
+    const isTargetFloor = f===RK_TARGET_FLOOR, hiFloor = isTargetFloor && showFloor;
+    if(f>1) el.appendChild(SVG('line',{x1:bx,y1:topY,x2:bx+bw,y2:topY,stroke:'#D8B26A','stroke-width':1}));
+    if(hiFloor) el.appendChild(SVG('rect',{x:bx+1,y:topY+1,width:bw-2,height:floorH-2,fill:'#FFE9B0',opacity:.55}));
+    const lbl=SVG('text',{x:bx-16,y:(topY+botY)/2+4,'text-anchor':'end','font-size':11,'font-weight':800,fill: hiFloor?'var(--accent)':'#B99A5C'});
+    lbl.textContent='Tầng '+f; el.appendChild(lbl);
+    for(let r=1;r<=RK_ROOMS;r++){
+      const dx = bx+20+(r-1)*(doorW+doorGap), dy = topY+8;
+      const isTargetRoom = isTargetFloor && r===RK_TARGET_ROOM;
+      const roomArrived = isTargetRoom && arrived, roomHi = isTargetRoom && showRoom;
+      el.appendChild(SVG('rect',{x:dx,y:dy,width:doorW,height:doorH,rx:4,
+        fill: roomArrived?'#1E7A46':(roomHi?'#FFD98A':'#fff'),
+        stroke: roomHi?'var(--accent)':'#D8B26A','stroke-width': roomHi?2.5:1}));
+      if(isTargetRoom){
+        const numT=SVG('text',{x:dx+doorW/2,y:dy+doorH/2+4,'text-anchor':'middle','font-size':10,'font-weight':800, fill: roomArrived?'#fff':'#7A5312'});
+        numT.textContent = roomArrived? '✓' : '05';
+        el.appendChild(numT);
+      }
+    }
   }
-  const idx = h % M;
-  traceRow(el, 'h % M = '+h+' % '+M+' = <b style="color:var(--lacquer)">'+idx+'</b> → <b>Phòng '+idx+'</b>', true);
-  CL.lock(['bHashDemo'],false); hashDemoBusy=false;
+  const carY = showFloor ? (groundY-(RK_TARGET_FLOOR-1)*floorH-floorH+8) : (groundY+2);
+  el.appendChild(SVG('rect',{x:shaftX+4,y:carY,width:shaftW-8,height:26,rx:3,fill:'#7A5312'}));
+  const carIcon=SVG('text',{x:shaftX+shaftW/2,y:carY+18,'text-anchor':'middle','font-size':14}); carIcon.textContent='🧑'; el.appendChild(carIcon);
+
+  const keyBadge=SVG('text',{x:bx+bw/2,y:groundY+26,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#7A5312'});
+  keyBadge.textContent='🔑 Phòng 305'; el.appendChild(keyBadge);
+
+  $('roomKeyNarr').innerHTML = RK_CAPTIONS[step];
+  $('rkStepCnt').textContent = 'bước '+(step+1)+' / '+RK_CAPTIONS.length;
 }
-$('bHashDemo').onclick = runHashDemo;
-$('hashInput').addEventListener('keydown', e=>{ if(e.key==='Enter') runHashDemo(); });
+function showRoomKeyStep(i){
+  rkCur = Math.max(0, Math.min(RK_CAPTIONS.length-1, i));
+  drawRoomKeyBuilding(rkCur);
+}
+$('rkPrev').onclick=()=>showRoomKeyStep(rkCur-1);
+$('rkNext').onclick=()=>showRoomKeyStep(rkCur+1);
+$('rkReset').onclick=()=>showRoomKeyStep(0);
+showRoomKeyStep(0);
 
 /* ---- chaining vs open addressing, minh hoạ trực tiếp trên cùng 1 lượt chèn ---- */
 const COLLIDE_KEYS=['Minh','An','Mai'];
-let chainDemoTable, openDemoTable, collideBusy=false;
-function renderMiniBuckets(elId, tbl, flashIdx, chipClass){
-  const el=$(elId); if(!el) return; el.innerHTML='';
-  const wrap=document.createElement('div'); wrap.className='mini-strip';
-  for(let i=0;i<M;i++){
-    const cell=document.createElement('div'); cell.className='mini-cell'+(i===flashIdx?' flash':'');
-    const idxEl=document.createElement('span'); idxEl.className='midx'; idxEl.textContent=i;
-    cell.appendChild(idxEl);
-    const items = Array.isArray(tbl[i]) ? tbl[i] : (tbl[i]!=null ? [tbl[i]] : []);
-    items.forEach(k=>{ const c=document.createElement('span'); c.className='mchip'+(chipClass?(' '+chipClass):''); c.textContent=k; cell.appendChild(c); });
-    wrap.appendChild(cell);
-  }
-  el.appendChild(wrap);
-}
-let collideStepIdx=0;
-function collideBtnLabel(){
-  return collideStepIdx>=COLLIDE_KEYS.length
-    ? '↺ Xong! Bấm để làm lại'
-    : '⏭ Chèn "'+COLLIDE_KEYS[collideStepIdx]+'" ('+(collideStepIdx+1)+'/'+COLLIDE_KEYS.length+')';
-}
-function resetCollideDemo(){
-  chainDemoTable=Array.from({length:M},()=>[]);
-  openDemoTable=Array(M).fill(null);
-  collideStepIdx=0;
-  renderMiniBuckets('bucketsChain', chainDemoTable, null);
-  renderMiniBuckets('bucketsOpen', openDemoTable, null, 'blue');
-  $('collideNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm nút để chèn từng khách, xem 2 cách xử lý.';
-  $('bCollideDemo').textContent=collideBtnLabel();
-}
-function collideStep(){
-  if(collideBusy) return;
-  if(collideStepIdx>=COLLIDE_KEYS.length){ resetCollideDemo(); return; }
-  const key = COLLIDE_KEYS[collideStepIdx];
-  const idx = hashFn(key);
-  chainDemoTable[idx].push(key);
-  renderMiniBuckets('bucketsChain', chainDemoTable, idx);
-  let oidx=idx, probes=0;
-  while(openDemoTable[oidx]!==null){ oidx=(oidx+1)%M; probes++; }
-  openDemoTable[oidx]=key;
-  renderMiniBuckets('bucketsOpen', openDemoTable, oidx, 'blue');
-  if(probes===0){
-    $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trống).';
-  } else {
-    $('collideNarr').innerHTML='<b>'+key+'</b> → ô '+idx+' (trùng!) · Chaining: ở lại ô '+idx+' · Open addressing: dò tới ô <b>'+oidx+'</b> ('+probes+' bước)';
-  }
-  collideStepIdx++;
-  $('bCollideDemo').textContent=collideBtnLabel();
-}
-$('bCollideDemo').onclick = collideStep;
-$('bCollideReset').onclick = ()=>{ if(collideBusy) return; resetCollideDemo(); };
+let chainDemoTable, openDemoTable;
+const MB_ROWH=34, MB_BOXX=6, MB_BOXW=32;
 
-/* ---- SipHash vs hàm băm kiểu Java, minh hoạ trực tiếp ---- */
-let sipSeed = Math.floor(Math.random()*0xFFFFFFFF);
-function sipMixStep(ch, v0, v1){
-  v0=(v0+ch.charCodeAt(0))>>>0;
-  v0=((v0<<13)|(v0>>>19))>>>0;
-  v1^=v0; v1=((v1<<7)|(v1>>>25))>>>0;
-  v0^=v1;
-  return {v0, v1};
+function drawMiniChain(landIdx){
+  const el=$('bucketsChain'); el.innerHTML='';
+  for(let i=0;i<M;i++){
+    const y=6+i*MB_ROWH, cy=y+(MB_ROWH-6)/2;
+    const isFlash=(i===landIdx);
+    el.appendChild(SVG('rect',{x:MB_BOXX,y,width:MB_BOXW,height:MB_ROWH-6,rx:6,fill:isFlash?'#0A5A3A':'#14261C',stroke:isFlash?'#5FE0A0':'var(--green)','stroke-width':2}));
+    const idxT=SVG('text',{x:MB_BOXX+MB_BOXW/2,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':800}); idxT.textContent=i; el.appendChild(idxT);
+    let prevX=MB_BOXX+MB_BOXW;
+    chainDemoTable[i].forEach((k,j)=>{
+      const cx=prevX+30, r=13;
+      el.appendChild(SVG('line',{x1:prevX,y1:cy,x2:cx-r,y2:cy,stroke:'#9FB0C0','stroke-width':2}));
+      const isNew=isFlash && j===chainDemoTable[i].length-1;
+      const circ=SVG('circle',{cx,cy,r,fill:isNew?'#0A5A3A':'#1B2330',stroke:isNew?'#5FE0A0':'#39506b','stroke-width':2});
+      if(isNew) circ.setAttribute('class','mb-new');
+      el.appendChild(circ);
+      const t=SVG('text',{x:cx,y:cy+3,'text-anchor':'middle',fill:'#fff','font-size':8.5,'font-weight':700}); t.textContent=k; el.appendChild(t);
+      prevX=cx+r;
+    });
+  }
 }
-let sipDemoBusy=false;
-async function runSipDemo(){
-  if(sipDemoBusy) return;
-  sipDemoBusy=true; CL.lock(['bSipDemo','bReseed'],true);
-  const key = $('sipInput').value.trim() || 'Mai';
-  const el = $('sipTrace'); el.innerHTML='';
-  const cap=document.createElement('div');
-  cap.style.cssText='font-size:11.5px;color:var(--soy-light);margin-bottom:6px;';
-  cap.innerHTML='Seed hiện tại: <b>'+sipSeed+'</b> — mỗi ký tự làm 2 hàm rẽ hướng khác nhau.';
-  el.appendChild(cap);
-  const table=document.createElement('table'); table.className='summary';
-  table.innerHTML='<tr><th>Ký tự</th><th style="color:var(--green)">Java (h)</th><th style="color:#3B78C4">SipHash (mix)</th></tr>';
-  el.appendChild(table);
-  let h=0, v0=(sipSeed^0x736f6d65)>>>0, v1=(sipSeed^0x646f7261)>>>0;
+function drawMiniOpen(landIdx, checkIdx){
+  const el=$('bucketsOpen'); el.innerHTML='';
+  const slotX=44, slotW=150;
+  for(let i=0;i<M;i++){
+    const y=6+i*MB_ROWH, cy=y+(MB_ROWH-6)/2;
+    const isLand=(i===landIdx), isCheck=(i===checkIdx);
+    el.appendChild(SVG('rect',{x:MB_BOXX,y,width:MB_BOXW,height:MB_ROWH-6,rx:6,fill:isLand?'#0A5A3A':'#14261C',stroke:isLand?'#5FE0A0':'var(--green)','stroke-width':2}));
+    const idxT=SVG('text',{x:MB_BOXX+MB_BOXW/2,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':800}); idxT.textContent=i; el.appendChild(idxT);
+    const occ=openDemoTable[i];
+    const slot=SVG('rect',{x:slotX,y,width:slotW,height:MB_ROWH-6,rx:6,
+      fill: isCheck?'#3A2A0A':(occ?'#1B2330':'#0E1712'),
+      stroke: isCheck?'var(--gold)':(occ?'#39506b':'#25352c'),'stroke-width':isCheck?2.5:1.5});
+    if(isLand) slot.setAttribute('class','mb-new');
+    el.appendChild(slot);
+    if(occ){
+      const t=SVG('text',{x:slotX+slotW/2,y:cy+4,'text-anchor':'middle',fill:'#fff','font-size':10,'font-weight':700}); t.textContent=occ; el.appendChild(t);
+    } else if(isCheck){
+      const t=SVG('text',{x:slotX+slotW/2,y:cy+4,'text-anchor':'middle',fill:'var(--gold)','font-size':9,'font-weight':700}); t.textContent='đang dò…'; el.appendChild(t);
+    }
+  }
+}
+function collideBtnLabel(idx){
+  return idx>=COLLIDE_KEYS.length
+    ? '↺ Xong! Bấm để làm lại'
+    : '⏭ Chèn "'+COLLIDE_KEYS[idx]+'" ('+(idx+1)+'/'+COLLIDE_KEYS.length+')';
+}
+
+/* ---- Chaining: bước độc lập, có hoạt ảnh ---- */
+let chainStepIdx=0, chainAnimBusy=false;
+function resetChainDemo(){
+  chainDemoTable=Array.from({length:M},()=>[]);
+  chainStepIdx=0;
+  drawMiniChain(null);
+  $('chainNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm nút để chèn từng khách, xem chaining xử lý va chạm.';
+  $('bChainStep').textContent=collideBtnLabel(chainStepIdx);
+}
+async function chainStep(){
+  if(chainAnimBusy) return;
+  if(chainStepIdx>=COLLIDE_KEYS.length){ resetChainDemo(); return; }
+  chainAnimBusy=true; CL.lock(['bChainStep','bChainReset'],true);
+  const key = COLLIDE_KEYS[chainStepIdx];
+  const idx = hashFn(key);
+  drawMiniChain(idx);
+  $('chainNarr').innerHTML='🔑 "'+key+'" băm ra ô <b>'+idx+'</b> — đi thẳng tới đó…';
+  await nap(550);
+  const collided = chainDemoTable[idx].length>0;
+  chainDemoTable[idx].push(key);
+  drawMiniChain(idx);
+  $('chainNarr').innerHTML = collided
+    ? '<b>'+key+'</b> → ô '+idx+' (trùng!) → nối thêm vào danh sách tại đúng ô '+idx+'.'
+    : '<b>'+key+'</b> → ô '+idx+' (trống).';
+  chainStepIdx++;
+  $('bChainStep').textContent=collideBtnLabel(chainStepIdx);
+  chainAnimBusy=false; CL.lock(['bChainStep','bChainReset'],false);
+}
+$('bChainStep').onclick = chainStep;
+$('bChainReset').onclick = ()=>{ if(chainAnimBusy) return; resetChainDemo(); };
+
+/* ---- Open Addressing: bước độc lập, hoạt ảnh dò từng ô ---- */
+let openStepIdx=0, openAnimBusy=false;
+function resetOpenDemo(){
+  openDemoTable=Array(M).fill(null);
+  openStepIdx=0;
+  drawMiniOpen(null,null);
+  $('openNarr').innerHTML='An và Mai cùng băm ra 1 ô — bấm nút để chèn từng khách, xem open addressing xử lý va chạm.';
+  $('bOpenStep').textContent=collideBtnLabel(openStepIdx);
+}
+async function openStep(){
+  if(openAnimBusy) return;
+  if(openStepIdx>=COLLIDE_KEYS.length){ resetOpenDemo(); return; }
+  openAnimBusy=true; CL.lock(['bOpenStep','bOpenReset'],true);
+  const key = COLLIDE_KEYS[openStepIdx];
+  const idx = hashFn(key);
+  let oidx=idx, probes=0;
+  drawMiniOpen(null, oidx);
+  $('openNarr').innerHTML='🔑 "'+key+'" băm ra ô <b>'+idx+'</b> — kiểm tra ô này trước…';
+  await nap(550);
+  while(openDemoTable[oidx]!==null){
+    const next=(oidx+1)%M;
+    drawMiniOpen(null, next);
+    $('openNarr').innerHTML='Ô '+oidx+' đã có người → dò sang ô kế tiếp: <b>'+next+'</b>…';
+    await nap(550);
+    oidx=next; probes++;
+  }
+  openDemoTable[oidx]=key;
+  drawMiniOpen(oidx, null);
+  $('openNarr').innerHTML = probes===0
+    ? '<b>'+key+'</b> → ô '+idx+' (trống).'
+    : '<b>'+key+'</b> → ô '+idx+' (trùng!) → dò tiếp tới ô trống gần nhất: ô <b>'+oidx+'</b> ('+probes+' bước).';
+  openStepIdx++;
+  $('bOpenStep').textContent=collideBtnLabel(openStepIdx);
+  openAnimBusy=false; CL.lock(['bOpenStep','bOpenReset'],false);
+}
+$('bOpenStep').onclick = openStep;
+$('bOpenReset').onclick = ()=>{ if(openAnimBusy) return; resetOpenDemo(); };
+
+/* ---- SipHash-2-4 THẬT (khoá bí mật, ARX 4 trạng thái) vs hàm băm kiểu Java ---- */
+let sipSeed = Math.floor(Math.random()*0xFFFFFFFF);
+const MASK64 = (1n<<64n)-1n;
+function rotl64(x,b){ b=BigInt(b); return ((x<<b)|(x>>(64n-b))) & MASK64; }
+// SipRound thật: cộng, xoay bit, xor trên 4 số 64-bit — đúng theo đặc tả SipHash gốc (Aumasson & Bernstein, 2012)
+function sipround(v){
+  v[0]=(v[0]+v[1])&MASK64; v[1]=rotl64(v[1],13); v[1]^=v[0]; v[0]=rotl64(v[0],32);
+  v[2]=(v[2]+v[3])&MASK64; v[3]=rotl64(v[3],16); v[3]^=v[2];
+  v[0]=(v[0]+v[3])&MASK64; v[3]=rotl64(v[3],21); v[3]^=v[0];
+  v[2]=(v[2]+v[1])&MASK64; v[1]=rotl64(v[1],17); v[1]^=v[2]; v[2]=rotl64(v[2],32);
+}
+function hex64(x){ return '0x'+x.toString(16).padStart(16,'0'); }
+function shortHex(x){ return '0x'+x.toString(16).padStart(16,'0').slice(0,8)+'…'; }
+function fingerprint(v){ return shortHex((v[0]^v[1]^v[2]^v[3])&MASK64); }
+// SplitMix64 (Vigna) — cách chuẩn để "trải" 1 seed nhỏ thành khoá 128-bit chất lượng cao
+function splitmix64(seed){
+  seed=(seed+0x9E3779B97F4A7C15n)&MASK64;
+  let z=seed;
+  z=((z^(z>>30n))*0xBF58476D1CE4E5B9n)&MASK64;
+  z=((z^(z>>27n))*0x94D049BB133111EBn)&MASK64;
+  z=(z^(z>>31n))&MASK64;
+  return {out:z, state:seed};
+}
+function deriveKey(seed32){
+  const s=BigInt(seed32);
+  const r0=splitmix64(s);
+  const r1=splitmix64(r0.state ^ 0x2545F4914F6CDD1Dn);
+  return {k0:r0.out, k1:r1.out};
+}
+function le64(bytes, off, len){
+  let x=0n;
+  for(let i=0;i<len;i++) if(off+i<bytes.length) x |= BigInt(bytes[off+i])<<BigInt(8*i);
+  return x;
+}
+function buildSiphashTrace(seed32, key){
+  const {k0,k1}=deriveKey(seed32);
+  const bytes=[];
+  for(const ch of String(key)){
+    const code=ch.codePointAt(0);
+    bytes.push(code & 0xff);
+    if(code>0xff) bytes.push((code>>8)&0xff);
+  }
+  const len=bytes.length;
+  let v=[
+    0x736f6d6570736575n ^ k0,
+    0x646f72616e646f6dn ^ k1,
+    0x6c7967656e657261n ^ k0,
+    0x7465646279746573n ^ k1,
+  ];
+  const steps=[];
+  steps.push({html:'🔑 Sinh <b>khoá bí mật 128-bit</b> — chỉ 1 lần lúc khởi động, không ai đoán trước được: <span class="sip-fp">'+shortHex(k0)+'</span>'});
+  steps.push({html:'⚙️ Trộn khoá với 4 hằng số cố định → <b>trạng thái ban đầu</b>: <span class="sip-fp">'+fingerprint(v)+'</span>'});
+  const full=Math.floor(len/8);
+  for(let i=0;i<full;i++){
+    const m=le64(bytes,i*8,8);
+    v[3]^=m; sipround(v); sipround(v); v[0]^=m;
+    steps.push({html:'📦 Đọc 8 byte dữ liệu, trộn qua <b>2 vòng</b> (cộng số → xoay bit → đảo bit): <span class="sip-fp">'+fingerprint(v)+'</span>'});
+  }
+  const tailStart=full*8, tailLen=len-tailStart;
+  let last=BigInt(len & 0xff)<<56n;
+  for(let i=0;i<tailLen;i++) last |= BigInt(bytes[tailStart+i])<<BigInt(8*i);
+  v[3]^=last; sipround(v); sipround(v); v[0]^=last;
+  steps.push({html:'📦 Đọc phần dữ liệu còn lại (+ độ dài chuỗi), trộn qua <b>2 vòng</b> nữa: <span class="sip-fp">'+fingerprint(v)+'</span>'});
+  v[2]^=0xffn;
+  sipround(v); sipround(v); sipround(v); sipround(v);
+  steps.push({html:'🏁 <b>Trộn kỹ thêm 4 vòng</b> nữa để đảm bảo an toàn: <span class="sip-fp">'+fingerprint(v)+'</span>'});
+  const result=(v[0]^v[1]^v[2]^v[3])&MASK64;
+  const bucket=Number(result % BigInt(M));
+  steps.push({html:'✅ <b>Kết quả</b>: <span class="sip-fp">'+hex64(result)+'</span> → <code>% '+M+'</code> = <b style="color:var(--lacquer)">'+bucket+'</b>', final:true});
+  return steps;
+}
+function renderJavaTable(key){
+  const el=$('javaTable'); el.innerHTML='';
+  el.innerHTML='<tr><th>Ký tự</th><th style="color:var(--green)">h = h×31 + code</th></tr>';
+  let h=0;
   for(const ch of String(key)){
     const code=ch.charCodeAt(0);
     h=(h*31+code)>>>0;
-    ({v0,v1}=sipMixStep(ch,v0,v1));
-    const mix=(v0^v1)>>>0;
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>\''+ch+'\' ('+code+')</td><td>'+h+'</td><td>'+mix+'</td>';
-    table.appendChild(tr);
-    await nap(450);
+    tr.innerHTML='<td>\''+ch+'\' ('+code+')</td><td>'+h+'</td>';
+    el.appendChild(tr);
   }
-  const ji=h%M, si=((v0^v1)>>>0)%M;
-  const trFinal=document.createElement('tr');
-  trFinal.innerHTML='<td><b>% '+M+'</b></td><td><b style="color:var(--green)">'+ji+'</b></td><td><b style="color:var(--lacquer)">'+si+'</b></td>';
-  table.appendChild(trFinal);
-  CL.lock(['bSipDemo','bReseed'],false); sipDemoBusy=false;
+  const trF=document.createElement('tr'); trF.style.cssText='border-top:1px dashed #D8CDB6;';
+  trF.innerHTML='<td><b>% '+M+'</b></td><td><b style="color:var(--green)">'+(h%M)+'</b></td>';
+  el.appendChild(trF);
 }
-$('bSipDemo').onclick = runSipDemo;
-$('bReseed').onclick = ()=>{ sipSeed = Math.floor(Math.random()*0xFFFFFFFF); runSipDemo(); };
+let sipSteps=[], sipCur=0, sipAutoT=null;
+function stopSipAuto(){ if(sipAutoT){clearInterval(sipAutoT);sipAutoT=null;$('bSipAuto').textContent='▶▶ Tự động';} }
+function showSipStep(i){
+  sipCur = Math.max(0, Math.min(sipSteps.length-1, i));
+  const el=$('sipTrace'); el.innerHTML='';
+  for(let k=0;k<=sipCur;k++) traceRow(el, sipSteps[k].html, sipSteps[k].final && k===sipCur);
+  $('sipStepCnt').textContent = 'bước '+(sipCur+1)+' / '+sipSteps.length;
+}
+function startSipDemo(){
+  stopSipAuto();
+  const key = $('sipInput').value.trim() || 'Mai';
+  renderJavaTable(key);
+  sipSteps = buildSiphashTrace(sipSeed, key);
+  showSipStep(0);
+}
+$('bSipDemo').onclick = startSipDemo;
+$('sipInput').addEventListener('keydown', e=>{ if(e.key==='Enter') startSipDemo(); });
+$('bReseed').onclick = ()=>{ sipSeed = Math.floor(Math.random()*0xFFFFFFFF); startSipDemo(); };
+$('bSipFirst').onclick=()=>{ stopSipAuto(); showSipStep(0); };
+$('bSipPrev').onclick=()=>{ stopSipAuto(); showSipStep(sipCur-1); };
+$('bSipNext').onclick=()=>{ stopSipAuto(); showSipStep(sipCur+1); };
+$('bSipLast').onclick=()=>{ stopSipAuto(); showSipStep(sipSteps.length-1); };
+$('bSipAuto').onclick=function(){
+  if(sipAutoT){ stopSipAuto(); return; }
+  this.textContent='⏸ Dừng';
+  if(sipCur>=sipSteps.length-1) showSipStep(0);
+  sipAutoT=setInterval(()=>{ if(sipCur>=sipSteps.length-1) stopSipAuto(); else showSipStep(sipCur+1); },1400);
+};
 
 initQuiz('quiz','hash',{
   bug:{ok:false,msg:'Sai — nó không hiếm. Với đủ số key, va chạm gần như chắc chắn xảy ra (nghịch lý ngày sinh: chỉ 23 người đã >50% trùng ngày sinh).'},
@@ -562,9 +994,12 @@ initQuiz('quiz','hash',{
 });
 
 draw();
-runHashDemo();
-resetCollideDemo();
-runSipDemo();
+resetChainDemo();
+resetOpenDemo();
+startSipDemo();
+renderBadGoodDemo();
+resetJavaTree();
+resetProbeDemo();
 })();
 </script>
 </body>
